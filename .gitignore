@@ -20,3 +20,8 @@ supabase/.temp/
 .DS_Store
 *.swp
 Thumbs.db
+
+# next.js generated
+next-env.d.ts
+*.tsbuildinfo
+.vercel

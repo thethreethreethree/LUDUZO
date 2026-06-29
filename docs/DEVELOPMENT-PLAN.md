@@ -23,13 +23,17 @@ Conventional relational tables for current entity state **+** an append-only, im
 source of "what happened," and is **never updated or deleted** (enforced by DB trigger).
 
 ## Phases
-### Phase 1 — Foundation 🚧 (this commit)
+### Phase 1 — Foundation 🚧 (DB foundation verified; app layer pending)
 Multi-tenancy (`organizations` → `locations`), identity (`profiles` ↔ `auth.users`), RBAC
 (`organization_members` + `app_role`), RLS tenant isolation, append-only `events` stream.
 - **Clauses:** §0, §1.5.1 layer 1 (data shape), §1.7 (ground-up), §3.1 (append-only events), A12 (idempotent
   migrations), A5 (tenancy decided up front — expensive to retrofit).
 - **Exit gate (four-layer):** structure sound · RLS *verified* to isolate tenants · composes with every later
   phase · (no UI yet — layer 4 N/A this phase).
+- **Exit-gate status (2026-06-29):** DB foundation **VERIFIED** against live Supabase — **23/23** checks
+  (tenant isolation · role-gating on every writable table · `anon` denial · suspended-access revocation ·
+  append-only `events`) pass via `supabase/tests/0001_foundation_rls_verify.sql`. App layer (Next.js
+  scaffold + Supabase client) **not yet built** — that is the remaining Phase-1 work.
 
 ### Phase 2 — Member Management ⬜
 Member profiles & statuses, search, member-lifecycle events, waivers/contracts (Storage + digital signature),
