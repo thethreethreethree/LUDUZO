@@ -1,0 +1,22 @@
+# dependencies / build output
+node_modules/
+.next/
+out/
+dist/
+build/
+
+# environment
+.env
+.env.local
+.env*.local
+
+# vercel / supabase
+.vercel/
+supabase/.branches/
+supabase/.temp/
+
+# editor / OS lock & temp files
+~$*
+.DS_Store
+*.swp
+Thumbs.db
