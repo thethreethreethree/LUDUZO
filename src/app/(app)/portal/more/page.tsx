@@ -10,8 +10,8 @@ const OK_MSG: Record<string, string> = { contact: "Contact details updated." };
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
-type Comment = { id: string; body: string };
-type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; community_comments: Comment[] };
+type Comment = { id: string; body: string; author_id: string | null };
+type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; author_id: string | null; community_comments: Comment[] };
 type Ann = { id: string; title: string; body: string | null; created_at: string };
 
 export default async function PortalMorePage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
@@ -27,12 +27,17 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const currentPhone = memberRows[0]?.phone ?? "";
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
-    supabase.from("community_posts").select("id, organization_id, title, body, created_at, community_comments(id, body)").order("created_at", { ascending: false }).limit(10),
+    supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id)").order("created_at", { ascending: false }).limit(10),
     supabase.from("announcements").select("id, title, body, created_at").order("created_at", { ascending: false }).limit(5),
+    // Staff names for post/comment attribution (0040, name-only). Posts are always
+    // staff-authored; comments may be staff or member. Member-authored comment
+    // attribution is deferred (needs a member-to-member name-visibility decision).
+    supabase.from("gym_staff_directory").select("user_id, full_name"),
   ]);
+  const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
 
   const subs = (subData ?? []) as unknown as Sub[];
   const invoices = (invData ?? []) as unknown as Inv[];
@@ -110,10 +115,15 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
               <li key={p.id} className="rounded-2xl border border-iron bg-onyx p-4">
                 {p.title ? <div className="font-bold text-bone">{p.title}</div> : null}
                 <p className="mt-0.5 text-sm text-ash">{p.body}</p>
-                <p className="mono mt-1 text-[10px] text-ash-dim">{new Date(p.created_at).toLocaleDateString()}</p>
+                <p className="mono mt-1 text-[10px] text-ash-dim">
+                  {p.author_id && staffName.get(p.author_id) ? `${staffName.get(p.author_id)} · ` : ""}{new Date(p.created_at).toLocaleDateString()}
+                </p>
                 {p.community_comments.length > 0 ? (
                   <ul className="mt-2 flex flex-col gap-1 border-t border-iron pt-2">
-                    {p.community_comments.map((c) => (<li key={c.id} className="text-xs text-ash">💬 {c.body}</li>))}
+                    {p.community_comments.map((c) => {
+                      const who = c.author_id ? staffName.get(c.author_id) : null;
+                      return <li key={c.id} className="text-xs text-ash">💬 {who ? <span className="font-semibold text-bone">{who}: </span> : null}{c.body}</li>;
+                    })}
                   </ul>
                 ) : null}
                 <form action={addMemberComment} className="mt-2 flex gap-2">
