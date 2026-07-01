@@ -5,7 +5,7 @@ import { bookSession, cancelBooking } from "../actions";
 export const dynamic = "force-dynamic";
 
 type Booking = { id: string; status: string; session: { id: string; starts_at: string; class: { name: string } | null } | null };
-type Appt = { id: string; title: string | null; starts_at: string; ends_at: string; status: string; trainer: { full_name: string | null } | null };
+type Appt = { id: string; title: string | null; starts_at: string; ends_at: string; status: string; trainer_id: string | null };
 type Session = { id: string; starts_at: string; ends_at: string | null; capacity: number | null; class: { name: string; description: string | null; capacity: number | null; instructor_name: string | null } | null };
 
 const OK_MSG: Record<string, string> = {
@@ -26,17 +26,21 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   if (ids.length === 0) redirect("/portal");
 
   const nowIso = new Date().toISOString();
-  const [{ data: bookingData }, { data: apptData }, { data: sessionData }] = await Promise.all([
+  const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }] = await Promise.all([
     supabase.from("bookings").select("id, status, session:class_sessions(id, starts_at, class:classes(name))").in("member_id", ids).order("created_at", { ascending: false }).limit(30),
-    supabase.from("appointments").select("id, title, starts_at, ends_at, status, trainer:profiles(full_name)").in("member_id", ids).order("starts_at", { ascending: false }).limit(20),
+    // trainer_id (not a profiles embed): members can't read staff profiles, so the
+    // embed returned null. Names come from gym_staff_directory (0040, name-only).
+    supabase.from("appointments").select("id, title, starts_at, ends_at, status, trainer_id").in("member_id", ids).order("starts_at", { ascending: false }).limit(20),
     // Bookable schedule — readable by the member via 0034 (org-scoped). Upcoming only.
     supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class:classes(name, description, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
+    supabase.from("gym_staff_directory").select("user_id, full_name"),
   ]);
 
   const now = new Date().getTime();
   const allBookings = ((bookingData ?? []) as unknown as Booking[]);
   const appts = (apptData ?? []) as unknown as Appt[];
   const sessions = (sessionData ?? []) as unknown as Session[];
+  const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
   const withSession = allBookings.filter((b) => b.session);
   // Bookings whose class detail is not member-readable — show them anyway (F1).
   const detailsPending = allBookings.filter((b) => !b.session && b.status !== "cancelled");
@@ -139,7 +143,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
               <li key={a.id} className="rounded-2xl border border-iron bg-onyx p-4">
                 <div className="mono text-xs font-semibold text-gold">{new Date(a.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
                 <div className="mt-0.5 font-bold text-bone">{a.title ?? "PT session"}</div>
-                <div className="text-xs text-ash">{a.trainer?.full_name ? `with ${a.trainer.full_name} · ` : ""}{a.status}</div>
+                <div className="text-xs text-ash">{a.trainer_id && staffName.get(a.trainer_id) ? `with ${staffName.get(a.trainer_id)} · ` : ""}{a.status}</div>
               </li>
             ))}
           </ul>
