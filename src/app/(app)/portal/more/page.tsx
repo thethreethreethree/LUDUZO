@@ -2,9 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment } from "../actions";
+import { portalSignOut, addMemberComment, updateMyContact } from "../actions";
 
 export const dynamic = "force-dynamic";
+
+const OK_MSG: Record<string, string> = { contact: "Contact details updated." };
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
@@ -12,14 +14,17 @@ type Comment = { id: string; body: string };
 type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; community_comments: Comment[] };
 type Ann = { id: string; title: string; body: string | null; created_at: string };
 
-export default async function PortalMorePage() {
+export default async function PortalMorePage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
+  const { ok, error } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: memberData } = await supabase.from("members").select("id, organization:organizations(name)").eq("profile_id", user.id);
-  const ids = ((memberData ?? []) as unknown as { id: string; organization: { name: string } | null }[]).map((m) => m.id);
-  const gymName = ((memberData ?? []) as unknown as { organization: { name: string } | null }[])[0]?.organization?.name ?? "your gym";
+  const { data: memberData } = await supabase.from("members").select("id, phone, organization:organizations(name)").eq("profile_id", user.id);
+  const memberRows = ((memberData ?? []) as unknown as { id: string; phone: string | null; organization: { name: string } | null }[]);
+  const ids = memberRows.map((m) => m.id);
+  const gymName = memberRows[0]?.organization?.name ?? "your gym";
+  const currentPhone = memberRows[0]?.phone ?? "";
   if (ids.length === 0) redirect("/portal");
 
   const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }] = await Promise.all([
@@ -44,6 +49,19 @@ export default async function PortalMorePage() {
         <h1 className="text-2xl font-extrabold text-bone">More</h1>
         <form action={portalSignOut}><button className="text-xs text-ash hover:text-gold">Sign out</button></form>
       </div>
+
+      {ok ? <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">{OK_MSG[ok] ?? "Done."}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
+
+      {/* Contact details — member self-edit of phone only (0037 RPC). */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="text-[15px] font-bold text-bone">Contact details</div>
+        <form action={updateMyContact} className="mt-2 flex gap-2">
+          <input name="phone" defaultValue={currentPhone} inputMode="tel" placeholder="Phone number" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save</button>
+        </form>
+        <p className="mt-1.5 text-[11px] text-ash-dim">To change your name or email, ask the front desk.</p>
+      </section>
 
       {/* Membership */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">
