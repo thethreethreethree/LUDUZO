@@ -69,10 +69,10 @@ export default async function MemberDetailPage({
   if (!member) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 p-8">
-        <Link href="/dashboard/members" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/members" className="text-sm text-ash hover:underline">
           ← Members
         </Link>
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           Member not found (or not in your gym).
         </p>
       </main>
@@ -194,13 +194,13 @@ export default async function MemberDetailPage({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard/members" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/members" className="text-sm text-ash hover:underline">
           ← Members
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-h1 text-bone">
           {member.first_name} {member.last_name}
         </h1>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-ash">
           {member.organization?.name ?? "—"} · member since {member.member_since}
           {member.member_number ? ` · #${member.member_number}` : ""}
           {age != null ? ` · age ${age}` : ""}
@@ -226,7 +226,7 @@ export default async function MemberDetailPage({
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
@@ -238,37 +238,37 @@ export default async function MemberDetailPage({
       ) : null}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Details</h2>
+        <h2 className="text-sm font-medium text-ash">Details</h2>
         <form action={updateMemberDetails} className="flex flex-col gap-3">
           <input type="hidden" name="id" value={member.id} />
           <div className="flex gap-3">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">First name</span>
-              <input name="first_name" required defaultValue={member.first_name} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <span className="text-xs text-ash">First name</span>
+              <input name="first_name" required defaultValue={member.first_name} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
             </label>
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">Last name</span>
-              <input name="last_name" required defaultValue={member.last_name} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
-            </label>
-          </div>
-          <div className="flex gap-3">
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">Email</span>
-              <input name="email" type="email" defaultValue={member.email ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
-            </label>
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">Phone</span>
-              <input name="phone" defaultValue={member.phone ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <span className="text-xs text-ash">Last name</span>
+              <input name="last_name" required defaultValue={member.last_name} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
             </label>
           </div>
           <div className="flex gap-3">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">Member #</span>
-              <input name="member_number" defaultValue={member.member_number ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <span className="text-xs text-ash">Email</span>
+              <input name="email" type="email" defaultValue={member.email ?? ""} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
             </label>
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="text-xs text-zinc-500">Date of birth</span>
-              <input name="date_of_birth" type="date" defaultValue={member.date_of_birth ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <span className="text-xs text-ash">Phone</span>
+              <input name="phone" defaultValue={member.phone ?? ""} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
+            </label>
+          </div>
+          <div className="flex gap-3">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+              <span className="text-xs text-ash">Member #</span>
+              <input name="member_number" defaultValue={member.member_number ?? ""} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
+            </label>
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+              <span className="text-xs text-ash">Date of birth</span>
+              <input name="date_of_birth" type="date" defaultValue={member.date_of_birth ?? ""} className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2" />
             </label>
           </div>
           <button className="self-start rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
@@ -277,7 +277,7 @@ export default async function MemberDetailPage({
         </form>
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <div className="text-xs text-zinc-500">Check-in QR token</div>
+            <div className="text-xs text-ash">Check-in QR token</div>
             <div className="font-mono text-xs break-all">{member.qr_token ?? "—"}</div>
           </div>
           <form action={rotateCheckInCode}>
@@ -293,13 +293,13 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Status</h2>
+        <h2 className="text-sm font-medium text-ash">Status</h2>
         <form action={updateMemberStatus} className="flex items-center gap-2">
           <input type="hidden" name="id" value={member.id} />
           <select
             name="status"
             defaultValue={member.status}
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2"
           >
             {MEMBER_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -314,7 +314,7 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Notes</h2>
+        <h2 className="text-sm font-medium text-ash">Notes</h2>
         <form action={updateMemberNotes} className="flex flex-col gap-2">
           <input type="hidden" name="id" value={member.id} />
           <textarea
@@ -322,7 +322,7 @@ export default async function MemberDetailPage({
             rows={3}
             defaultValue={member.notes ?? ""}
             placeholder="Staff notes about this member…"
-            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2"
           />
           <button className="self-start rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Save notes
@@ -331,20 +331,20 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Membership</h2>
+        <h2 className="text-sm font-medium text-ash">Membership</h2>
         {subscriptions.length === 0 ? (
-          <p className="text-sm text-zinc-500">No subscription.</p>
+          <p className="text-sm text-ash">No subscription.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {subscriptions.map((s) => (
               <li
                 key={s.id}
-                className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+                className="flex items-center justify-between rounded-md border border-iron px-3 py-2"
               >
                 <span className="flex flex-col">
                   <span>{s.plan?.name ?? "(no plan)"}</span>
                   {s.current_period_end ? (
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-ash">
                       renews {new Date(s.current_period_end).toLocaleDateString()}
                     </span>
                   ) : null}
@@ -355,7 +355,7 @@ export default async function MemberDetailPage({
                   <select
                     name="status"
                     defaultValue={s.status}
-                    className="rounded-md border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                   >
                     {SUBSCRIPTION_STATUSES.map((st) => (
                       <option key={st} value={st}>
@@ -363,14 +363,14 @@ export default async function MemberDetailPage({
                       </option>
                     ))}
                   </select>
-                  <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                  <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                     Update
                   </button>
                 </form>
                 <form action={renewSubscription}>
                   <input type="hidden" name="id" value={s.id} />
                   <input type="hidden" name="member_id" value={member.id} />
-                  <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                  <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                     Renew
                   </button>
                 </form>
@@ -382,7 +382,7 @@ export default async function MemberDetailPage({
           <form action={assignSubscription} className="flex items-center gap-2">
             <input type="hidden" name="organization_id" value={member.organization_id} />
             <input type="hidden" name="member_id" value={member.id} />
-            <select name="plan_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="plan_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} — {formatMoney(p.price_cents, p.currency)}/{p.interval}
@@ -394,37 +394,37 @@ export default async function MemberDetailPage({
             </button>
           </form>
         ) : (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-ash">
             No active plans yet — create one under Plans.
           </p>
         )}
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Documents</h2>
+        <h2 className="text-sm font-medium text-ash">Documents</h2>
         {memberDocs.length === 0 ? (
-          <p className="text-sm text-zinc-500">No documents assigned.</p>
+          <p className="text-sm text-ash">No documents assigned.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {memberDocs.map((d) => (
               <li
                 key={d.id}
-                className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+                className="flex items-center justify-between rounded-md border border-iron px-3 py-2"
               >
                 <span>
-                  {d.kind} · <span className="text-zinc-500">{d.status}</span>
+                  {d.kind} · <span className="text-ash">{d.status}</span>
                 </span>
                 <span className="flex items-center gap-2">
                   {d.status === "pending" ? (
                     <form action={signMemberDocument}>
                       <input type="hidden" name="id" value={d.id} />
                       <input type="hidden" name="member_id" value={member.id} />
-                      <button className="rounded-md border border-zinc-300 px-3 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                      <button className="rounded-md border border-iron px-3 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                         Mark signed
                       </button>
                     </form>
                   ) : (
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-ash">
                       {d.signed_at ? new Date(d.signed_at).toLocaleDateString() : ""}
                     </span>
                   )}
@@ -443,7 +443,7 @@ export default async function MemberDetailPage({
         <form action={assignDocument} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <select name="template_id" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="template_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">(no template)</option>
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
@@ -451,7 +451,7 @@ export default async function MemberDetailPage({
               </option>
             ))}
           </select>
-          <select name="kind" defaultValue="waiver" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="kind" defaultValue="waiver" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {DOCUMENT_KINDS.map((k) => (
               <option key={k} value={k}>
                 {k}
@@ -465,18 +465,18 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Progress</h2>
+        <h2 className="text-sm font-medium text-ash">Progress</h2>
         {measurements.length === 0 ? (
-          <p className="text-sm text-zinc-500">No measurements logged.</p>
+          <p className="text-sm text-ash">No measurements logged.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {measurements.map((m) => (
               <li
                 key={m.id}
-                className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+                className="flex items-center justify-between rounded-md border border-iron px-3 py-2"
               >
                 <span>{m.recorded_at}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {m.weight_kg != null ? `${m.weight_kg} kg` : ""}
                   {m.weight_kg != null && m.body_fat_pct != null ? " · " : ""}
                   {m.body_fat_pct != null ? `${m.body_fat_pct}% bf` : ""}
@@ -488,8 +488,8 @@ export default async function MemberDetailPage({
         <form action={logMeasurement} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="weight_kg" type="number" step="0.1" min="0" placeholder="Weight kg" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="body_fat_pct" type="number" step="0.1" min="0" placeholder="Body fat %" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="weight_kg" type="number" step="0.1" min="0" placeholder="Weight kg" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="body_fat_pct" type="number" step="0.1" min="0" placeholder="Body fat %" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Log
           </button>
@@ -497,17 +497,17 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Billing</h2>
-        <div className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <span className="text-sm text-zinc-500">Outstanding</span>
+        <h2 className="text-sm font-medium text-ash">Billing</h2>
+        <div className="flex items-center justify-between rounded-md border border-iron px-4 py-3">
+          <span className="text-sm text-ash">Outstanding</span>
           <span className="text-lg font-semibold">{formatMoney(outstanding)}</span>
         </div>
         {invoices.length > 0 ? (
           <ul className="flex flex-col gap-1 text-sm">
             {invoices.map((inv) => (
-              <li key={inv.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+              <li key={inv.id} className="flex items-center justify-between rounded-md border border-iron px-3 py-2">
                 <span>{formatMoney(inv.amount_cents, inv.currency)}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {inv.status}
                   {inv.due_date ? ` · due ${inv.due_date}` : ""}
                 </span>
@@ -518,8 +518,8 @@ export default async function MemberDetailPage({
         <form action={createMemberInvoice} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="amount" type="number" min="0" step="0.01" placeholder="Amount" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="due_date" type="date" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="amount" type="number" min="0" step="0.01" placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="due_date" type="date" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Invoice
           </button>
@@ -527,16 +527,16 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Groups</h2>
+        <h2 className="text-sm font-medium text-ash">Groups</h2>
         {groupLinks.length === 0 ? (
-          <p className="text-sm text-zinc-500">Not in any group.</p>
+          <p className="text-sm text-ash">Not in any group.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {groupLinks.map((g) => (
-              <li key={g.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+              <li key={g.id} className="flex items-center justify-between rounded-md border border-iron px-3 py-2">
                 <span>
                   {g.group?.name ?? "(group)"}
-                  {g.relationship ? <span className="text-xs text-zinc-500"> · {g.relationship}</span> : null}
+                  {g.relationship ? <span className="text-xs text-ash"> · {g.relationship}</span> : null}
                 </span>
                 <form action={removeMemberFromGroup}>
                   <input type="hidden" name="id" value={g.id} />
@@ -551,7 +551,7 @@ export default async function MemberDetailPage({
           <form action={addMemberToGroup} className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="organization_id" value={member.organization_id} />
             <input type="hidden" name="member_id" value={member.id} />
-            <select name="group_id" required className="rounded-md border border-zinc-300 px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="group_id" required className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
               <option value="">— group —</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
@@ -559,27 +559,27 @@ export default async function MemberDetailPage({
                 </option>
               ))}
             </select>
-            <input name="relationship" placeholder="Relationship (e.g. parent)" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="relationship" placeholder="Relationship (e.g. parent)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
               Add to group
             </button>
           </form>
         ) : (
-          <p className="text-xs text-zinc-500">No groups yet — create one under Groups.</p>
+          <p className="text-xs text-ash">No groups yet — create one under Groups.</p>
         )}
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Loyalty</h2>
-        <div className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <span className="text-sm text-zinc-500">Balance</span>
+        <h2 className="text-sm font-medium text-ash">Loyalty</h2>
+        <div className="flex items-center justify-between rounded-md border border-iron px-4 py-3">
+          <span className="text-sm text-ash">Balance</span>
           <span className="text-lg font-semibold">{loyaltyBalance} pts</span>
         </div>
         <form action={awardPoints} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="points" type="number" placeholder="Points (+/-)" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="points" type="number" placeholder="Points (+/-)" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Adjust
           </button>
@@ -587,16 +587,16 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-zinc-500">Communication</h2>
+        <h2 className="text-sm font-medium text-ash">Communication</h2>
         {communications.length === 0 ? (
-          <p className="text-sm text-zinc-500">No communications logged.</p>
+          <p className="text-sm text-ash">No communications logged.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {communications.map((c) => (
-              <li key={c.id} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
+              <li key={c.id} className="rounded-md border border-iron px-3 py-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium uppercase text-zinc-500">{c.channel}</span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs font-medium uppercase text-ash">{c.channel}</span>
+                  <span className="text-xs text-ash">
                     {new Date(c.created_at).toLocaleDateString()}
                   </span>
                 </div>
@@ -608,14 +608,14 @@ export default async function MemberDetailPage({
         <form action={logCommunication} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <select name="channel" defaultValue="note" className="rounded-md border border-zinc-300 px-2 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="channel" defaultValue="note" className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
             {["note", "email", "sms", "call"].map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
             ))}
           </select>
-          <input name="body" placeholder="Message…" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="body" placeholder="Message…" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Log
           </button>
@@ -623,18 +623,18 @@ export default async function MemberDetailPage({
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">History</h2>
+        <h2 className="text-sm font-medium text-ash">History</h2>
         {events.length === 0 ? (
-          <p className="text-sm text-zinc-500">No events yet.</p>
+          <p className="text-sm text-ash">No events yet.</p>
         ) : (
           <ul className="flex flex-col gap-1 text-sm">
             {events.map((e) => (
               <li
                 key={e.id}
-                className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800"
+                className="flex items-center justify-between rounded-md border border-iron px-3 py-2"
               >
                 <span className="font-mono text-xs">{e.event_type}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {new Date(e.occurred_at).toLocaleString()}
                 </span>
               </li>

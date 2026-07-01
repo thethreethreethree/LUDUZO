@@ -47,10 +47,10 @@ export default async function SessionRosterPage({
   if (!session) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 p-8">
-        <Link href="/dashboard/classes" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/classes" className="text-sm text-ash hover:underline">
           ← Classes
         </Link>
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           Session not found (or not in your gym).
         </p>
       </main>
@@ -71,20 +71,20 @@ export default async function SessionRosterPage({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard/classes" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/classes" className="text-sm text-ash hover:underline">
           ← Classes
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+        <h1 className="mt-1 text-h1 text-bone">
           {session.class?.name ?? "Session"}
         </h1>
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-ash">
           {new Date(session.starts_at).toLocaleString()} · {active}
           {cap != null ? ` / ${cap}` : ""} booked · {session.status}
         </p>
         {session.status !== "cancelled" ? (
           <form action={cancelSession} className="mt-2">
             <input type="hidden" name="id" value={session.id} />
-            <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-zinc-700 dark:text-red-400 dark:hover:bg-red-950">
+            <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950">
               Cancel session
             </button>
           </form>
@@ -92,15 +92,15 @@ export default async function SessionRosterPage({
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Roster</h2>
+        <h2 className="text-sm font-medium text-ash">Roster</h2>
         {bookings.length === 0 ? (
-          <p className="text-sm text-zinc-500">No bookings yet.</p>
+          <p className="text-sm text-ash">No bookings yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {bookings.map((b) => (
@@ -114,7 +114,7 @@ export default async function SessionRosterPage({
                   <select
                     name="status"
                     defaultValue={b.status}
-                    className="rounded-md border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                    className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                   >
                     {BOOKING_STATUSES.map((s) => (
                       <option key={s} value={s}>
@@ -122,7 +122,7 @@ export default async function SessionRosterPage({
                       </option>
                     ))}
                   </select>
-                  <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                  <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                     Save
                   </button>
                 </form>

@@ -52,21 +52,21 @@ export default async function PayrollPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Payroll & commissions</h1>
-        <p className="text-sm text-zinc-500">Visible to management, and to each staff member for their own.</p>
+        <h1 className="mt-1 text-h1 text-bone">Payroll & commissions</h1>
+        <p className="text-sm text-ash">Visible to management, and to each staff member for their own.</p>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       {commissions.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           No commissions recorded.
         </p>
       ) : (
@@ -75,7 +75,7 @@ export default async function PayrollPage({
             <li key={c.id} className="flex items-center justify-between px-4 py-3">
               <span className="flex flex-col">
                 <span className="font-medium">{c.staff?.full_name ?? c.staff?.email ?? "(staff)"}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {c.reason ?? "—"} · {c.status}
                 </span>
               </span>
@@ -89,7 +89,7 @@ export default async function PayrollPage({
         <form action={createCommission} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Record commission</h2>
           <OrgPicker orgs={orgs} />
-          <select name="staff_user_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="staff_user_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">— staff —</option>
             {staff.map((s) => (
               <option key={s.user_id} value={s.user_id}>
@@ -97,14 +97,14 @@ export default async function PayrollPage({
               </option>
             ))}
           </select>
-          <input name="amount" type="number" min="0" step="0.01" required placeholder="Amount" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="amount" type="number" min="0" step="0.01" required placeholder="Amount" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Record
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-500">You need a manager+ role to record commissions.</p>
+        <p className="text-sm text-ash">You need a manager+ role to record commissions.</p>
       )}
     </main>
   );

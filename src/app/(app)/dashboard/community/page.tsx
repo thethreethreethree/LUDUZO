@@ -35,31 +35,31 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Community</h1>
-        <p className="text-sm text-zinc-500">Post updates and discuss with your members.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Community</h1>
+        <p className="text-sm text-ash">Post updates and discuss with your members.</p>
       </div>
 
-      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
 
       {orgs.length > 0 ? (
         <form action={createPost} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="title" placeholder="Title (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <textarea name="body" rows={3} required placeholder="Share something with the community…" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="title" placeholder="Title (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="body" rows={3} required placeholder="Share something with the community…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Post</button>
         </form>
       ) : null}
 
       <section className="flex flex-col gap-4">
         {posts.length === 0 ? (
-          <p className="text-sm text-zinc-500">No posts yet.</p>
+          <p className="text-sm text-ash">No posts yet.</p>
         ) : (
           posts.map((p) => (
             <article key={p.id} className="rounded-md border border-onyx bg-onyx p-4">
               {p.title ? <h3 className="font-display font-bold">{p.title}</h3> : null}
               <p className="mt-1 text-sm">{p.body}</p>
-              <p className="mt-1 text-xs text-zinc-500">{p.author?.full_name ?? "Staff"} · {new Date(p.created_at).toLocaleString()}</p>
+              <p className="mt-1 text-xs text-ash">{p.author?.full_name ?? "Staff"} · {new Date(p.created_at).toLocaleString()}</p>
 
               <div className="mt-3 flex flex-col gap-2 border-t border-iron pt-3">
                 {p.community_comments
@@ -73,7 +73,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
                 <form action={addComment} className="flex gap-2">
                   <input type="hidden" name="organization_id" value={p.organization_id} />
                   <input type="hidden" name="post_id" value={p.id} />
-                  <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+                  <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
                   <button className="rounded-md border border-iron px-3 py-1 text-xs font-medium hover:border-gold hover:text-gold">Reply</button>
                 </form>
               </div>

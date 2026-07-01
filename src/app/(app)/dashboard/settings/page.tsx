@@ -39,26 +39,26 @@ export default async function SettingsPage({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Settings</h1>
-        <p className="text-sm text-zinc-500">Rename the gyms you own or administer.</p>
+        <h1 className="mt-1 text-h1 text-bone">Settings</h1>
+        <p className="text-sm text-ash">Rename the gyms you own or administer.</p>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
       {ok ? (
-        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-green-700 dark:bg-green-950 dark:text-green-300">
+        <p className="rounded-md bg-green-50 px-3 py-2 text-sm text-win dark:bg-green-950 dark:text-green-300">
           Saved.
         </p>
       ) : null}
 
       {orgs.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           You don&apos;t own or administer any gym.
         </p>
       ) : (
@@ -74,9 +74,9 @@ export default async function SettingsPage({
                       name="name"
                       required
                       defaultValue={r.organization!.name}
-                      className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
                     />
-                    <span className="text-xs text-zinc-500">/{r.organization!.slug}</span>
+                    <span className="text-xs text-ash">/{r.organization!.slug}</span>
                   </label>
                   <div className="flex gap-3">
                     <label className="flex flex-col gap-1 text-sm">
@@ -85,7 +85,7 @@ export default async function SettingsPage({
                         name="brand_color"
                         type="color"
                         defaultValue={r.organization!.settings?.brand_color ?? "#000000"}
-                        className="h-10 w-16 rounded-md border border-zinc-300 dark:border-zinc-700"
+                        className="h-10 w-16 rounded-md border border-iron"
                       />
                     </label>
                     <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
@@ -94,7 +94,7 @@ export default async function SettingsPage({
                         name="logo_url"
                         defaultValue={r.organization!.settings?.logo_url ?? ""}
                         placeholder="https://…"
-                        className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                        className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
                       />
                     </label>
                   </div>

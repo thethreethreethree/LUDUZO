@@ -60,22 +60,22 @@ export default async function ClassesPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Classes & bookings</h1>
+        <h1 className="mt-1 text-h1 text-bone">Classes & bookings</h1>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Classes</h2>
+        <h2 className="text-sm font-medium text-ash">Classes</h2>
         {classes.length === 0 ? (
-          <p className="text-sm text-zinc-500">No classes yet.</p>
+          <p className="text-sm text-ash">No classes yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {classes.map((c) => (
@@ -83,17 +83,17 @@ export default async function ClassesPage({
                 {mgmtOrgs.length > 0 ? (
                   <form action={updateClass} className="flex flex-wrap items-center gap-2">
                     <input type="hidden" name="id" value={c.id} />
-                    <input name="name" defaultValue={c.name} className="flex-1 rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-                    <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-                    <input name="capacity" type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-                    <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <input name="name" defaultValue={c.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                    <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                    <input name="capacity" type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Save
                     </button>
                   </form>
                 ) : (
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{c.name}</span>
-                    <span className="text-xs text-zinc-500">{c.instructor_name ?? ""}</span>
+                    <span className="text-xs text-ash">{c.instructor_name ?? ""}</span>
                   </div>
                 )}
               </li>
@@ -103,9 +103,9 @@ export default async function ClassesPage({
         {mgmtOrgs.length > 0 ? (
           <form action={createClass} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={mgmtOrgs} />
-            <input name="name" required placeholder="Class name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="instructor_name" placeholder="Instructor" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="name" required placeholder="Class name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="instructor_name" placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add class
             </button>
@@ -117,14 +117,14 @@ export default async function ClassesPage({
         <form action={createSession} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a session</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="class_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule
           </button>
@@ -135,15 +135,15 @@ export default async function ClassesPage({
         <form action={createRecurringSessions} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a weekly series</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="class_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="count" type="number" min="1" max="52" defaultValue={8} className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" title="Number of weeks" />
+          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="count" type="number" min="1" max="52" defaultValue={8} className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" title="Number of weeks" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule weekly
           </button>
@@ -151,13 +151,13 @@ export default async function ClassesPage({
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Sessions</h2>
+        <h2 className="text-sm font-medium text-ash">Sessions</h2>
         {sessions.length === 0 ? (
-          <p className="text-sm text-zinc-500">No sessions scheduled.</p>
+          <p className="text-sm text-ash">No sessions scheduled.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {sessions.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800">
+              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-iron px-4 py-3">
                 <Link href={`/dashboard/classes/${s.id}`} className="flex flex-col hover:underline">
                   <span className="font-medium">
                     {s.class?.name ?? "(class)"}
@@ -167,13 +167,13 @@ export default async function ClassesPage({
                       </span>
                     ) : null}
                   </span>
-                  <span className="text-xs text-zinc-500">{new Date(s.starts_at).toLocaleString()}</span>
+                  <span className="text-xs text-ash">{new Date(s.starts_at).toLocaleString()}</span>
                 </Link>
                 {members.length > 0 && s.status !== "cancelled" ? (
                   <form action={createBooking} className="flex items-center gap-2">
                     <input type="hidden" name="organization_id" value={s.organization_id} />
                     <input type="hidden" name="session_id" value={s.id} />
-                    <select name="member_id" required className="rounded-md border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900">
+                    <select name="member_id" required className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2">
                       <option value="">— member —</option>
                       {members.map((m) => (
                         <option key={m.id} value={m.id}>
@@ -181,7 +181,7 @@ export default async function ClassesPage({
                         </option>
                       ))}
                     </select>
-                    <button className="rounded-md border border-zinc-300 px-3 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <button className="rounded-md border border-iron px-3 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Book
                     </button>
                   </form>

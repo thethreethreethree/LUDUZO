@@ -30,21 +30,21 @@ export default async function ActivityPage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Activity</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="mt-1 text-h1 text-bone">Activity</h1>
+        <p className="text-sm text-ash">
           The immutable record of what happened across your gym.
         </p>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           Could not load activity: {error.message}
         </p>
       ) : events.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           No activity yet.
         </p>
       ) : (
@@ -53,12 +53,12 @@ export default async function ActivityPage() {
             <li key={e.id} className="flex items-center justify-between border-l-2 border-gold px-4 py-2.5">
               <span className="flex flex-col">
                 <span className="font-mono text-xs">{e.event_type}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {e.organization?.name ? `${e.organization.name}` : ""}
                   {e.subject_type ? ` · ${e.subject_type}` : ""}
                 </span>
               </span>
-              <span className="text-xs text-zinc-500">
+              <span className="text-xs text-ash">
                 {new Date(e.occurred_at).toLocaleString()}
               </span>
             </li>

@@ -102,11 +102,11 @@ export default async function ReportsPage() {
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Reports</h1>
-        <p className="text-sm text-zinc-500">Scoped to your gym(s) by row-level security.</p>
+        <h1 className="mt-1 text-h1 text-bone">Reports</h1>
+        <p className="text-sm text-ash">Scoped to your gym(s) by row-level security.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -119,30 +119,30 @@ export default async function ReportsPage() {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Check-ins · last 7 days</h2>
+        <h2 className="text-sm font-medium text-ash">Check-ins · last 7 days</h2>
         <div className="flex items-end justify-between gap-2 rounded-md border border-onyx bg-onyx p-4">
           {days.map((d) => (
             <div key={d.day} className="flex flex-1 flex-col items-center gap-1">
-              <div className="text-xs text-zinc-500">{d.count}</div>
+              <div className="text-xs text-ash">{d.count}</div>
               <div
                 className={`w-full rounded-t ${d.count === maxDay && d.count > 0 ? "bg-gold" : "bg-iron"}`}
                 style={{ height: `${8 + Math.round((d.count / maxDay) * 60)}px` }}
               />
-              <div className="text-[10px] text-zinc-400">{d.day.slice(5)}</div>
+              <div className="text-[10px] text-ash">{d.day.slice(5)}</div>
             </div>
           ))}
         </div>
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Members by status</h2>
+        <h2 className="text-sm font-medium text-ash">Members by status</h2>
         {statusRows.length === 0 ? (
-          <p className="text-sm text-zinc-500">No members yet.</p>
+          <p className="text-sm text-ash">No members yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {statusRows.map(([status, count]) => (
               <li key={status} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                <span className="text-zinc-500">{status}</span>
+                <span className="text-ash">{status}</span>
                 <span className="font-medium">{count}</span>
               </li>
             ))}
@@ -151,14 +151,14 @@ export default async function ReportsPage() {
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Revenue by month</h2>
+        <h2 className="text-sm font-medium text-ash">Revenue by month</h2>
         {months.length === 0 ? (
-          <p className="text-sm text-zinc-500">No paid invoices yet.</p>
+          <p className="text-sm text-ash">No paid invoices yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {months.map(([month, cents]) => (
               <li key={month} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                <span className="text-zinc-500">{month}</span>
+                <span className="text-ash">{month}</span>
                 <span className={cents === maxRevenue && maxRevenue > 0 ? "font-medium text-gold" : "font-medium"}>
                   {formatMoney(cents)}
                 </span>

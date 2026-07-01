@@ -51,10 +51,10 @@ export default async function GuestPassesPage({
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <header className="flex items-center justify-between">
         <div>
-          <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+          <Link href="/dashboard" className="text-sm text-ash hover:underline">
             ← Dashboard
           </Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Guest passes</h1>
+          <h1 className="mt-1 text-h1 text-bone">Guest passes</h1>
         </div>
         <a
           href="/dashboard/guest-passes/export"
@@ -65,13 +65,13 @@ export default async function GuestPassesPage({
       </header>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       {passes.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           No guest passes issued yet.
         </p>
       ) : (
@@ -80,7 +80,7 @@ export default async function GuestPassesPage({
             <li key={p.id} className="flex items-center justify-between px-4 py-3">
               <span className="flex flex-col">
                 <span className="font-medium">{p.guest_name}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {p.organization?.name ? `${p.organization.name} · ` : ""}
                   {p.code ? `code ${p.code}` : "—"}
                   {p.expires_at ? ` · expires ${p.expires_at}` : ""}
@@ -91,7 +91,7 @@ export default async function GuestPassesPage({
                 <select
                   name="status"
                   defaultValue={p.status}
-                  className="rounded-md border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                  className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                 >
                   {GUEST_PASS_STATUSES.map((s) => (
                     <option key={s} value={s}>
@@ -99,7 +99,7 @@ export default async function GuestPassesPage({
                     </option>
                   ))}
                 </select>
-                <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                   Save
                 </button>
               </form>
@@ -113,11 +113,11 @@ export default async function GuestPassesPage({
           <h2 className="text-sm font-medium">Issue guest pass</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="guest_name" required placeholder="Guest name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="guest_email" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="guest_name" required placeholder="Guest name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="guest_email" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <div className="flex gap-3">
-            <select name="host_member_id" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="host_member_id" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">Host member (optional)</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -125,14 +125,14 @@ export default async function GuestPassesPage({
                 </option>
               ))}
             </select>
-            <input name="expires_at" type="date" title="Expires" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="expires_at" type="date" title="Expires" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Issue pass
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-ash">
           You need a staff role in a gym to issue guest passes.
         </p>
       )}

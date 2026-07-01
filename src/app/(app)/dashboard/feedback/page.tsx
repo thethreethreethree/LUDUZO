@@ -40,17 +40,17 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Reviews &amp; NPS</h1>
-        <p className="text-sm text-zinc-500">Member satisfaction at a glance.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Reviews &amp; NPS</h1>
+        <p className="text-sm text-ash">Member satisfaction at a glance.</p>
       </div>
 
-      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
 
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-md border border-onyx bg-onyx p-4">
           <div className="text-xs text-ash">Avg rating</div>
-          <div className="mt-1 font-display text-2xl font-extrabold">{avgRating}<span className="text-sm text-zinc-500"> /5</span></div>
+          <div className="mt-1 font-display text-2xl font-extrabold">{avgRating}<span className="text-sm text-ash"> /5</span></div>
         </div>
         <div className="rounded-md border border-onyx bg-onyx p-4">
           <div className="text-xs text-ash">NPS</div>
@@ -68,12 +68,12 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
             <span className="text-sm font-medium">Log a review</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <select name="rating" required className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+              <select name="rating" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                 {[5, 4, 3, 2, 1].map((n) => (<option key={n} value={n}>{n}★</option>))}
               </select>
-              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">{memberOptions}</select>
+              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
             </div>
-            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save review</button>
           </form>
 
@@ -81,28 +81,28 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
             <span className="text-sm font-medium">Log NPS</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <select name="score" required className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+              <select name="score" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                 {Array.from({ length: 11 }, (_, i) => 10 - i).map((n) => (<option key={n} value={n}>{n}</option>))}
               </select>
-              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">{memberOptions}</select>
+              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
             </div>
-            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save NPS</button>
           </form>
         </div>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Recent reviews</h2>
+        <h2 className="text-sm font-medium text-ash">Recent reviews</h2>
         {reviews.length === 0 ? (
-          <p className="text-sm text-zinc-500">No reviews yet.</p>
+          <p className="text-sm text-ash">No reviews yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
             {reviews.slice(0, 20).map((r) => (
               <li key={r.id} className="px-4 py-2 text-sm">
                 <span className="text-gold">{"★".repeat(r.rating)}</span>
-                <span className="text-zinc-600">{"★".repeat(5 - r.rating)}</span>
-                {r.comment ? <span className="ml-2 text-zinc-400">{r.comment}</span> : null}
+                <span className="text-ash">{"★".repeat(5 - r.rating)}</span>
+                {r.comment ? <span className="ml-2 text-ash">{r.comment}</span> : null}
               </li>
             ))}
           </ul>

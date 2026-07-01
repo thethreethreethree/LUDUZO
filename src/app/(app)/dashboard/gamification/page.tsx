@@ -39,12 +39,12 @@ export default async function GamificationPage({ searchParams }: { searchParams:
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Gamification</h1>
-        <p className="text-sm text-zinc-500">Badges, challenges, and a check-in leaderboard.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Gamification</h1>
+        <p className="text-sm text-ash">Badges, challenges, and a check-in leaderboard.</p>
       </div>
 
-      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
       {ok ? <p className="rounded-md border border-l-2 border-onyx border-l-gold px-3 py-2 text-sm text-gold">{ok}</p> : null}
 
       {orgs.length > 0 ? (
@@ -53,21 +53,21 @@ export default async function GamificationPage({ searchParams }: { searchParams:
             <span className="text-sm font-medium">New badge</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <input name="icon" placeholder="🏅" className="w-16 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-              <input name="name" required placeholder="Badge name" className="w-full min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="icon" placeholder="🏅" className="w-16 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="name" required placeholder="Badge name" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             </div>
-            <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Add badge</button>
           </form>
 
           <form action={awardBadge} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-5">
             <span className="text-sm font-medium">Award a badge</span>
             <OrgPicker orgs={orgs} />
-            <select name="badge_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="badge_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">Badge…</option>
               {badges.map((b) => (<option key={b.id} value={b.id}>{b.icon ? `${b.icon} ` : ""}{b.name}</option>))}
             </select>
-            <select name="member_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="member_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">Member…</option>
               {members.map((m) => (<option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>))}
             </select>
@@ -81,12 +81,12 @@ export default async function GamificationPage({ searchParams }: { searchParams:
           <span className="text-sm font-medium">New challenge</span>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-2">
-            <input name="name" required placeholder="e.g. 20 visits in March" className="w-full min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="goal_target" type="number" min="1" placeholder="Goal" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="name" required placeholder="e.g. 20 visits in March" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="goal_target" type="number" min="1" placeholder="Goal" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <div className="flex gap-2">
-            <input name="starts_on" type="date" className="w-full min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="ends_on" type="date" className="w-full min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="starts_on" type="date" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="ends_on" type="date" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Create challenge</button>
         </form>
@@ -94,15 +94,15 @@ export default async function GamificationPage({ searchParams }: { searchParams:
 
       <div className="grid gap-4 sm:grid-cols-2">
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-500">Leaderboard · check-ins</h2>
+          <h2 className="text-sm font-medium text-ash">Leaderboard · check-ins</h2>
           {leaderboard.length === 0 ? (
-            <p className="text-sm text-zinc-500">No check-ins yet.</p>
+            <p className="text-sm text-ash">No check-ins yet.</p>
           ) : (
             <ol className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
               {leaderboard.map((l, i) => (
                 <li key={i} className="flex items-center justify-between px-4 py-2 text-sm">
                   <span><span className="text-gold">{i + 1}.</span> {l.name}</span>
-                  <span className="text-xs text-zinc-500">{l.n} visits</span>
+                  <span className="text-xs text-ash">{l.n} visits</span>
                 </li>
               ))}
             </ol>
@@ -110,18 +110,18 @@ export default async function GamificationPage({ searchParams }: { searchParams:
         </section>
 
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-500">Badges &amp; challenges</h2>
+          <h2 className="text-sm font-medium text-ash">Badges &amp; challenges</h2>
           <div className="flex flex-wrap gap-2">
             {badges.map((b) => (
               <span key={b.id} className="rounded-full border border-iron px-3 py-1 text-xs">{b.icon ? `${b.icon} ` : ""}{b.name}</span>
             ))}
-            {badges.length === 0 ? <span className="text-sm text-zinc-500">No badges yet.</span> : null}
+            {badges.length === 0 ? <span className="text-sm text-ash">No badges yet.</span> : null}
           </div>
           <ul className="mt-1 flex flex-col gap-1 text-sm">
             {challenges.map((c) => (
               <li key={c.id} className="rounded-md border border-onyx bg-onyx px-3 py-2">
                 <span className="font-medium">{c.name}</span>
-                <span className="text-xs text-zinc-500">{c.goal_target ? ` · goal ${c.goal_target}` : ""}{c.ends_on ? ` · ends ${c.ends_on}` : ""}</span>
+                <span className="text-xs text-ash">{c.goal_target ? ` · goal ${c.goal_target}` : ""}{c.ends_on ? ` · ends ${c.ends_on}` : ""}</span>
               </li>
             ))}
           </ul>

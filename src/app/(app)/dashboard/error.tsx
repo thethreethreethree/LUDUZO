@@ -10,7 +10,7 @@ export default function DashboardError({
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-4 p-8 text-center">
       <h1 className="text-xl font-semibold tracking-tight">Something went wrong</h1>
-      <p className="max-w-md text-sm text-zinc-500">{error.message || "Unexpected error."}</p>
+      <p className="max-w-md text-sm text-ash">{error.message || "Unexpected error."}</p>
       <button
         onClick={reset}
         className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold"

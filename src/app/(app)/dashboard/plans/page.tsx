@@ -41,20 +41,20 @@ export default async function PlansPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Membership plans</h1>
+        <h1 className="mt-1 text-h1 text-bone">Membership plans</h1>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       {plans.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           No plans yet.
         </p>
       ) : (
@@ -63,7 +63,7 @@ export default async function PlansPage({
             <li key={p.id} className="flex items-center justify-between px-4 py-3">
               <span className="flex flex-col">
                 <span className="font-medium">{p.name}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {p.organization?.name ? `${p.organization.name} · ` : ""}
                   {p.active ? "active" : "inactive"}
                 </span>
@@ -71,13 +71,13 @@ export default async function PlansPage({
               <span className="flex items-center gap-3">
                 <span className="text-sm">
                   {formatMoney(p.price_cents, p.currency)}
-                  <span className="text-xs text-zinc-500"> / {p.interval}</span>
+                  <span className="text-xs text-ash"> / {p.interval}</span>
                 </span>
                 {orgs.length > 0 ? (
                   <form action={togglePlanActive}>
                     <input type="hidden" name="id" value={p.id} />
                     <input type="hidden" name="active" value={String(p.active)} />
-                    <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       {p.active ? "Deactivate" : "Activate"}
                     </button>
                   </form>
@@ -93,9 +93,9 @@ export default async function PlansPage({
           <h2 className="text-sm font-medium">New plan</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="name" required placeholder="Plan name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <select name="interval" defaultValue="month" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <input name="name" required placeholder="Plan name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <select name="interval" defaultValue="month" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {PLAN_INTERVALS.map((i) => (
                 <option key={i} value={i}>
                   {i}
@@ -103,13 +103,13 @@ export default async function PlansPage({
               ))}
             </select>
           </div>
-          <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create plan
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-500">
+        <p className="text-sm text-ash">
           You need a manager+ role in a gym to create plans.
         </p>
       )}

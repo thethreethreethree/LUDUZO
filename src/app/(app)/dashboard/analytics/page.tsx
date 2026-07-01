@@ -72,9 +72,9 @@ export default async function AnalyticsPage() {
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 p-8">
       <div className="flex items-start justify-between">
         <div>
-          <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline print:hidden">← Dashboard</Link>
-          <h1 className="mt-1 text-2xl font-semibold tracking-tight">Analytics</h1>
-          <p className="text-sm text-zinc-500">Attendance, growth, revenue &amp; trainer performance.</p>
+          <Link href="/dashboard" className="text-sm text-ash hover:underline print:hidden">← Dashboard</Link>
+          <h1 className="mt-1 text-h1 text-bone">Analytics</h1>
+          <p className="text-sm text-ash">Attendance, growth, revenue &amp; trainer performance.</p>
         </div>
         <PrintButton />
       </div>
@@ -95,13 +95,13 @@ export default async function AnalyticsPage() {
 
       {/* Peak-hour heatmap */}
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Peak hours (check-ins)</h2>
+        <h2 className="text-sm font-medium text-ash">Peak hours (check-ins)</h2>
         <div className="overflow-x-auto rounded-md border border-onyx bg-onyx p-3">
           <table className="border-separate" style={{ borderSpacing: "2px" }}>
             <tbody>
               {heat.map((row, d) => (
                 <tr key={d}>
-                  <td className="pr-2 text-[10px] text-zinc-500">{DOW[d]}</td>
+                  <td className="pr-2 text-[10px] text-ash">{DOW[d]}</td>
                   {row.map((v, h) => {
                     const intensity = heatMax ? v / heatMax : 0;
                     return (
@@ -112,7 +112,7 @@ export default async function AnalyticsPage() {
                   })}
                 </tr>
               ))}
-              <tr><td /><td colSpan={24} className="pt-1 text-[9px] text-zinc-600">0h → 23h</td></tr>
+              <tr><td /><td colSpan={24} className="pt-1 text-[9px] text-ash">0h → 23h</td></tr>
             </tbody>
           </table>
         </div>
@@ -121,14 +121,14 @@ export default async function AnalyticsPage() {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Revenue trend + forecast */}
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-500">Revenue (paid) · last 6 mo</h2>
+          <h2 className="text-sm font-medium text-ash">Revenue (paid) · last 6 mo</h2>
           <div className="flex items-end gap-1 rounded-md border border-onyx bg-onyx p-3" style={{ height: 120 }}>
             {revSeries.map((v, i) => {
               const max = Math.max(...revSeries, forecast, 1);
               return (
                 <div key={i} className="flex flex-1 flex-col items-center justify-end gap-1">
                   <div className="w-full rounded-t bg-gold" style={{ height: `${(v / max) * 80}px` }} />
-                  <span className="text-[9px] text-zinc-600">{last6Keys[i].slice(5)}</span>
+                  <span className="text-[9px] text-ash">{last6Keys[i].slice(5)}</span>
                 </div>
               );
             })}
@@ -137,16 +137,16 @@ export default async function AnalyticsPage() {
               <span className="text-[9px] text-gold">next*</span>
             </div>
           </div>
-          <p className="text-[10px] text-zinc-600">*forecast = mean of last 3 months (trend estimate, not a prediction).</p>
+          <p className="text-[10px] text-ash">*forecast = mean of last 3 months (trend estimate, not a prediction).</p>
         </section>
 
         {/* Membership growth */}
         <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-500">New members · by month</h2>
+          <h2 className="text-sm font-medium text-ash">New members · by month</h2>
           <ul className="flex flex-col gap-1 rounded-md border border-onyx bg-onyx p-3 text-sm">
             {last6Keys.map((k) => (
               <li key={k} className="flex items-center justify-between text-xs">
-                <span className="text-zinc-500">{MONTHS[Number(k.slice(5)) - 1]} {k.slice(0, 4)}</span>
+                <span className="text-ash">{MONTHS[Number(k.slice(5)) - 1]} {k.slice(0, 4)}</span>
                 <span className="font-medium">{joinsByMonth.get(k) ?? 0}</span>
               </li>
             ))}
@@ -156,15 +156,15 @@ export default async function AnalyticsPage() {
 
       {/* Trainer performance */}
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Trainer performance (appointments)</h2>
+        <h2 className="text-sm font-medium text-ash">Trainer performance (appointments)</h2>
         {trainers.length === 0 ? (
-          <p className="text-sm text-zinc-500">No appointment data yet.</p>
+          <p className="text-sm text-ash">No appointment data yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
             {trainers.map((t, i) => (
               <li key={i} className="flex items-center justify-between px-4 py-2 text-sm">
                 <span>{t.name}</span>
-                <span className="text-xs text-zinc-500">{t.completed}/{t.total} completed</span>
+                <span className="text-xs text-ash">{t.completed}/{t.total} completed</span>
               </li>
             ))}
           </ul>

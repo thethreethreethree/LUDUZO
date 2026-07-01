@@ -16,15 +16,15 @@ export default async function LoginPage({
           <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={28} height={28} />
           <span className="font-display font-extrabold tracking-widest">LUDUZO</span>
         </Link>
-        <h1 className="mt-6 text-2xl font-semibold tracking-tight">Sign in</h1>
+        <h1 className="mt-6 text-h1 text-bone">Sign in</h1>
 
         {error ? (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          <p className="mt-4 rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
             {error}
           </p>
         ) : null}
         {message ? (
-          <p className="mt-4 rounded-md bg-zinc-100 px-3 py-2 text-sm text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300">
+          <p className="mt-4 rounded-md bg-onyx-2 px-3 py-2 text-sm text-zinc-700 bg-onyx-2 dark:text-zinc-300">
             {message}
           </p>
         ) : null}
@@ -37,7 +37,7 @@ export default async function LoginPage({
               name="email"
               required
               autoComplete="email"
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -48,7 +48,7 @@ export default async function LoginPage({
               required
               autoComplete="current-password"
               minLength={6}
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
             />
           </label>
 
@@ -61,7 +61,7 @@ export default async function LoginPage({
             </button>
             <button
               formAction={signup}
-              className="flex-1 rounded-md border border-zinc-300 px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+              className="flex-1 rounded-md border border-iron px-4 py-2.5 text-sm font-medium hover:bg-onyx-2 hover:bg-onyx-2"
             >
               Create account
             </button>

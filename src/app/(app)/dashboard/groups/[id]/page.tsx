@@ -36,10 +36,10 @@ export default async function GroupDetailPage({
   if (!group) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 p-8">
-        <Link href="/dashboard/groups" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/groups" className="text-sm text-ash hover:underline">
           ← Groups
         </Link>
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           Group not found (or not in your gym).
         </p>
       </main>
@@ -56,34 +56,34 @@ export default async function GroupDetailPage({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard/groups" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard/groups" className="text-sm text-ash hover:underline">
           ← Groups
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{group.name}</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="mt-1 text-h1 text-bone">{group.name}</h1>
+        <p className="text-sm text-ash">
           {group.organization?.name ? `${group.organization.name} · ` : ""}
           {group.group_type}
         </p>
         <form action={updateGroup} className="mt-3 flex flex-wrap items-center gap-2">
           <input type="hidden" name="id" value={group.id} />
-          <input name="name" defaultValue={group.name} className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <select name="group_type" defaultValue={group.group_type} className="rounded-md border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <input name="name" defaultValue={group.name} className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+          <select name="group_type" defaultValue={group.group_type} className="rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2">
             {GROUP_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
-          <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+          <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
             Save
           </button>
         </form>
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Members</h2>
+        <h2 className="text-sm font-medium text-ash">Members</h2>
         {links.length === 0 ? (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ash">
             No members yet. Add members to this group from a member&apos;s page.
           </p>
         ) : (
@@ -95,10 +95,10 @@ export default async function GroupDetailPage({
                     {l.member.first_name} {l.member.last_name}
                   </Link>
                 ) : (
-                  <span className="text-zinc-500">(member)</span>
+                  <span className="text-ash">(member)</span>
                 )}
                 {l.relationship ? (
-                  <span className="text-xs text-zinc-500">{l.relationship}</span>
+                  <span className="text-xs text-ash">{l.relationship}</span>
                 ) : null}
               </li>
             ))}

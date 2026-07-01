@@ -24,17 +24,17 @@ export default async function KioskPage({
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col items-center justify-center gap-8 p-8 text-center">
-      <Link href="/dashboard" className="self-start text-sm text-zinc-500 hover:underline">
+      <Link href="/dashboard" className="self-start text-sm text-ash hover:underline">
         ← Dashboard
       </Link>
 
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Check in</h1>
-        <p className="mt-1 text-sm text-zinc-500">Scan your member QR or enter your token.</p>
+        <p className="mt-1 text-sm text-ash">Scan your member QR or enter your token.</p>
       </div>
 
       {ok ? (
-        <p className="w-full rounded-md bg-green-50 px-3 py-3 text-lg font-medium text-green-700 dark:bg-green-950 dark:text-green-300">
+        <p className="w-full rounded-md bg-green-50 px-3 py-3 text-lg font-medium text-win dark:bg-green-950 dark:text-green-300">
           ✓ Checked in. Welcome!
         </p>
       ) : null}
@@ -49,14 +49,14 @@ export default async function KioskPage({
           name="qr_token"
           autoFocus
           placeholder="QR token"
-          className="w-full rounded-md border border-zinc-300 px-4 py-4 text-center text-lg dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-iron px-4 py-4 text-center text-lg bg-onyx-2"
         />
         <button className="w-full rounded-md bg-gold px-4 py-4 text-lg font-medium text-black hover:opacity-90">
           Check in
         </button>
       </form>
 
-      <p className="text-sm text-zinc-500">{count ?? 0} currently in the gym</p>
+      <p className="text-sm text-ash">{count ?? 0} currently in the gym</p>
     </main>
   );
 }

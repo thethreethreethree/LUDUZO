@@ -45,35 +45,35 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Team messages</h1>
-        <p className="text-sm text-zinc-500">{unread > 0 ? `${unread} unread · ` : ""}Direct messages between staff.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Team messages</h1>
+        <p className="text-sm text-ash">{unread > 0 ? `${unread} unread · ` : ""}Direct messages between staff.</p>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p>
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p>
       ) : null}
 
       {orgs.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500">You don&apos;t manage any gym.</p>
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash">You don&apos;t manage any gym.</p>
       ) : (
         <form action={sendMessage} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <select name="to_user" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="to_user" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">To…</option>
             {staff.filter((s) => s.user_id !== user.id).map((s) => (
               <option key={s.user_id} value={s.user_id}>{s.profile?.full_name ?? "(staff)"}</option>
             ))}
           </select>
-          <textarea name="body" rows={2} required placeholder="Message…" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <textarea name="body" rows={2} required placeholder="Message…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Send</button>
         </form>
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Conversations</h2>
+        <h2 className="text-sm font-medium text-ash">Conversations</h2>
         {messages.length === 0 ? (
-          <p className="text-sm text-zinc-500">No messages.</p>
+          <p className="text-sm text-ash">No messages.</p>
         ) : (
           <ul className="flex flex-col gap-2">
             {messages.map((m) => {
@@ -81,7 +81,7 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
               return (
                 <li key={m.id} className={`rounded-md border px-4 py-3 text-sm ${incoming && !m.read_at ? "border-gold bg-onyx" : "border-onyx bg-onyx"}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-zinc-500">
+                    <span className="text-xs text-ash">
                       {incoming ? `${m.sender?.full_name ?? "(staff)"} → you` : `you → ${m.recipient?.full_name ?? "(staff)"}`}
                       {" · "}{new Date(m.created_at).toLocaleString()}
                     </span>

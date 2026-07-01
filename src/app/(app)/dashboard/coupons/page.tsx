@@ -49,20 +49,20 @@ export default async function CouponsPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Coupons</h1>
+        <h1 className="mt-1 text-h1 text-bone">Coupons</h1>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       {coupons.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500 ">
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash ">
           No coupons yet.
         </p>
       ) : (
@@ -71,7 +71,7 @@ export default async function CouponsPage({
             <li key={c.id} className="flex items-center justify-between px-4 py-3">
               <span className="flex flex-col">
                 <span className="font-mono font-medium">{c.code}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {c.organization?.name ? `${c.organization.name} · ` : ""}
                   {c.active ? "active" : "inactive"}
                 </span>
@@ -82,7 +82,7 @@ export default async function CouponsPage({
                   <form action={toggleCouponActive}>
                     <input type="hidden" name="id" value={c.id} />
                     <input type="hidden" name="active" value={String(c.active)} />
-                    <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       {c.active ? "Deactivate" : "Activate"}
                     </button>
                   </form>
@@ -97,21 +97,21 @@ export default async function CouponsPage({
         <form action={createCoupon} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">New coupon</h2>
           <OrgPicker orgs={orgs} />
-          <input name="code" required placeholder="CODE" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <select name="discount_type" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <input name="code" required placeholder="CODE" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="discount_type" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {DISCOUNT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
-          <input name="discount_value" type="number" min="0" step="0.01" required placeholder="Value" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="discount_value" type="number" min="0" step="0.01" required placeholder="Value" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-500">You need a manager+ role to create coupons.</p>
+        <p className="text-sm text-ash">You need a manager+ role to create coupons.</p>
       )}
     </main>
   );

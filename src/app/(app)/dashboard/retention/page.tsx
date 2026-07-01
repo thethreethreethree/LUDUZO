@@ -51,9 +51,9 @@ export default async function RetentionPage() {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Retention &amp; at-risk</h1>
-        <p className="text-sm text-zinc-500">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Retention &amp; at-risk</h1>
+        <p className="text-sm text-ash">
           Active members who haven&apos;t checked in for {AT_RISK_DAYS}+ days. This is a simple
           activity heuristic, not a prediction — the signal is shown so you can judge it.
         </p>
@@ -75,9 +75,9 @@ export default async function RetentionPage() {
       </div>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Reach out</h2>
+        <h2 className="text-sm font-medium text-ash">Reach out</h2>
         {atRisk.length === 0 ? (
-          <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500">
+          <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash">
             No at-risk members — everyone active has visited recently. 💪
           </p>
         ) : (

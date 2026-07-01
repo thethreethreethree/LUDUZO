@@ -39,19 +39,19 @@ export default async function GiftCardsPage({ searchParams }: { searchParams: Pr
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Gift cards</h1>
-        <p className="text-sm text-zinc-500">{formatMoney(outstanding)} outstanding balance across active cards.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Gift cards</h1>
+        <p className="text-sm text-ash">{formatMoney(outstanding)} outstanding balance across active cards.</p>
       </div>
 
-      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
 
       {orgs.length > 0 ? (
         <form action={issueGiftCard} className="flex flex-wrap items-end gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="code" required placeholder="CODE" className="w-32 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <select name="issued_to_member" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <input name="code" required placeholder="CODE" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="issued_to_member" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">— unassigned —</option>
             {members.map((m) => (<option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>))}
           </select>
@@ -60,16 +60,16 @@ export default async function GiftCardsPage({ searchParams }: { searchParams: Pr
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Cards</h2>
+        <h2 className="text-sm font-medium text-ash">Cards</h2>
         {cards.length === 0 ? (
-          <p className="text-sm text-zinc-500">No gift cards issued.</p>
+          <p className="text-sm text-ash">No gift cards issued.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
             {cards.map((c) => (
               <li key={c.id} className={`flex items-center justify-between gap-3 px-4 py-3 text-sm ${c.active ? "" : "opacity-50"}`}>
                 <div className="flex min-w-0 flex-col">
                   <span className="font-mono font-medium">{c.code}</span>
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-ash">
                     {formatMoney(c.balance_cents)} / {formatMoney(c.initial_cents)}
                     {c.member ? ` · ${c.member.first_name} ${c.member.last_name}` : ""}
                     {c.active ? "" : " · inactive"}

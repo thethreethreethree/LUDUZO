@@ -24,14 +24,14 @@ export default async function OnboardingPage({
           <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={24} height={24} />
           <span className="font-display font-extrabold tracking-widest">LUDUZO</span>
         </div>
-        <h1 className="text-2xl font-semibold tracking-tight">Create your gym</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-h1 text-bone">Create your gym</h1>
+        <p className="mt-1 text-sm text-ash">
           You&apos;ll be set up as the owner. You can add locations and staff
           afterwards.
         </p>
 
         {error ? (
-          <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          <p className="mt-4 rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
             {error}
           </p>
         ) : null}
@@ -44,7 +44,7 @@ export default async function OnboardingPage({
               name="name"
               required
               placeholder="Iron Works Gym"
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -53,9 +53,9 @@ export default async function OnboardingPage({
               type="text"
               name="slug"
               placeholder="iron-works"
-              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
             />
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-ash">
               Leave blank to derive it from the name.
             </span>
           </label>

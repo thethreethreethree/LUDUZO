@@ -44,22 +44,22 @@ export default async function InventoryPage({
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Inventory & equipment</h1>
+        <h1 className="mt-1 text-h1 text-bone">Inventory & equipment</h1>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Products</h2>
+        <h2 className="text-sm font-medium text-ash">Products</h2>
         {products.length === 0 ? (
-          <p className="text-sm text-zinc-500">No products yet.</p>
+          <p className="text-sm text-ash">No products yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {products.map((p) => (
@@ -73,12 +73,12 @@ export default async function InventoryPage({
                       </span>
                     ) : null}
                     {!p.active ? (
-                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium text-zinc-500 dark:bg-zinc-800">
+                      <span className="rounded bg-onyx-2 px-1.5 py-0.5 text-[10px] font-medium text-ash">
                         inactive
                       </span>
                     ) : null}
                   </span>
-                  <span className="text-xs text-zinc-500">{formatMoney(p.price_cents, p.currency)}</span>
+                  <span className="text-xs text-ash">{formatMoney(p.price_cents, p.currency)}</span>
                 </span>
                 {orgs.length > 0 ? (
                   <form action={adjustStock} className="flex items-center gap-2">
@@ -88,22 +88,22 @@ export default async function InventoryPage({
                       type="number"
                       min="0"
                       defaultValue={p.stock_quantity}
-                      className="w-20 rounded-md border border-zinc-300 px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-20 rounded-md border border-iron px-2 py-1 text-sm bg-onyx-2"
                     />
-                    <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Set
                     </button>
                     <button
                       formAction={toggleProductActive}
                       name="active"
                       value={String(p.active)}
-                      className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
+                      className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2"
                     >
                       {p.active ? "Deactivate" : "Activate"}
                     </button>
                   </form>
                 ) : (
-                  <span className="text-xs text-zinc-500">{p.stock_quantity} in stock</span>
+                  <span className="text-xs text-ash">{p.stock_quantity} in stock</span>
                 )}
               </li>
             ))}
@@ -112,11 +112,11 @@ export default async function InventoryPage({
         {orgs.length > 0 ? (
           <form action={createProduct} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="Product" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="sku" placeholder="SKU" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="stock" type="number" min="0" placeholder="Stock" className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="reorder_level" type="number" min="0" placeholder="Reorder ≤" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="name" required placeholder="Product" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="sku" placeholder="SKU" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="stock" type="number" min="0" placeholder="Stock" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="reorder_level" type="number" min="0" placeholder="Reorder ≤" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add
             </button>
@@ -125,9 +125,9 @@ export default async function InventoryPage({
       </section>
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Equipment</h2>
+        <h2 className="text-sm font-medium text-ash">Equipment</h2>
         {equipment.length === 0 ? (
-          <p className="text-sm text-zinc-500">No equipment yet.</p>
+          <p className="text-sm text-ash">No equipment yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {equipment.map((e) => (
@@ -139,7 +139,7 @@ export default async function InventoryPage({
                     <select
                       name="status"
                       defaultValue={e.status}
-                      className="rounded-md border border-zinc-300 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-900"
+                      className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                     >
                       {EQUIPMENT_STATUSES.map((s) => (
                         <option key={s} value={s}>
@@ -147,12 +147,12 @@ export default async function InventoryPage({
                         </option>
                       ))}
                     </select>
-                    <button className="rounded-md border border-zinc-300 px-2 py-1 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
+                    <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Save
                     </button>
                   </form>
                 ) : (
-                  <span className="text-xs text-zinc-500">{e.status}</span>
+                  <span className="text-xs text-ash">{e.status}</span>
                 )}
               </li>
             ))}
@@ -161,9 +161,9 @@ export default async function InventoryPage({
         {orgs.length > 0 ? (
           <form action={createEquipment} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="Equipment" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="purchased_at" type="date" title="Purchased" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <select name="status" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <input name="name" required placeholder="Equipment" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="purchased_at" type="date" title="Purchased" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <select name="status" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {EQUIPMENT_STATUSES.map((s) => (
                 <option key={s} value={s}>
                   {s}

@@ -38,16 +38,16 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Admin</h1>
-        <p className="text-sm text-zinc-500">White-label, plan tier, localisation, API &amp; webhooks.</p>
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-h1 text-bone">Admin</h1>
+        <p className="text-sm text-ash">White-label, plan tier, localisation, API &amp; webhooks.</p>
       </div>
 
-      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
       {ok ? <p className="break-all rounded-md border border-l-2 border-onyx border-l-gold px-3 py-2 text-sm text-gold">{ok}</p> : null}
 
       {orgs.length === 0 ? (
-        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500">You don&apos;t own or admin any gym.</p>
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash">You don&apos;t own or admin any gym.</p>
       ) : (
         orgs.map((o) => (
           <form key={o.id} action={updateOrgSettings} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
@@ -57,25 +57,25 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <span className="text-xs text-gold">{o.role}</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Brand colour
-                <input name="brand_color" defaultValue={o.brand_color ?? "#FECE00"} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <label className="flex flex-col gap-1 text-xs text-ash">Brand colour
+                <input name="brand_color" defaultValue={o.brand_color ?? "#FECE00"} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Accent colour
-                <input name="accent_color" defaultValue={o.accent_color ?? "#0A0A0A"} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <label className="flex flex-col gap-1 text-xs text-ash">Accent colour
+                <input name="accent_color" defaultValue={o.accent_color ?? "#0A0A0A"} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Logo URL
-                <input name="logo_url" defaultValue={o.logo_url ?? ""} placeholder="https://…" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <label className="flex flex-col gap-1 text-xs text-ash">Logo URL
+                <input name="logo_url" defaultValue={o.logo_url ?? ""} placeholder="https://…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Plan tier
-                <select name="plan_tier" defaultValue={o.plan_tier} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+              <label className="flex flex-col gap-1 text-xs text-ash">Plan tier
+                <select name="plan_tier" defaultValue={o.plan_tier} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                   {TIERS.map((t) => (<option key={t} value={t}>{t}</option>))}
                 </select>
               </label>
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Currency
-                <input name="default_currency" defaultValue={o.default_currency} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <label className="flex flex-col gap-1 text-xs text-ash">Currency
+                <input name="default_currency" defaultValue={o.default_currency} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
-              <label className="flex flex-col gap-1 text-xs text-zinc-500">Locale
-                <input name="locale" defaultValue={o.locale} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <label className="flex flex-col gap-1 text-xs text-ash">Locale
+                <input name="locale" defaultValue={o.locale} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
             </div>
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save settings</button>
@@ -86,10 +86,10 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       {orgs.length > 0 ? (
         <>
           <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">API keys</h2>
+            <h2 className="text-sm font-medium text-ash">API keys</h2>
             <form action={generateApiKey} className="flex gap-2 rounded-md border border-onyx bg-onyx p-4">
               <input type="hidden" name="organization_id" value={orgs[0].id} />
-              <input name="name" placeholder="Key name" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="name" placeholder="Key name" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Generate</button>
             </form>
             {keys.length > 0 ? (
@@ -109,11 +109,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
           </section>
 
           <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">Webhooks</h2>
+            <h2 className="text-sm font-medium text-ash">Webhooks</h2>
             <form action={addWebhook} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4 sm:flex-row">
               <input type="hidden" name="organization_id" value={orgs[0].id} />
-              <input name="url" required placeholder="https://your-endpoint" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-              <input name="event_types" placeholder="member.created, invoice.paid" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="url" required placeholder="https://your-endpoint" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="event_types" placeholder="member.created, invoice.paid" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Add</button>
             </form>
             {webhooks.length > 0 ? (
@@ -128,7 +128,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
                 ))}
               </ul>
             ) : null}
-            <p className="text-[10px] text-zinc-600">Registration only — event delivery requires a background job runner (not implemented).</p>
+            <p className="text-[10px] text-ash">Registration only — event delivery requires a background job runner (not implemented).</p>
           </section>
         </>
       ) : null}

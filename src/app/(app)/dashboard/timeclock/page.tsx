@@ -44,14 +44,14 @@ export default async function TimeclockPage({
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
       <div>
-        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">
+        <Link href="/dashboard" className="text-sm text-ash hover:underline">
           ← Dashboard
         </Link>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Time clock</h1>
+        <h1 className="mt-1 text-h1 text-bone">Time clock</h1>
       </div>
 
       {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+        <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
         </p>
       ) : null}
@@ -74,7 +74,7 @@ export default async function TimeclockPage({
           {orgs.length === 1 ? (
             <input type="hidden" name="organization_id" value={orgs[0].id} />
           ) : (
-            <select name="organization_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="organization_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {orgs.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.name}
@@ -87,19 +87,19 @@ export default async function TimeclockPage({
           </button>
         </form>
       ) : (
-        <p className="text-sm text-zinc-500">You&apos;re not a member of any gym.</p>
+        <p className="text-sm text-ash">You&apos;re not a member of any gym.</p>
       )}
 
       <section className="flex flex-col gap-2">
-        <h2 className="text-sm font-medium text-zinc-500">Recent</h2>
+        <h2 className="text-sm font-medium text-ash">Recent</h2>
         {entries.length === 0 ? (
-          <p className="text-sm text-zinc-500">No time entries yet.</p>
+          <p className="text-sm text-ash">No time entries yet.</p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx dark:divide-onyx dark:border-onyx">
             {entries.map((e) => (
               <li key={e.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
                 <span>{new Date(e.clock_in).toLocaleString()}</span>
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-ash">
                   {e.clock_out ? `→ ${new Date(e.clock_out).toLocaleTimeString()}` : "open"}
                 </span>
               </li>
