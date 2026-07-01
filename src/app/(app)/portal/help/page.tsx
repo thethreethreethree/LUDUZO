@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { submitFeedback } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,8 @@ const FAQ = [
   { q: "How do streaks work?", a: "Your streak counts consecutive days with a check-in. Keep it alive on the Home tab." },
 ];
 
-export default async function PortalHelpPage() {
+export default async function PortalHelpPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
+  const { ok, error } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -47,6 +49,26 @@ export default async function PortalHelpPage() {
           <a href="mailto:" className="rounded-xl border border-iron bg-onyx-2 px-4 py-2.5 text-sm font-semibold text-bone">✉ Email the gym</a>
         </div>
         <p className="mt-2 text-[11px] text-ash-dim">Contact details are set by your gym in Settings (coming to your card soon).</p>
+      </section>
+
+      {/* Feedback / report — functional now (member-insert RLS live) */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="text-[15px] font-bold text-bone">Share feedback</div>
+        <p className="mt-1 text-sm text-ash">How likely are you to recommend {gymName}? (0–10)</p>
+        {ok ? <p className="mt-2 rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">Thanks — feedback sent. 🙌</p> : null}
+        {error ? <p className="mt-2 rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
+        <form action={submitFeedback} className="mt-3 flex flex-col gap-2">
+          <div className="flex flex-wrap gap-1.5">
+            {Array.from({ length: 11 }, (_, i) => i).map((n) => (
+              <label key={n} className="cursor-pointer">
+                <input type="radio" name="score" value={n} required className="peer sr-only" />
+                <span className="mono grid h-8 w-8 place-items-center rounded-lg border border-iron text-sm text-ash peer-checked:border-gold peer-checked:bg-gold peer-checked:text-black">{n}</span>
+              </label>
+            ))}
+          </div>
+          <textarea name="comment" rows={2} placeholder="Anything else? (optional)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <button className="self-start rounded-xl bg-gold px-4 py-2 text-sm font-bold text-black">Send feedback</button>
+        </form>
       </section>
 
       <p className="text-center text-[11px] text-ash-dim">Luduzo — run your gym like an arena.</p>

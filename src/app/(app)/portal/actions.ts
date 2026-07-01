@@ -27,6 +27,29 @@ export async function portalSignOut() {
   redirect("/login");
 }
 
+// Member self-service feedback (NPS). Uses the already-live member-insert RLS on
+// nps_responses (migration 0031, org-bound) — works without 0034.
+export async function submitFeedback(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/help?error=" + encodeURIComponent("No membership on file."));
+
+  const score = Number(formData.get("score") ?? -1);
+  const comment = String(formData.get("comment") ?? "").trim() || null;
+  if (!(score >= 0 && score <= 10)) redirect("/portal/help?error=" + encodeURIComponent("Pick a score 0–10."));
+
+  const { error } = await supabase
+    .from("nps_responses")
+    .insert({ organization_id: me.organization_id, member_id: me.id, score, comment });
+  if (error) redirect("/portal/help?error=" + encodeURIComponent(error.message));
+  revalidatePath("/portal/help");
+  redirect("/portal/help?ok=1");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {
