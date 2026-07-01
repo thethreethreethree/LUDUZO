@@ -128,6 +128,8 @@ export default async function DashboardPage() {
                 { href: "/dashboard/checkins", label: "Check-ins" },
                 { href: "/dashboard/kiosk", label: "Kiosk" },
                 { href: "/dashboard/classes", label: "Classes" },
+                { href: "/dashboard/appointments", label: "Appointments" },
+                { href: "/dashboard/resources", label: "Resources" },
                 { href: "/dashboard/staff", label: "Team" },
                 { href: "/dashboard/payroll", label: "Payroll" },
                 { href: "/dashboard/timeclock", label: "Time clock" },
