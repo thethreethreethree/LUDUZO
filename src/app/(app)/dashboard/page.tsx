@@ -145,6 +145,8 @@ export default async function DashboardPage() {
                 { href: "/dashboard/activity", label: "Activity" },
                 { href: "/dashboard/reports", label: "Reports" },
                 { href: "/dashboard/inventory", label: "Inventory" },
+                { href: "/dashboard/maintenance", label: "Maintenance" },
+                { href: "/dashboard/lockers", label: "Lockers" },
                 { href: "/dashboard/pos", label: "Point of sale" },
                 { href: "/dashboard/announcements", label: "Announcements" },
                 { href: "/dashboard/community", label: "Community" },

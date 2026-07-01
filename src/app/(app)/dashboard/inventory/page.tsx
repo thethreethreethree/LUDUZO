@@ -8,7 +8,7 @@ import { createProduct, createEquipment, updateEquipmentStatus, adjustStock, tog
 
 export const dynamic = "force-dynamic";
 
-type ProductRow = { id: string; name: string; price_cents: number; currency: string; stock_quantity: number; active: boolean };
+type ProductRow = { id: string; name: string; price_cents: number; currency: string; stock_quantity: number; reorder_level: number; active: boolean };
 type EquipmentRow = { id: string; name: string; status: string };
 
 const EQUIPMENT_STATUSES = ["operational", "maintenance", "retired"];
@@ -27,7 +27,7 @@ export default async function InventoryPage({
 
   const { data: prodData } = await supabase
     .from("products")
-    .select("id, name, price_cents, currency, stock_quantity, active")
+    .select("id, name, price_cents, currency, stock_quantity, reorder_level, active")
     .order("name", { ascending: true })
     .limit(300);
   const products = (prodData ?? []) as unknown as ProductRow[];
@@ -67,9 +67,9 @@ export default async function InventoryPage({
                 <span className="flex flex-col">
                   <span className="flex items-center gap-2 font-medium">
                     {p.name}
-                    {p.stock_quantity <= 5 ? (
+                    {p.stock_quantity <= (p.reorder_level || 5) ? (
                       <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-                        low stock
+                        reorder{p.reorder_level ? ` (≤${p.reorder_level})` : ""}
                       </span>
                     ) : null}
                     {!p.active ? (
@@ -116,6 +116,7 @@ export default async function InventoryPage({
             <input name="sku" placeholder="SKU" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="stock" type="number" min="0" placeholder="Stock" className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="reorder_level" type="number" min="0" placeholder="Reorder ≤" className="w-24 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add
             </button>

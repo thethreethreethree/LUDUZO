@@ -19,13 +19,15 @@ export async function createProduct(formData: FormData) {
   const price_cents = priceRaw && !Number.isNaN(Number(priceRaw)) ? Math.round(Number(priceRaw) * 100) : 0;
   const stockRaw = String(formData.get("stock") ?? "").trim();
   const stock_quantity = stockRaw && !Number.isNaN(Number(stockRaw)) ? Math.round(Number(stockRaw)) : 0;
+  const reorderRaw = String(formData.get("reorder_level") ?? "").trim();
+  const reorder_level = reorderRaw && !Number.isNaN(Number(reorderRaw)) ? Math.round(Number(reorderRaw)) : 0;
 
   if (!organization_id || !name) {
     redirect("/dashboard/inventory?error=" + encodeURIComponent("Gym and name are required."));
   }
   const { error } = await supabase
     .from("products")
-    .insert({ organization_id, name, sku, price_cents, stock_quantity });
+    .insert({ organization_id, name, sku, price_cents, stock_quantity, reorder_level });
   if (error) {
     // uq_products_org_sku — unique (organization_id, sku) (0008).
     const msg = isUniqueViolation(error) ? "A product with that SKU already exists." : error.message;
