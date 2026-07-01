@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 type Booking = { id: string; status: string; session: { id: string; starts_at: string; class: { name: string } | null } | null };
 type Appt = { id: string; title: string | null; starts_at: string; ends_at: string; status: string; trainer: { full_name: string | null } | null };
-type Session = { id: string; starts_at: string; ends_at: string | null; capacity: number | null; class: { name: string; capacity: number | null; instructor_name: string | null } | null };
+type Session = { id: string; starts_at: string; ends_at: string | null; capacity: number | null; class: { name: string; description: string | null; capacity: number | null; instructor_name: string | null } | null };
 
 const OK_MSG: Record<string, string> = {
   booked: "You're booked. See you there.",
@@ -30,7 +30,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
     supabase.from("bookings").select("id, status, session:class_sessions(id, starts_at, class:classes(name))").in("member_id", ids).order("created_at", { ascending: false }).limit(30),
     supabase.from("appointments").select("id, title, starts_at, ends_at, status, trainer:profiles(full_name)").in("member_id", ids).order("starts_at", { ascending: false }).limit(20),
     // Bookable schedule — readable by the member via 0034 (org-scoped). Upcoming only.
-    supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class:classes(name, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
+    supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class:classes(name, description, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
   ]);
 
   const now = new Date().getTime();
@@ -74,6 +74,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                     <div className="mono text-xs font-semibold text-gold">{new Date(s.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
                     <div className="mt-0.5 truncate font-bold text-bone">{s.class?.name ?? "Class"}</div>
                     {s.class?.instructor_name ? <div className="truncate text-xs text-ash">with {s.class.instructor_name}</div> : null}
+                    {s.class?.description ? <div className="mt-0.5 line-clamp-2 text-xs text-ash-dim">{s.class.description}</div> : null}
                   </div>
                   {mine === "booked" ? (
                     <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">Booked ✓</span>
