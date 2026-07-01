@@ -41,7 +41,10 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   // Bookings whose class detail is not member-readable — show them anyway (F1).
   const detailsPending = allBookings.filter((b) => !b.session && b.status !== "cancelled");
   const upcoming = withSession.filter((b) => Date.parse(b.session!.starts_at) > now && b.status !== "cancelled").sort((a, b) => Date.parse(a.session!.starts_at) - Date.parse(b.session!.starts_at));
-  const past = withSession.filter((b) => Date.parse(b.session!.starts_at) <= now);
+  // "Past" = classes that actually happened for the member. Exclude cancelled /
+  // still-waitlisted rows — showing a class they cancelled as history reads as if
+  // they attended it (misleading).
+  const past = withSession.filter((b) => Date.parse(b.session!.starts_at) <= now && (b.status === "booked" || b.status === "attended" || b.status === "no_show"));
 
   // Sessions the member already has an active booking for → show state, not a Book button.
   const bookedStatusBySession = new Map<string, string>();
