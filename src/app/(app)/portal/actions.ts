@@ -50,6 +50,29 @@ export async function submitFeedback(formData: FormData) {
   redirect("/portal/help?ok=1");
 }
 
+// Member comment on a community post. Uses live community_comments_member_insert RLS
+// (0031, org-bound) — works without 0034.
+export async function addMemberComment(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/more");
+
+  const post_id = String(formData.get("post_id") ?? "");
+  const body = String(formData.get("body") ?? "").trim();
+  if (!post_id || !body) redirect("/portal/more");
+
+  const { error } = await supabase
+    .from("community_comments")
+    .insert({ organization_id: me.organization_id, post_id, author_member_id: me.id, body });
+  if (error) redirect("/portal/more?error=" + encodeURIComponent(error.message));
+  revalidatePath("/portal/more");
+  redirect("/portal/more");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

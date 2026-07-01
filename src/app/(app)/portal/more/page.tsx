@@ -2,13 +2,14 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut } from "../actions";
+import { portalSignOut, addMemberComment } from "../actions";
 
 export const dynamic = "force-dynamic";
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
-type Post = { id: string; title: string | null; body: string; created_at: string };
+type Comment = { id: string; body: string };
+type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; community_comments: Comment[] };
 type Ann = { id: string; title: string; body: string | null; created_at: string };
 
 export default async function PortalMorePage() {
@@ -24,7 +25,7 @@ export default async function PortalMorePage() {
   const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
-    supabase.from("community_posts").select("id, title, body, created_at").order("created_at", { ascending: false }).limit(10),
+    supabase.from("community_posts").select("id, organization_id, title, body, created_at, community_comments(id, body)").order("created_at", { ascending: false }).limit(10),
     supabase.from("announcements").select("id, title, body, created_at").order("created_at", { ascending: false }).limit(5),
   ]);
 
@@ -92,6 +93,16 @@ export default async function PortalMorePage() {
                 {p.title ? <div className="font-bold text-bone">{p.title}</div> : null}
                 <p className="mt-0.5 text-sm text-ash">{p.body}</p>
                 <p className="mono mt-1 text-[10px] text-ash-dim">{new Date(p.created_at).toLocaleDateString()}</p>
+                {p.community_comments.length > 0 ? (
+                  <ul className="mt-2 flex flex-col gap-1 border-t border-iron pt-2">
+                    {p.community_comments.map((c) => (<li key={c.id} className="text-xs text-ash">💬 {c.body}</li>))}
+                  </ul>
+                ) : null}
+                <form action={addMemberComment} className="mt-2 flex gap-2">
+                  <input type="hidden" name="post_id" value={p.id} />
+                  <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-1.5 text-xs text-bone placeholder:text-ash-dim" />
+                  <button className="rounded-md border border-iron px-3 py-1 text-xs font-semibold text-ash hover:border-gold hover:text-gold">Send</button>
+                </form>
               </li>
             ))}
           </ul>
