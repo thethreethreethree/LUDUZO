@@ -50,7 +50,7 @@ export default async function NewMemberPage({
           </Link>
         </div>
       ) : (
-        <form action={createMember} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
+        <form action={createMember} autoComplete="off" className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
           {orgs.length === 1 ? (
             <input type="hidden" name="organization_id" value={orgs[0].organization!.id} />
           ) : (
