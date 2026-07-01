@@ -1,0 +1,116 @@
+/* =========================================================
+   LUDUZO — Design Tokens
+   Single source of truth for colors, type, spacing, radius.
+   Import once at app root:  import './tokens.css'
+   ========================================================= */
+
+:root {
+  /* ---- Surfaces ---- */
+  --black:   #0A0A0A;   /* app background */
+  --onyx:    #161616;   /* card / panel */
+  --onyx-2:  #1C1C1C;   /* raised / hover / table header */
+  --iron:    #2A2A2A;   /* borders, dividers */
+  --iron-2:  #333333;   /* hover borders */
+
+  /* ---- Text ---- */
+  --bone:    #EDEDED;   /* primary text (not pure white) */
+  --ash:     #8A8A8A;   /* secondary text / labels */
+  --ash-dim: #5E5E5E;   /* tertiary / placeholder / disabled */
+
+  /* ---- Brand accent ---- */
+  --gold:      #F5C518;
+  --gold-dim:  rgba(245, 197, 24, 0.14);  /* tinted bg */
+  --gold-line: rgba(245, 197, 24, 0.35);  /* highlighted border */
+
+  /* ---- Semantic / status ---- */
+  --win:  #3FB950;  /* success / active / positive */
+  --loss: #E5534B;  /* error / overdue / negative */
+  --warn: #E3A008;  /* at-risk / attention (status only) */
+
+  /* ---- Plan tiers ---- */
+  --plan-warrior-text: #F5C518;
+  --plan-warrior-bg:   rgba(245, 197, 24, 0.14);
+  --plan-gladiator-text: #B794F4;
+  --plan-gladiator-bg:   rgba(159, 122, 234, 0.15);
+  --plan-rookie-text: #8A8A8A;
+  --plan-rookie-bg:   #2A2A2A;
+
+  /* ---- Typography ---- */
+  --font-display: 'Montserrat', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --fs-h1: 30px;
+  --fs-stat: 34px;
+  --fs-h2: 16px;
+  --fs-card-title: 15px;
+  --fs-body: 14px;
+  --fs-label: 12px;
+  --fs-micro: 11px;
+
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+  --fw-black: 900;
+
+  --tracking-tight: -0.02em;
+  --tracking-label: 0.07em;
+
+  /* ---- Spacing scale ---- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-7: 28px;
+  --sp-8: 32px;
+
+  /* ---- Radius ---- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-2xl: 24px;
+  --r-pill: 999px;
+
+  /* ---- Borders ---- */
+  --border: 1px solid var(--iron);
+  --border-hover: 1px solid var(--iron-2);
+  --border-gold: 1px solid var(--gold-line);
+
+  /* ---- Layout ---- */
+  --content-max: 1240px;
+  --content-pad: 28px;
+
+  /* ---- Motion ---- */
+  --t-fast: 0.12s;
+  --t-base: 0.15s;
+}
+
+/* Highlighted / hero card gradient (use as background) */
+.gold-gradient { background: linear-gradient(160deg, #1A1A12, var(--onyx)); }
+
+/* Base reset scoped to app */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--black);
+  color: var(--bone);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.mono { font-family: var(--font-mono); }
+
+@keyframes luduzo-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(63,185,80,.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(63,185,80,0); }
+  100% { box-shadow: 0 0 0 0 rgba(63,185,80,0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}

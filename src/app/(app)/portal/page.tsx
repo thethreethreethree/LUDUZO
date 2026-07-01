@@ -5,7 +5,6 @@ import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
 import { PlanBadge, btnGold, btnSecondary } from "@/components/ui";
-import { PWARegister } from "@/components/PWARegister";
 import { claimRecords, signMyDocument, portalSignOut } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -73,9 +72,13 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   while (days.has(isoOf(cursor))) { streak++; cursor.setDate(cursor.getDate() - 1); }
   const weekMarks = [...Array(7)].map((_, i) => { const d = new Date(todayD); d.setDate(d.getDate() - (6 - i)); return { label: ["S", "M", "T", "W", "T", "F", "S"][d.getDay()], on: days.has(isoOf(d)) }; });
 
-  const nextBooking = ((bookingData ?? []) as unknown as Booking[])
+  const bookedRows = ((bookingData ?? []) as unknown as Booking[]);
+  const nextBooking = bookedRows
     .filter((b) => b.session && Date.parse(b.session.starts_at) > new Date().getTime())
     .sort((a, b) => Date.parse(a.session!.starts_at) - Date.parse(b.session!.starts_at))[0] ?? null;
+  // Booked rows whose class detail isn't member-readable yet (needs 0034): count them
+  // so the member isn't told "nothing booked" when they in fact have bookings (F1 fix).
+  const pendingDetail = bookedRows.filter((b) => !b.session).length;
 
   const qrDataUrl = me.qr_token
     ? await QRCode.toDataURL(me.qr_token, { margin: 1, width: 240, color: { dark: "#0A0A0A", light: "#FFFFFF" } })
@@ -92,8 +95,6 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </div>
 
       {error ? <ErrBanner>{error}</ErrBanner> : null}
-
-      <PWARegister />
 
       {/* ---- Arena Pass hero ---- */}
       <section id="pass" className="gold-gradient rounded-2xl border border-gold-line p-5">
@@ -147,6 +148,11 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
             <div className="mt-1 font-bold text-bone">{nextBooking.session.class?.name ?? "Class"}</div>
             <div className="text-xs text-ash">You&apos;re booked</div>
           </div>
+        ) : pendingDetail > 0 ? (
+          <Link href="/portal/book" className="block rounded-xl border border-iron bg-onyx p-4">
+            <div className="font-bold text-bone">{pendingDetail} class{pendingDetail === 1 ? "" : "es"} booked</div>
+            <div className="text-xs text-ash">Class details syncing — tap to view</div>
+          </Link>
         ) : (
           <div className="rounded-xl border border-iron bg-onyx p-4 text-center text-sm text-ash">No upcoming classes booked.</div>
         )}

@@ -1,0 +1,24 @@
+{
+  "version": 1.1,
+  "properties": [],
+  "atDirectives": [],
+  "pseudoClasses": [],
+  "pseudoElements": [],
+  "// Luduzo design tokens": "Enables autocomplete + hover docs for var(--token) in CSS",
+  "properties": [
+    { "name": "--black",     "description": "App background #0A0A0A" },
+    { "name": "--onyx",      "description": "Card / panel #161616" },
+    { "name": "--onyx-2",    "description": "Raised / hover / table header #1C1C1C" },
+    { "name": "--iron",      "description": "Borders, dividers #2A2A2A" },
+    { "name": "--iron-2",    "description": "Hover borders #333333" },
+    { "name": "--bone",      "description": "Primary text #EDEDED (not white)" },
+    { "name": "--ash",       "description": "Secondary text / labels #8A8A8A" },
+    { "name": "--ash-dim",   "description": "Tertiary / placeholder #5E5E5E" },
+    { "name": "--gold",      "description": "Brand accent #F5C518 — CTAs, active, live" },
+    { "name": "--gold-dim",  "description": "Gold tinted bg rgba(245,197,24,.14)" },
+    { "name": "--gold-line", "description": "Gold highlight border rgba(245,197,24,.35)" },
+    { "name": "--win",       "description": "Success / active #3FB950" },
+    { "name": "--loss",      "description": "Error / overdue #E5534B" },
+    { "name": "--warn",      "description": "At-risk / attention #E3A008 (status only)" }
+  ]
+}

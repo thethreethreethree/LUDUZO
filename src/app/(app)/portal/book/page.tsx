@@ -21,10 +21,14 @@ export default async function PortalBookPage() {
   ]);
 
   const now = new Date().getTime();
-  const bookings = ((bookingData ?? []) as unknown as Booking[]).filter((b) => b.session);
+  const allBookings = ((bookingData ?? []) as unknown as Booking[]);
   const appts = (apptData ?? []) as unknown as Appt[];
-  const upcoming = bookings.filter((b) => Date.parse(b.session!.starts_at) > now).sort((a, b) => Date.parse(a.session!.starts_at) - Date.parse(b.session!.starts_at));
-  const past = bookings.filter((b) => Date.parse(b.session!.starts_at) <= now);
+  const withSession = allBookings.filter((b) => b.session);
+  // Bookings whose class detail is not yet member-readable (needs migration 0034):
+  // show them anyway so the member sees they're booked — never silently drop (F1 fix).
+  const detailsPending = allBookings.filter((b) => !b.session && b.status !== "cancelled");
+  const upcoming = withSession.filter((b) => Date.parse(b.session!.starts_at) > now).sort((a, b) => Date.parse(a.session!.starts_at) - Date.parse(b.session!.starts_at));
+  const past = withSession.filter((b) => Date.parse(b.session!.starts_at) <= now);
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 pb-28 pt-8">
@@ -46,6 +50,20 @@ export default async function PortalBookPage() {
           </ul>
         )}
       </section>
+
+      {detailsPending.length > 0 ? (
+        <section>
+          <div className="mb-2 text-[15px] font-bold text-bone">Booked</div>
+          <ul className="flex flex-col gap-2">
+            {detailsPending.map((b) => (
+              <li key={b.id} className="rounded-2xl border border-iron bg-onyx p-4">
+                <div className="font-bold text-bone">Class booked</div>
+                <div className="text-xs text-ash">{b.status === "waitlisted" ? "On the waitlist" : "You're booked"} · class details syncing</div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {appts.length > 0 ? (
         <section>

@@ -21,15 +21,20 @@ create policy class_sessions_select_member on class_sessions for select
   using (organization_id in (select auth_member_org_ids()));
 
 -- ---- Self-book / self-cancel a class ----
+-- A member may only self-insert as 'booked' or 'waitlisted' (never 'attended'/'no_show'
+-- — that's staff-recorded), and a member UPDATE may only RESULT in 'cancelled'
+-- (they can't mark themselves attended or move sessions). §3.2 over-permissive-write fix.
 drop policy if exists bookings_member_insert on bookings;
 create policy bookings_member_insert on bookings for insert
   with check (member_id in (select auth_member_ids())
-              and organization_id in (select auth_member_org_ids()));
+              and organization_id in (select auth_member_org_ids())
+              and status in ('booked','waitlisted'));
 
 drop policy if exists bookings_member_cancel on bookings;
 create policy bookings_member_cancel on bookings for update
   using (member_id in (select auth_member_ids()))
-  with check (member_id in (select auth_member_ids()));
+  with check (member_id in (select auth_member_ids())
+              and status = 'cancelled');
 
 -- ---- Self-log a body measurement ----
 drop policy if exists member_measurements_member_insert on member_measurements;

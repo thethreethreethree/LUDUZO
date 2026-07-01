@@ -1,0 +1,37 @@
+{
+  "// Luduzo design-system editor hints": "Improves Tailwind + CSS-var DX in VS Code",
+
+  "// Requires extension": "bradlc.vscode-tailwindcss",
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "javascript": "javascript",
+    "javascriptreact": "javascriptreact",
+    "typescriptreact": "typescriptreact"
+  },
+  "editor.quickSuggestions": {
+    "strings": "on"
+  },
+
+  "// Inline color swatches for CSS vars + hex": "",
+  "editor.colorDecorators": true,
+
+  "// Associate token file for CSS var autocomplete": "",
+  "css.customData": [".vscode/luduzo-tokens.json"],
+
+  "files.associations": {
+    "CLAUDE.md": "markdown",
+    "*.css": "css"
+  },
+
+  "// Format on save keeps token usage tidy": "",
+  "editor.formatOnSave": true,
+
+  "// Flag raw hex so devs use tokens instead (optional, via TODO-tree/regex)": "",
+  "todo-tree.regex.regex": "(#[0-9a-fA-F]{6})",
+  "todo-tree.highlights.customHighlight": {
+    "#": { "//": "surfaces hardcoded hex as a reminder to use a token" }
+  }
+}
