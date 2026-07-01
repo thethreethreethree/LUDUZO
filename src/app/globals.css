@@ -1,56 +1,117 @@
 @import "tailwindcss";
 
-/* LUDUZO brand — dark-first (Gladiator Black + Plume Gold).
-   Force class-based dark so the whole app renders in the brand dark theme;
-   this activates the dark: variants every component already carries. */
+/* ============================================================================
+   LUDUZO — Design tokens (from DESIGN ELEMENTS/DESIGN GUIDE), translated to
+   Tailwind v4 @theme. Single source of truth for colour/type/radius/motion.
+   Changing a value here propagates to every bg / text / border usage.
+   ============================================================================ */
+
+/* Keep the class-based dark variant so pages still mid-migration keep working. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-:root {
-  /* Core palette (brand/luduzo-tokens.css) */
-  --luduzo-black: #0a0a0a;
-  --luduzo-gold: #fece00;
-  --luduzo-white: #ffffff;
-  /* Neutrals */
-  --luduzo-onyx: #1c1c1c;
-  --luduzo-iron: #3a3a3a;
-  --luduzo-ash: #8a8a8a;
-  --luduzo-fog: #f4f4f2;
-  /* Status */
-  --luduzo-win: #16a34a;
-  --luduzo-loss: #dc2626;
+@theme inline {
+  /* ---- Surfaces ---- */
+  --color-black: #0a0a0a;      /* app background + gold-button text */
+  --color-onyx: #161616;       /* card / panel */
+  --color-onyx-2: #1c1c1c;     /* raised / hover / table header */
+  --color-iron: #2a2a2a;       /* borders, dividers */
+  --color-iron-2: #333333;     /* hover borders */
 
-  --background: #0a0a0a;
-  --foreground: #ffffff;
+  /* ---- Text ---- */
+  --color-bone: #ededed;       /* primary text (never pure white) */
+  --color-ash: #8a8a8a;        /* secondary text / labels */
+  --color-ash-dim: #5e5e5e;    /* tertiary / placeholder / disabled */
 
-  /* Render ALL native browser controls (date/datetime pickers, <select> dropdown
-     popups, number spinners, checkboxes, scrollbars, text-input autofill/caret) in
-     dark mode. Without this, the browser paints native chrome in its LIGHT default,
-     which clashes with the forced-dark brand — e.g. the white calendar-picker button
-     on <input type="date">. Set once at the root (color-scheme inherits) so every
-     native control across the app is covered by one declaration. */
-  color-scheme: dark;
+  /* ---- Brand accent ---- */
+  --color-gold: #f5c518;
+  --color-gold-hover: #ffd429;
+  --color-gold-dim: rgba(245, 197, 24, 0.14);
+  --color-gold-line: rgba(245, 197, 24, 0.35);
+
+  /* ---- Semantic / status ---- */
+  --color-win: #3fb950;
+  --color-loss: #e5534b;
+  --color-warn: #e3a008;
+
+  /* ---- Plan tiers ---- */
+  --color-plan-warrior: #f5c518;
+  --color-plan-gladiator: #b794f4;
+  --color-plan-rookie: #8a8a8a;
+
+  /* Back-compat aliases (existing pages reference these before D7 migration) */
+  --color-background: #0a0a0a;
+  --color-foreground: #ededed;
+
+  /* ---- Typography ---- */
+  --font-display: var(--font-montserrat), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+  --font-sans: var(--font-montserrat), system-ui, sans-serif;
+
+  /* ---- Radius ---- */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+
+  /* ---- Motion ---- */
+  --animate-livepulse: livepulse 2s infinite;
+  --animate-scanline: scanline 2.4s ease-in-out infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-gold: #fece00;
-  --color-onyx: #1c1c1c;
-  --color-iron: #3a3a3a;
-  --color-ash: #8a8a8a;
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-montserrat);
+:root {
+  color-scheme: dark;
+  /* raw rgba tokens for gradients / arbitrary use */
+  --gold: #f5c518;
+  --gold-dim: rgba(245, 197, 24, 0.14);
+  --gold-line: rgba(245, 197, 24, 0.35);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter), system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #ededed;
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.4;
 }
 
 h1,
 h2,
 h3 {
   font-family: var(--font-montserrat), system-ui, sans-serif;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+}
+
+/* Numbers, currency, IDs, timestamps */
+.mono {
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Hero / highlighted card gradient + occupancy fill */
+.gold-gradient {
+  background: linear-gradient(160deg, #1a1a12, #161616);
+}
+.gold-fill {
+  background: linear-gradient(90deg, #f5c518, #c99a08);
+}
+
+@keyframes livepulse {
+  0% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0.5); }
+  70% { box-shadow: 0 0 0 7px rgba(63, 185, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(63, 185, 80, 0); }
+}
+@keyframes scanline {
+  0%, 100% { top: 18%; }
+  50% { top: 82%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
 }
