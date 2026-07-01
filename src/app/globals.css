@@ -21,6 +21,14 @@
 
   --background: #0a0a0a;
   --foreground: #ffffff;
+
+  /* Render ALL native browser controls (date/datetime pickers, <select> dropdown
+     popups, number spinners, checkboxes, scrollbars, text-input autofill/caret) in
+     dark mode. Without this, the browser paints native chrome in its LIGHT default,
+     which clashes with the forced-dark brand — e.g. the white calendar-picker button
+     on <input type="date">. Set once at the root (color-scheme inherits) so every
+     native control across the app is covered by one declaration. */
+  color-scheme: dark;
 }
 
 @theme inline {
