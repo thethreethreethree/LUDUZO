@@ -88,7 +88,14 @@ export async function bookSession(formData: FormData) {
   if (!session_id) redirect("/portal/book");
 
   const { data, error } = await supabase.rpc("book_my_session", { p_session_id: session_id });
-  if (error) redirect("/portal/book?error=" + encodeURIComponent(error.message));
+  if (error) {
+    // Map raw RPC exceptions (which leak the function name) to member-friendly copy (F-F).
+    const m = error.message ?? "";
+    const friendly = /no membership/i.test(m) ? "We couldn't find your membership at this gym."
+      : /not found/i.test(m) ? "That class isn't available anymore."
+      : "Sorry — that booking didn't go through. Please try again.";
+    redirect("/portal/book?error=" + encodeURIComponent(friendly));
+  }
   revalidatePath("/portal/book"); revalidatePath("/portal");
   redirect("/portal/book?ok=" + (data === "waitlisted" ? "waitlisted" : "booked"));
 }
@@ -120,8 +127,20 @@ export async function logMeasurement(formData: FormData) {
   const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
   if (!me) redirect("/portal/progress?error=" + encodeURIComponent("No membership on file."));
 
-  const num = (k: string) => { const v = String(formData.get(k) ?? "").trim(); if (!v) return null; const n = Number(v); return Number.isFinite(n) && n > 0 ? n : null; };
-  const weight_kg = num("weight_kg"), body_fat_pct = num("body_fat_pct"), muscle_mass_kg = num("muscle_mass_kg");
+  // Parse + range-check. Columns are numeric(6,2)/(5,2), so out-of-range values
+  // would otherwise surface as a raw Postgres overflow error (F-E). A sentinel
+  // (NaN) marks "provided but invalid" so we can reject rather than silently drop.
+  const num = (k: string, max: number) => {
+    const v = String(formData.get(k) ?? "").trim();
+    if (!v) return null;
+    const n = Number(v);
+    if (!Number.isFinite(n) || n <= 0 || n > max) return NaN;
+    return n;
+  };
+  const weight_kg = num("weight_kg", 999), body_fat_pct = num("body_fat_pct", 100), muscle_mass_kg = num("muscle_mass_kg", 999);
+  if ([weight_kg, body_fat_pct, muscle_mass_kg].some((v) => Number.isNaN(v))) {
+    redirect("/portal/progress?error=" + encodeURIComponent("Check your numbers — weight/muscle up to 999 kg, body fat 0–100%."));
+  }
   if (weight_kg == null && body_fat_pct == null && muscle_mass_kg == null) {
     redirect("/portal/progress?error=" + encodeURIComponent("Enter at least one measurement."));
   }
@@ -166,7 +185,10 @@ export async function updateMyContact(formData: FormData) {
 
   const phone = String(formData.get("phone") ?? "").trim();
   const { error } = await supabase.rpc("update_my_contact", { p_phone: phone });
-  if (error) redirect("/portal/more?error=" + encodeURIComponent(error.message));
+  if (error) {
+    const friendly = /too long/i.test(error.message ?? "") ? "That phone number is too long." : "Couldn't save your number. Please try again.";
+    redirect("/portal/more?error=" + encodeURIComponent(friendly));
+  }
   revalidatePath("/portal/more");
   redirect("/portal/more?ok=contact");
 }
