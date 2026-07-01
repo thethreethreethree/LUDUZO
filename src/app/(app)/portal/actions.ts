@@ -136,6 +136,53 @@ export async function cancelBooking(formData: FormData) {
   redirect("/portal/book?ok=cancelled");
 }
 
+// Member logs their own body measurement (0034 member_measurements_member_insert,
+// org-bound). At least one metric is required — an all-empty log is meaningless.
+export async function logMeasurement(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/progress?error=" + encodeURIComponent("No membership on file."));
+
+  const num = (k: string) => { const v = String(formData.get(k) ?? "").trim(); if (!v) return null; const n = Number(v); return Number.isFinite(n) && n > 0 ? n : null; };
+  const weight_kg = num("weight_kg"), body_fat_pct = num("body_fat_pct"), muscle_mass_kg = num("muscle_mass_kg");
+  if (weight_kg == null && body_fat_pct == null && muscle_mass_kg == null) {
+    redirect("/portal/progress?error=" + encodeURIComponent("Enter at least one measurement."));
+  }
+
+  const { error } = await supabase.from("member_measurements").insert({
+    organization_id: me.organization_id, member_id: me.id, weight_kg, body_fat_pct, muscle_mass_kg,
+  });
+  if (error) redirect("/portal/progress?error=" + encodeURIComponent(error.message));
+  revalidatePath("/portal/progress");
+  redirect("/portal/progress?ok=logged");
+}
+
+// Member joins a challenge (0034 challenge_participants_member_insert, org-bound).
+// Already-joined (unique challenge_id+member_id → 23505) is treated as success.
+export async function joinChallenge(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/progress?error=" + encodeURIComponent("No membership on file."));
+
+  const challenge_id = String(formData.get("challenge_id") ?? "");
+  if (!challenge_id) redirect("/portal/progress");
+
+  const { error } = await supabase.from("challenge_participants").insert({
+    organization_id: me.organization_id, challenge_id, member_id: me.id,
+  });
+  if (error && error.code !== "23505") redirect("/portal/progress?error=" + encodeURIComponent(error.message));
+  revalidatePath("/portal/progress");
+  redirect("/portal/progress?ok=joined");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

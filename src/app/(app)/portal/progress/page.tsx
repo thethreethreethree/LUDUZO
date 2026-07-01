@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { logMeasurement, joinChallenge } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +10,13 @@ type MItem = { id: string; meal: string; description: string; calories: number |
 type MPlan = { id: string; name: string; daily_calorie_target: number | null; meal_plan_items: MItem[] };
 type Measure = { id: string; recorded_at: string; weight_kg: number | null; body_fat_pct: number | null; muscle_mass_kg: number | null };
 type Badge = { id: string; awarded_at: string; badge: { name: string; icon: string | null } | null };
+type Challenge = { id: string; name: string; description: string | null; metric: string; goal_target: number | null; starts_on: string | null; ends_on: string | null };
+type Participation = { challenge_id: string; progress: number };
 
-export default async function PortalProgressPage() {
+const OK_MSG: Record<string, string> = { logged: "Measurement logged.", joined: "You're in — good luck." };
+
+export default async function PortalProgressPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
+  const { ok, error } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -19,12 +25,15 @@ export default async function PortalProgressPage() {
   const ids = ((memberData ?? []) as { id: string }[]).map((m) => m.id);
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }] = await Promise.all([
+  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }, { data: chData }, { data: partData }] = await Promise.all([
     supabase.from("workout_plans").select("id, name, workout_exercises(id, name, sets, reps, weight_kg)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("meal_plans").select("id, name, daily_calorie_target, meal_plan_items(id, meal, description, calories)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("member_measurements").select("id, recorded_at, weight_kg, body_fat_pct, muscle_mass_kg").in("member_id", ids).order("recorded_at", { ascending: false }).limit(24),
     supabase.from("member_badges").select("id, awarded_at, badge:badges(name, icon)").in("member_id", ids).order("awarded_at", { ascending: false }).limit(20),
     supabase.from("checkins").select("checked_in_at").in("member_id", ids).order("checked_in_at", { ascending: false }).limit(60),
+    // Challenges + own participation now readable via 0036 (member-scoped).
+    supabase.from("challenges").select("id, name, description, metric, goal_target, starts_on, ends_on").order("starts_on", { ascending: false }).limit(20),
+    supabase.from("challenge_participants").select("challenge_id, progress").in("member_id", ids),
   ]);
 
   const wplans = (wData ?? []) as unknown as WPlan[];
@@ -32,6 +41,9 @@ export default async function PortalProgressPage() {
   const measures = (measData ?? []) as unknown as Measure[];
   const badges = (badgeData ?? []) as unknown as Badge[];
   const visits = (visitData ?? []) as { checked_in_at: string }[];
+  const challenges = (chData ?? []) as unknown as Challenge[];
+  const participation = (partData ?? []) as unknown as Participation[];
+  const joinedProgress = new Map(participation.map((p) => [p.challenge_id, p.progress]));
 
   // weight trend (oldest→newest) for a tiny sparkline
   const weights = measures.filter((m) => m.weight_kg != null).map((m) => m.weight_kg as number).reverse();
@@ -42,11 +54,14 @@ export default async function PortalProgressPage() {
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 pb-28 pt-8">
       <h1 className="text-2xl font-extrabold text-bone">Your progress</h1>
 
+      {ok ? <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">{OK_MSG[ok] ?? "Done."}</p> : null}
+      {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
+
       {/* body metrics */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">
         <div className="mb-3 text-[15px] font-bold text-bone">Body metrics</div>
         {measures.length === 0 ? (
-          <p className="text-sm text-ash">No measurements logged yet. Your trainer can record these, or log your own soon.</p>
+          <p className="text-sm text-ash">No measurements logged yet — record your first below, or your trainer can add them.</p>
         ) : (
           <>
             <div className="grid grid-cols-3 gap-3 text-center">
@@ -65,7 +80,57 @@ export default async function PortalProgressPage() {
             <p className="mono mt-2 text-[11px] text-ash-dim">Last {measures.length} readings</p>
           </>
         )}
+        {/* Self-log — uses live 0034 member_measurements_member_insert RLS. */}
+        <form action={logMeasurement} className="mt-4 border-t border-iron pt-4">
+          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.07em] text-ash">Log a measurement</div>
+          <div className="grid grid-cols-3 gap-2">
+            <input name="weight_kg" inputMode="decimal" placeholder="Weight kg" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="body_fat_pct" inputMode="decimal" placeholder="Fat %" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="muscle_mass_kg" inputMode="decimal" placeholder="Muscle kg" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          </div>
+          <button className="mt-2 w-full rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save today&apos;s reading</button>
+        </form>
       </section>
+
+      {/* challenges — browse + join (0036 read, 0034 join) */}
+      {challenges.length > 0 ? (
+        <section>
+          <div className="mb-2 text-[15px] font-bold text-bone">Challenges</div>
+          <ul className="flex flex-col gap-2">
+            {challenges.map((c) => {
+              const joined = joinedProgress.has(c.id);
+              const prog = joinedProgress.get(c.id) ?? 0;
+              const pct = c.goal_target && c.goal_target > 0 ? Math.min(100, Math.round((prog / c.goal_target) * 100)) : null;
+              return (
+                <li key={c.id} className="rounded-2xl border border-iron bg-onyx p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="truncate font-bold text-bone">{c.name}</div>
+                      {c.description ? <div className="truncate text-xs text-ash">{c.description}</div> : null}
+                    </div>
+                    {joined ? (
+                      <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">Joined ✓</span>
+                    ) : (
+                      <form action={joinChallenge} className="shrink-0">
+                        <input type="hidden" name="challenge_id" value={c.id} />
+                        <button className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110">Join</button>
+                      </form>
+                    )}
+                  </div>
+                  {joined && pct != null ? (
+                    <div className="mt-3">
+                      <div className="h-1.5 overflow-hidden rounded-full bg-iron"><div className="h-full rounded-full bg-gold" style={{ width: `${pct}%` }} /></div>
+                      <div className="mono mt-1 text-[11px] text-ash">{prog} / {c.goal_target} {c.metric}</div>
+                    </div>
+                  ) : joined ? (
+                    <div className="mono mt-2 text-[11px] text-ash">Progress: {prog} {c.metric}</div>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
 
       {/* workout plans */}
       <section>
