@@ -144,6 +144,7 @@ export default async function DashboardPage() {
                 { href: "/dashboard/timeclock", label: "Time clock" },
                 { href: "/dashboard/activity", label: "Activity" },
                 { href: "/dashboard/reports", label: "Reports" },
+                { href: "/dashboard/analytics", label: "Analytics" },
                 { href: "/dashboard/inventory", label: "Inventory" },
                 { href: "/dashboard/maintenance", label: "Maintenance" },
                 { href: "/dashboard/lockers", label: "Lockers" },
