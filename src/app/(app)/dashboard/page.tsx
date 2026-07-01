@@ -153,6 +153,7 @@ export default async function DashboardPage() {
                 { href: "/dashboard/community", label: "Community" },
                 { href: "/dashboard/feedback", label: "Reviews / NPS" },
                 { href: "/dashboard/settings", label: "Settings" },
+                { href: "/dashboard/admin", label: "Admin" },
               ].map((l) => (
                 <Link
                   key={l.href}

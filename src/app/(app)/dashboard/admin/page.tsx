@@ -1,0 +1,137 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { updateOrgSettings, generateApiKey, revokeApiKey, addWebhook, deleteWebhook } from "./actions";
+
+export const dynamic = "force-dynamic";
+
+type Org = {
+  id: string; name: string; role: string;
+  brand_color: string | null; accent_color: string | null; logo_url: string | null;
+  plan_tier: string; default_currency: string; locale: string;
+};
+type ApiKey = { id: string; name: string; key_prefix: string; revoked: boolean; last_used_at: string | null };
+type Webhook = { id: string; url: string; event_types: string[]; active: boolean };
+
+const TIERS = ["free", "starter", "pro", "enterprise"];
+
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ error?: string; ok?: string }> }) {
+  const { error, ok } = await searchParams;
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  // Orgs where the caller is owner/admin (platform admin scope).
+  const { data: memData } = await supabase
+    .from("organization_members")
+    .select("role, organization:organizations(id, name, brand_color, accent_color, logo_url, plan_tier, default_currency, locale)")
+    .in("role", ["owner", "admin"]);
+  const orgs: Org[] = ((memData ?? []) as unknown as { role: string; organization: Omit<Org, "role"> | null }[])
+    .filter((m) => m.organization)
+    .map((m) => ({ ...(m.organization as Omit<Org, "role">), role: m.role }));
+
+  const { data: keyData } = await supabase.from("api_keys").select("id, name, key_prefix, revoked, last_used_at").order("created_at", { ascending: false });
+  const keys = (keyData ?? []) as unknown as ApiKey[];
+  const { data: whData } = await supabase.from("webhooks").select("id, url, event_types, active").order("created_at", { ascending: false });
+  const webhooks = (whData ?? []) as unknown as Webhook[];
+
+  return (
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 p-8">
+      <div>
+        <Link href="/dashboard" className="text-sm text-zinc-500 hover:underline">← Dashboard</Link>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">Admin</h1>
+        <p className="text-sm text-zinc-500">White-label, plan tier, localisation, API &amp; webhooks.</p>
+      </div>
+
+      {error ? <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">{error}</p> : null}
+      {ok ? <p className="break-all rounded-md border border-l-2 border-onyx border-l-gold px-3 py-2 text-sm text-gold">{ok}</p> : null}
+
+      {orgs.length === 0 ? (
+        <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-zinc-500">You don&apos;t own or admin any gym.</p>
+      ) : (
+        orgs.map((o) => (
+          <form key={o.id} action={updateOrgSettings} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
+            <input type="hidden" name="organization_id" value={o.id} />
+            <div className="flex items-center justify-between">
+              <span className="font-medium">{o.name}</span>
+              <span className="text-xs text-gold">{o.role}</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Brand colour
+                <input name="brand_color" defaultValue={o.brand_color ?? "#FECE00"} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Accent colour
+                <input name="accent_color" defaultValue={o.accent_color ?? "#0A0A0A"} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Logo URL
+                <input name="logo_url" defaultValue={o.logo_url ?? ""} placeholder="https://…" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Plan tier
+                <select name="plan_tier" defaultValue={o.plan_tier} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+                  {TIERS.map((t) => (<option key={t} value={t}>{t}</option>))}
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Currency
+                <input name="default_currency" defaultValue={o.default_currency} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-zinc-500">Locale
+                <input name="locale" defaultValue={o.locale} className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              </label>
+            </div>
+            <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save settings</button>
+          </form>
+        ))
+      )}
+
+      {orgs.length > 0 ? (
+        <>
+          <section className="flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-zinc-500">API keys</h2>
+            <form action={generateApiKey} className="flex gap-2 rounded-md border border-onyx bg-onyx p-4">
+              <input type="hidden" name="organization_id" value={orgs[0].id} />
+              <input name="name" placeholder="Key name" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Generate</button>
+            </form>
+            {keys.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
+                {keys.map((k) => (
+                  <li key={k.id} className={`flex items-center justify-between px-4 py-2 text-sm ${k.revoked ? "opacity-50" : ""}`}>
+                    <span className="font-mono text-xs">{k.key_prefix}… · {k.name}{k.revoked ? " · revoked" : ""}</span>
+                    {!k.revoked ? (
+                      <form action={revokeApiKey}><input type="hidden" name="id" value={k.id} />
+                        <button className="rounded-md border border-iron px-2 py-1 text-xs hover:border-gold hover:text-gold">Revoke</button>
+                      </form>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </section>
+
+          <section className="flex flex-col gap-2">
+            <h2 className="text-sm font-medium text-zinc-500">Webhooks</h2>
+            <form action={addWebhook} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4 sm:flex-row">
+              <input type="hidden" name="organization_id" value={orgs[0].id} />
+              <input name="url" required placeholder="https://your-endpoint" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="event_types" placeholder="member.created, invoice.paid" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Add</button>
+            </form>
+            {webhooks.length > 0 ? (
+              <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">
+                {webhooks.map((w) => (
+                  <li key={w.id} className="flex items-center justify-between px-4 py-2 text-sm">
+                    <span className="min-w-0 truncate font-mono text-xs">{w.url} · {w.event_types.join(", ") || "all"}</span>
+                    <form action={deleteWebhook}><input type="hidden" name="id" value={w.id} />
+                      <button className="rounded-md border border-iron px-2 py-1 text-xs hover:border-gold hover:text-gold">Delete</button>
+                    </form>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            <p className="text-[10px] text-zinc-600">Registration only — event delivery requires a background job runner (not implemented).</p>
+          </section>
+        </>
+      ) : null}
+    </main>
+  );
+}
