@@ -1,324 +1,202 @@
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
+import { PlanBadge, btnGold, btnSecondary } from "@/components/ui";
 import { claimRecords, signMyDocument, portalSignOut } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-type MyMember = { id: string; first_name: string; last_name: string; qr_token: string | null; organization: { name: string } | null };
-type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
-type Measure = { id: string; recorded_at: string; weight_kg: number | null };
-type Visit = { id: string; checked_in_at: string };
-type Doc = { id: string; kind: string; status: string };
-type Announcement = { id: string; title: string; body: string | null; created_at: string };
+type MyMember = { id: string; first_name: string; last_name: string; qr_token: string | null; member_number: string | null; organization: { name: string } | null };
 type Booking = { id: string; status: string; session: { starts_at: string; class: { name: string } | null } | null };
-type GroupLink = { id: string; relationship: string | null; group: { name: string; group_type: string } | null };
+type Doc = { id: string; kind: string; status: string };
 
-export default async function PortalPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function PortalPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { error } = await searchParams;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
   const { data: memberData } = await supabase
     .from("members")
-    .select("id, first_name, last_name, qr_token, organization:organizations(name)")
+    .select("id, first_name, last_name, qr_token, member_number, organization:organizations(name)")
     .eq("profile_id", user.id);
   const members = (memberData ?? []) as unknown as MyMember[];
+  const me = members[0] ?? null;
   const memberIds = members.map((m) => m.id);
 
-  // Gym announcements the member may read (migration 0019 member-scoped policy).
-  const { data: annData } = await supabase
-    .from("announcements")
-    .select("id, title, body, created_at")
-    .order("created_at", { ascending: false })
-    .limit(5);
-  const announcements = (annData ?? []) as unknown as Announcement[];
-
-  let subs: Sub[] = [];
-  let measures: Measure[] = [];
-  let visits: Visit[] = [];
-  let docs: Doc[] = [];
-  let bookings: Booking[] = [];
-  let groupLinks: GroupLink[] = [];
-  let loyaltyBalance = 0;
-  let outstanding = 0;
-  if (memberIds.length > 0) {
-    const { data: subData } = await supabase
-      .from("subscriptions")
-      .select("id, status, current_period_end, plan:plans(name)")
-      .in("member_id", memberIds);
-    subs = (subData ?? []) as unknown as Sub[];
-    const { data: mData } = await supabase
-      .from("member_measurements")
-      .select("id, recorded_at, weight_kg")
-      .in("member_id", memberIds)
-      .order("recorded_at", { ascending: false })
-      .limit(12);
-    measures = (mData ?? []) as unknown as Measure[];
-    const { data: loyData } = await supabase
-      .from("loyalty_transactions")
-      .select("points")
-      .in("member_id", memberIds)
-      .limit(1000);
-    loyaltyBalance = ((loyData ?? []) as { points: number }[]).reduce((s, r) => s + (r.points ?? 0), 0);
-
-    const { data: invData } = await supabase
-      .from("invoices")
-      .select("amount_cents, status")
-      .in("member_id", memberIds)
-      .limit(500);
-    outstanding = ((invData ?? []) as { amount_cents: number; status: string }[])
-      .filter((i) => i.status === "open" || i.status === "past_due")
-      .reduce((s, i) => s + (i.amount_cents ?? 0), 0);
-
-    const { data: visitData } = await supabase
-      .from("checkins")
-      .select("id, checked_in_at")
-      .in("member_id", memberIds)
-      .order("checked_in_at", { ascending: false })
-      .limit(10);
-    visits = (visitData ?? []) as unknown as Visit[];
-
-    const { data: docData } = await supabase
-      .from("member_documents")
-      .select("id, kind, status")
-      .in("member_id", memberIds)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    docs = (docData ?? []) as unknown as Doc[];
-
-    const { data: bookingData } = await supabase
-      .from("bookings")
-      .select("id, status, session:class_sessions(starts_at, class:classes(name))")
-      .in("member_id", memberIds)
-      .order("created_at", { ascending: false })
-      .limit(20);
-    bookings = (bookingData ?? []) as unknown as Booking[];
-
-    const { data: linkData } = await supabase
-      .from("member_group_links")
-      .select("id, relationship, group:member_groups(name, group_type)")
-      .in("member_id", memberIds);
-    groupLinks = (linkData ?? []) as unknown as GroupLink[];
+  // ---- No linked membership: keep the claim / onboarding flow ----
+  if (!me) {
+    return (
+      <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 py-8">
+        <Brand email={user.email ?? ""} />
+        {error ? <ErrBanner>{error}</ErrBanner> : null}
+        <div className="rounded-xl border border-iron bg-onyx p-6 text-center">
+          <p className="text-sm text-bone">We couldn&apos;t find a membership linked to your account.</p>
+          <p className="mt-1 text-xs text-ash">If your gym has your email on file, link it now.</p>
+          <form action={claimRecords} className="mt-3"><button className={btnGold}>Find my membership</button></form>
+          <div className="mt-4 border-t border-iron pt-4">
+            <p className="text-xs text-ash">Run a gym instead?</p>
+            <Link href="/onboarding" className={`${btnSecondary} mt-2`}>Set up your gym →</Link>
+          </div>
+        </div>
+      </main>
+    );
   }
 
+  const [{ data: subData }, { data: visitData }, { data: loyData }, { data: openData }, { data: bookingData }, { data: docData }, { data: invData }] = await Promise.all([
+    supabase.from("subscriptions").select("status, plan:plans(name)").in("member_id", memberIds).eq("status", "active").limit(1),
+    supabase.from("checkins").select("checked_in_at").in("member_id", memberIds).order("checked_in_at", { ascending: false }).limit(400),
+    supabase.from("loyalty_transactions").select("points").in("member_id", memberIds).limit(2000),
+    supabase.from("checkins").select("id").in("member_id", memberIds).is("checked_out_at", null).limit(1),
+    supabase.from("bookings").select("id, status, session:class_sessions(starts_at, class:classes(name))").in("member_id", memberIds).eq("status", "booked").limit(20),
+    supabase.from("member_documents").select("id, kind, status").in("member_id", memberIds).neq("status", "signed").limit(20),
+    supabase.from("invoices").select("amount_cents, status").in("member_id", memberIds).limit(500),
+  ]);
+
+  const planName = ((subData ?? []) as unknown as { plan: { name: string } | null }[])[0]?.plan?.name ?? null;
+  const checkedIn = ((openData ?? []) as { id: string }[]).length > 0;
+  const points = ((loyData ?? []) as { points: number }[]).reduce((s, r) => s + (r.points ?? 0), 0);
+  const level = Math.max(1, Math.floor(points / 100) + 1);
+  const outstanding = ((invData ?? []) as { amount_cents: number; status: string }[]).filter((i) => i.status === "open").reduce((s, i) => s + i.amount_cents, 0);
+  const docs = (docData ?? []) as unknown as Doc[];
+
+  // current streak from visit days
+  const days = new Set(((visitData ?? []) as { checked_in_at: string }[]).map((v) => new Date(v.checked_in_at).toISOString().slice(0, 10)));
+  const todayD = new Date(); todayD.setHours(0, 0, 0, 0);
+  const isoOf = (d: Date) => d.toISOString().slice(0, 10);
+  let cursor = new Date(todayD); let streak = 0;
+  if (!days.has(isoOf(cursor))) cursor.setDate(cursor.getDate() - 1);
+  while (days.has(isoOf(cursor))) { streak++; cursor.setDate(cursor.getDate() - 1); }
+  const weekMarks = [...Array(7)].map((_, i) => { const d = new Date(todayD); d.setDate(d.getDate() - (6 - i)); return { label: ["S", "M", "T", "W", "T", "F", "S"][d.getDay()], on: days.has(isoOf(d)) }; });
+
+  const nextBooking = ((bookingData ?? []) as unknown as Booking[])
+    .filter((b) => b.session && Date.parse(b.session.starts_at) > new Date().getTime())
+    .sort((a, b) => Date.parse(a.session!.starts_at) - Date.parse(b.session!.starts_at))[0] ?? null;
+
+  const qrDataUrl = me.qr_token
+    ? await QRCode.toDataURL(me.qr_token, { margin: 1, width: 240, color: { dark: "#0A0A0A", light: "#FFFFFF" } })
+    : null;
+
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
-      <div className="flex items-start justify-between">
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 pb-28 pt-8">
+      <div className="flex items-center justify-between">
         <div>
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={24} height={24} />
-            <span className="font-display font-extrabold tracking-widest">LUDUZO</span>
-          </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight">My membership</h1>
-          <p className="text-sm text-zinc-500">{user.email}</p>
+          <p className="text-sm text-ash">Ready to train,</p>
+          <h1 className="text-2xl font-extrabold text-bone">{me.first_name} 👋</h1>
         </div>
-        <form action={portalSignOut}>
-          <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
-            Sign out
-          </button>
-        </form>
+        <form action={portalSignOut}><button className="text-xs text-ash hover:text-gold">Sign out</button></form>
       </div>
 
-      {error ? (
-        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
-          {error}
-        </p>
-      ) : null}
+      {error ? <ErrBanner>{error}</ErrBanner> : null}
 
-      {announcements.length > 0 ? (
-        <section className="flex flex-col gap-2">
-          <h2 className="text-sm font-medium text-zinc-500">Gym news</h2>
-          <ul className="flex flex-col gap-2">
-            {announcements.map((a) => (
-              <li key={a.id} className="rounded-md border border-zinc-200 border-l-2 border-l-gold p-3 dark:border-zinc-800">
-                <div className="text-sm font-medium">{a.title}</div>
-                {a.body ? <p className="mt-0.5 text-sm text-zinc-600 dark:text-zinc-400">{a.body}</p> : null}
-              </li>
-            ))}
-          </ul>
+      {/* ---- Arena Pass hero ---- */}
+      <section id="pass" className="gold-gradient rounded-2xl border border-gold-line p-5">
+        <div className="flex items-center justify-between">
+          <div className="text-xs font-bold uppercase tracking-[0.07em] text-gold">◈ Arena Pass</div>
+          {checkedIn ? (
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-win"><span className="h-[7px] w-[7px] rounded-full bg-win animate-[livepulse_2s_infinite]" />Checked in</span>
+          ) : (
+            <span className="text-xs text-ash">Scan at the front desk</span>
+          )}
+        </div>
+        <div className="mt-4 flex justify-center">
+          <div className="rounded-xl bg-white p-3">
+            {qrDataUrl ? <Image src={qrDataUrl} alt="Your Arena Pass QR" width={200} height={200} unoptimized /> : <div className="grid h-[200px] w-[200px] place-items-center text-xs text-black">No pass yet</div>}
+          </div>
+        </div>
+        <p className="mono mt-4 text-center text-xs text-ash">
+          Member {me.member_number ? <span className="text-bone">{me.member_number}</span> : ""}{planName ? ` · ${planName}` : ""}
+        </p>
+      </section>
+
+      {/* ---- Journey: level + streak ---- */}
+      <section>
+        <div className="mb-2 flex items-center justify-between"><h2 className="text-[15px] font-bold text-bone">Your journey</h2></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl border border-iron bg-onyx p-4 text-center">
+            <div className="text-3xl">🦁</div>
+            <div className="mt-1 text-sm font-bold text-bone">Level {level}</div>
+            <div className="mono text-[11px] text-ash">{points} pts</div>
+          </div>
+          <div className="rounded-xl border border-iron bg-onyx p-4">
+            <div className="flex items-baseline gap-1.5"><span className="text-2xl">🔥</span><span className="mono text-3xl font-extrabold text-bone">{streak}</span></div>
+            <div className="text-[11px] text-ash">day streak</div>
+            <div className="mt-2 flex justify-between">
+              {weekMarks.map((w, i) => (
+                <span key={i} className={`grid h-5 w-5 place-items-center rounded text-[9px] font-bold ${w.on ? "bg-gold text-black" : "border border-iron text-ash-dim"}`}>{w.label}</span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- Next up ---- */}
+      <section id="book">
+        <div className="mb-2 flex items-center justify-between"><h2 className="text-[15px] font-bold text-bone">Next up</h2></div>
+        {nextBooking?.session ? (
+          <div className="rounded-xl border border-iron bg-onyx p-4">
+            <div className="mono text-xs font-semibold text-gold">
+              {new Date(nextBooking.session.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}
+            </div>
+            <div className="mt-1 font-bold text-bone">{nextBooking.session.class?.name ?? "Class"}</div>
+            <div className="text-xs text-ash">You&apos;re booked</div>
+          </div>
+        ) : (
+          <div className="rounded-xl border border-iron bg-onyx p-4 text-center text-sm text-ash">No upcoming classes booked.</div>
+        )}
+      </section>
+
+      {/* ---- Balance + docs to sign ---- */}
+      {outstanding > 0 || docs.length > 0 ? (
+        <section id="more" className="flex flex-col gap-2">
+          {outstanding > 0 ? (
+            <div className="flex items-center justify-between rounded-xl border border-loss/40 bg-loss/10 px-4 py-3 text-sm">
+              <span className="text-loss">Balance due</span><span className="mono font-bold text-loss">{formatMoney(outstanding)}</span>
+            </div>
+          ) : null}
+          {docs.map((d) => (
+            <form key={d.id} action={signMyDocument} className="flex items-center justify-between rounded-xl border border-gold-line bg-gold-dim px-4 py-3 text-sm">
+              <span className="font-semibold text-bone">Sign your {d.kind}</span>
+              <input type="hidden" name="id" value={d.id} />
+              <button className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-black">Sign</button>
+            </form>
+          ))}
         </section>
       ) : null}
 
-      {members.length === 0 ? (
-        <div className="rounded-md border border-onyx bg-onyx p-6 text-center">
-          <p className="text-sm text-zinc-400">
-            We couldn&apos;t find a membership linked to your account.
-          </p>
-          <p className="mt-1 text-xs text-zinc-500">
-            If your gym has your email on file, link it now.
-          </p>
-          <form action={claimRecords} className="mt-3">
-            <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
-              Find my membership
-            </button>
-          </form>
-          <div className="mt-4 border-t border-iron pt-4">
-            <p className="text-xs text-zinc-500">Run a gym instead?</p>
-            <Link
-              href="/onboarding"
-              className="mt-2 inline-block rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold"
-            >
-              Set up your gym →
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <>
-          {members.map((m) => (
-            <section key={m.id} className="flex flex-col gap-1 rounded-md border border-onyx bg-onyx p-4">
-              <span className="font-medium">
-                {m.first_name} {m.last_name}
-              </span>
-              <span className="text-xs text-zinc-500">{m.organization?.name ?? ""}</span>
-              {m.qr_token ? (
-                <span className="mt-1 text-xs text-zinc-500">
-                  Check-in code: <span className="font-mono break-all">{m.qr_token}</span>
-                </span>
-              ) : null}
-            </section>
-          ))}
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">Membership</h2>
-            {subs.length === 0 ? (
-              <p className="text-sm text-zinc-500">No active plan.</p>
-            ) : (
-              <ul className="flex flex-col gap-1 text-sm">
-                {subs.map((s) => (
-                  <li key={s.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    <span className="flex flex-col">
-                      <span>{s.plan?.name ?? "(plan)"}</span>
-                      {s.current_period_end ? (
-                        <span className="text-xs text-zinc-500">
-                          renews {new Date(s.current_period_end).toLocaleDateString()}
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="text-xs text-zinc-500">{s.status}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-              <span className="text-sm text-zinc-500">Loyalty</span>
-              <span className="text-lg font-semibold">{loyaltyBalance} pts</span>
-            </div>
-            <div className="flex items-center justify-between rounded-md border border-zinc-200 px-4 py-3 dark:border-zinc-800">
-              <span className="text-sm text-zinc-500">Balance due</span>
-              <span className="text-lg font-semibold">{formatMoney(outstanding)}</span>
-            </div>
-          </div>
-
-          {groupLinks.length > 0 ? (
-            <section className="flex flex-col gap-2">
-              <h2 className="text-sm font-medium text-zinc-500">My group</h2>
-              <ul className="flex flex-col gap-1 text-sm">
-                {groupLinks.map((g) => (
-                  <li key={g.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    <span>{g.group?.name ?? "(group)"}</span>
-                    <span className="text-xs text-zinc-500">
-                      {g.group?.group_type}
-                      {g.relationship ? ` · ${g.relationship}` : ""}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ) : null}
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">My classes</h2>
-            {bookings.length === 0 ? (
-              <p className="text-sm text-zinc-500">No class bookings.</p>
-            ) : (
-              <ul className="flex flex-col gap-1 text-sm">
-                {bookings.map((b) => (
-                  <li key={b.id} className="flex items-center justify-between rounded-md border border-zinc-200 border-l-2 border-l-gold px-3 py-2 dark:border-zinc-800">
-                    <span className="flex flex-col">
-                      <span>{b.session?.class?.name ?? "(class)"}</span>
-                      {b.session?.starts_at ? (
-                        <span className="text-xs text-zinc-500">
-                          {new Date(b.session.starts_at).toLocaleString()}
-                        </span>
-                      ) : null}
-                    </span>
-                    <span className="text-xs text-zinc-500">{b.status}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">My documents</h2>
-            {docs.length === 0 ? (
-              <p className="text-sm text-zinc-500">No documents.</p>
-            ) : (
-              <ul className="flex flex-col gap-1 text-sm">
-                {docs.map((d) => (
-                  <li key={d.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    <span>{d.kind}</span>
-                    {d.status === "signed" ? (
-                      <span className="text-xs text-green-600 dark:text-green-400">signed</span>
-                    ) : (
-                      <form action={signMyDocument}>
-                        <input type="hidden" name="id" value={d.id} />
-                        <button className="rounded-md bg-gold px-3 py-1 text-xs font-medium text-black hover:opacity-90">
-                          Sign
-                        </button>
-                      </form>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">Recent visits</h2>
-            {visits.length === 0 ? (
-              <p className="text-sm text-zinc-500">No visits yet.</p>
-            ) : (
-              <ul className="flex flex-col gap-1 text-sm">
-                {visits.map((v) => (
-                  <li key={v.id} className="rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    {new Date(v.checked_in_at).toLocaleString()}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          <section className="flex flex-col gap-2">
-            <h2 className="text-sm font-medium text-zinc-500">My progress</h2>
-            {measures.length === 0 ? (
-              <p className="text-sm text-zinc-500">No measurements yet.</p>
-            ) : (
-              <ul className="flex flex-col gap-1 text-sm">
-                {measures.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between rounded-md border border-zinc-200 px-3 py-2 dark:border-zinc-800">
-                    <span>{m.recorded_at}</span>
-                    <span className="text-xs text-zinc-500">{m.weight_kg != null ? `${m.weight_kg} kg` : "—"}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-        </>
-      )}
+      {/* ---- Bottom tab bar (PWA) ---- */}
+      <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md items-center justify-around border-t border-iron bg-black/92 px-4 py-2 backdrop-blur">
+        <TabLink href="#pass" label="Home" icon="⌂" active />
+        <TabLink href="#book" label="Book" icon="◲" />
+        <a href="#pass" className="-mt-6 grid h-14 w-14 place-items-center rounded-full bg-gold text-2xl text-black shadow-[0_0_20px_rgba(245,197,24,0.5)]">▢</a>
+        <TabLink href="#more" label="Progress" icon="📈" />
+        <TabLink href="#more" label="More" icon="☰" />
+      </nav>
     </main>
+  );
+}
+
+function Brand({ email }: { email: string }) {
+  return (
+    <div>
+      <Link href="/" className="flex items-center gap-2">
+        <span className="grid h-7 w-7 place-items-center rounded-md bg-gold"><Image src="/brand/luduzo_helmet.svg" alt="" width={18} height={18} /></span>
+        <span className="font-display text-[15px] font-extrabold tracking-[0.18em] text-bone">LUDUZO</span>
+      </Link>
+      <p className="mt-2 text-xs text-ash">{email}</p>
+    </div>
+  );
+}
+function ErrBanner({ children }: { children: React.ReactNode }) {
+  return <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{children}</p>;
+}
+function TabLink({ href, label, icon, active = false }: { href: string; label: string; icon: string; active?: boolean }) {
+  return (
+    <a href={href} className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold ${active ? "text-gold" : "text-ash-dim"}`}>
+      <span className="text-lg">{icon}</span>{label}
+    </a>
   );
 }
