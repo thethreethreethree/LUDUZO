@@ -5,10 +5,10 @@
 -- Every member policy is bound to the caller's OWN member records
 -- (auth_member_ids) AND their org (auth_member_org_ids) — no cross-tenant writes.
 --
--- ⚠ STATUS: NOT YET APPLIED. The direct-Postgres host was unreachable at authoring
--- time (DNS EAI_AGAIN on db.<ref>.supabase.co). Apply via the Supabase dashboard
--- SQL editor (API path), or re-run the migration runner once the host resolves.
--- Until applied, the member self-service UI (book/log/join) will be RLS-denied.
+-- STATUS: APPLIED + verified live by the agent (all 7 policies present in
+-- pg_policies). The direct-Postgres host was briefly unreachable at authoring time
+-- (DNS EAI_AGAIN); it resolved and the migration was applied in-session. A12: all
+-- objects are drop-guarded, so re-running is safe.
 -- ============================================================================
 
 -- ---- Read the class schedule (browse to book) ----
