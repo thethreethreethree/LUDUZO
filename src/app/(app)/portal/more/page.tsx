@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
@@ -96,6 +97,10 @@ export default async function PortalMorePage() {
           </ul>
         )}
       </section>
+
+      <Link href="/portal/help" className="flex items-center justify-between rounded-2xl border border-iron bg-onyx px-4 py-3 text-sm font-semibold text-bone">
+        Help &amp; info<span className="text-gold">→</span>
+      </Link>
 
       {/* Payment history */}
       <section>
