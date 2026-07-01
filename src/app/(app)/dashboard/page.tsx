@@ -147,6 +147,8 @@ export default async function DashboardPage() {
                 { href: "/dashboard/inventory", label: "Inventory" },
                 { href: "/dashboard/pos", label: "Point of sale" },
                 { href: "/dashboard/announcements", label: "Announcements" },
+                { href: "/dashboard/community", label: "Community" },
+                { href: "/dashboard/feedback", label: "Reviews / NPS" },
                 { href: "/dashboard/settings", label: "Settings" },
               ].map((l) => (
                 <Link
