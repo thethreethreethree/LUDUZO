@@ -28,6 +28,7 @@ export const metadata: Metadata = {
     apple: "/apple-touch-icon.png",
   },
   manifest: "/site.webmanifest",
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Luduzo" },
   openGraph: {
     title: "LUDUZO — Gym management, reforged",
     description: "Memberships, classes, billing, and check-ins in one command center.",

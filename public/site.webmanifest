@@ -1,11 +1,23 @@
 {
-  "name": "Luduzo",
+  "id": "/portal",
+  "name": "Luduzo — Member",
   "short_name": "Luduzo",
-  "icons": [
-    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
-  ],
+  "description": "Your Arena Pass, classes, streaks and progress — run your gym like an arena.",
+  "start_url": "/portal",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
   "theme_color": "#0A0A0A",
   "background_color": "#0A0A0A",
-  "display": "standalone"
+  "categories": ["health", "fitness", "lifestyle"],
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Arena Pass", "short_name": "Pass", "url": "/portal", "description": "Show your check-in QR" },
+    { "name": "Book a class", "short_name": "Book", "url": "/portal/book" },
+    { "name": "Progress", "short_name": "Progress", "url": "/portal/progress" }
+  ]
 }

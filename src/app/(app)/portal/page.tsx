@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
 import { PlanBadge, btnGold, btnSecondary } from "@/components/ui";
+import { PWARegister } from "@/components/PWARegister";
 import { claimRecords, signMyDocument, portalSignOut } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -91,6 +92,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
       </div>
 
       {error ? <ErrBanner>{error}</ErrBanner> : null}
+
+      <PWARegister />
 
       {/* ---- Arena Pass hero ---- */}
       <section id="pass" className="gold-gradient rounded-2xl border border-gold-line p-5">
