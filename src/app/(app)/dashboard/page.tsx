@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { signout } from "./actions";
+import { NAV_GROUPS } from "@/lib/nav";
 
 // Dynamic: reads cookies/session, so it is never statically prerendered.
 export const dynamic = "force-dynamic";
@@ -114,56 +115,24 @@ export default async function DashboardPage() {
                 </li>
               ))}
             </ul>
-            <nav className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {[
-                { href: "/dashboard/members", label: "Members" },
-                { href: "/dashboard/programs", label: "Programs" },
-                { href: "/dashboard/gamification", label: "Gamification" },
-                { href: "/dashboard/retention", label: "Retention" },
-                { href: "/dashboard/locations", label: "Locations" },
-                { href: "/dashboard/groups", label: "Groups" },
-                { href: "/dashboard/guest-passes", label: "Guest passes" },
-                { href: "/dashboard/referrals", label: "Referrals" },
-                { href: "/dashboard/documents", label: "Documents" },
-                { href: "/dashboard/plans", label: "Plans" },
-                { href: "/dashboard/coupons", label: "Coupons" },
-                { href: "/dashboard/gift-cards", label: "Gift cards" },
-                { href: "/dashboard/leads", label: "Leads / CRM" },
-                { href: "/dashboard/invoices", label: "Invoices" },
-                { href: "/dashboard/checkins", label: "Check-ins" },
-                { href: "/dashboard/kiosk", label: "Kiosk" },
-                { href: "/dashboard/classes", label: "Classes" },
-                { href: "/dashboard/appointments", label: "Appointments" },
-                { href: "/dashboard/resources", label: "Resources" },
-                { href: "/dashboard/staff", label: "Team" },
-                { href: "/dashboard/shifts", label: "Shifts" },
-                { href: "/dashboard/tasks", label: "Tasks" },
-                { href: "/dashboard/messages", label: "Messages" },
-                { href: "/dashboard/certifications", label: "Certifications" },
-                { href: "/dashboard/payroll", label: "Payroll" },
-                { href: "/dashboard/timeclock", label: "Time clock" },
-                { href: "/dashboard/activity", label: "Activity" },
-                { href: "/dashboard/reports", label: "Reports" },
-                { href: "/dashboard/analytics", label: "Analytics" },
-                { href: "/dashboard/inventory", label: "Inventory" },
-                { href: "/dashboard/maintenance", label: "Maintenance" },
-                { href: "/dashboard/lockers", label: "Lockers" },
-                { href: "/dashboard/pos", label: "Point of sale" },
-                { href: "/dashboard/announcements", label: "Announcements" },
-                { href: "/dashboard/community", label: "Community" },
-                { href: "/dashboard/feedback", label: "Reviews / NPS" },
-                { href: "/dashboard/settings", label: "Settings" },
-                { href: "/dashboard/admin", label: "Admin" },
-              ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="rounded-md border border-onyx bg-onyx px-4 py-3 text-sm font-medium hover:border-gold hover:text-gold"
-                >
-                  {l.label} →
-                </Link>
+            <div className="mt-2 flex flex-col gap-5">
+              {NAV_GROUPS.map((group) => (
+                <div key={group.title} className="flex flex-col gap-2">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-ash">{group.title}</h3>
+                  <nav className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {group.links.map((l) => (
+                      <Link
+                        key={l.href}
+                        href={l.href}
+                        className="rounded-md border border-onyx bg-onyx px-4 py-3 text-sm font-medium hover:border-gold hover:text-gold"
+                      >
+                        {l.label} →
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
               ))}
-            </nav>
+            </div>
           </>
         )}
       </section>
