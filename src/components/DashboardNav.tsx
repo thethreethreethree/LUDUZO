@@ -15,7 +15,7 @@ export function DashboardNav() {
           <Link
             key={n.href}
             href={n.href}
-            className={active ? "font-medium text-gold" : "text-ash hover:text-gold"}
+            className={`text-sm font-semibold transition-colors duration-150 ${active ? "text-gold" : "text-ash hover:text-bone"}`}
           >
             {n.label}
           </Link>
