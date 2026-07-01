@@ -109,7 +109,7 @@ export default async function InvoicesPage({
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
             <input name="amount" type="number" min="0" step="0.01" required placeholder="Amount" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="due_date" type="date" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="due_date" type="date" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create invoice

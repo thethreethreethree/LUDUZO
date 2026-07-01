@@ -93,7 +93,7 @@ export default async function DocumentsPage({
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
             <input name="title" required placeholder="Title (e.g. Liability Waiver)" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <select name="kind" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="kind" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
               {DOCUMENT_KINDS.map((k) => (
                 <option key={k} value={k}>
                   {k}
@@ -101,7 +101,7 @@ export default async function DocumentsPage({
               ))}
             </select>
           </div>
-          <textarea name="body" rows={4} placeholder="Template text (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <textarea name="body" rows={4} placeholder="Template text (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create template
           </button>

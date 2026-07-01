@@ -59,7 +59,7 @@ export default async function NewMemberPage({
               <select
                 name="organization_id"
                 required
-                data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
               >
                 {orgs.map((o) => (
                   <option key={o.organization!.id} value={o.organization!.id}>
@@ -71,31 +71,31 @@ export default async function NewMemberPage({
           )}
 
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="font-medium">First name</span>
-              <input name="first_name" required data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="first_name" required data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="font-medium">Last name</span>
-              <input name="last_name" required data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="last_name" required data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
           </div>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Email</span>
-            <input type="email" name="email" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            <input type="email" name="email" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
           </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Phone</span>
-            <input name="phone" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="phone" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
           </label>
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="font-medium">Member # (optional)</span>
-              <input name="member_number" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="member_number" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="font-medium">Date of birth</span>
-              <input name="date_of_birth" type="date" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="date_of_birth" type="date" data-1p-ignore data-lpignore="true" data-bwignore data-form-type="other" className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
           </div>
 

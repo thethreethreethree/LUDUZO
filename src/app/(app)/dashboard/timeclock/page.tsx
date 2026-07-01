@@ -74,7 +74,7 @@ export default async function TimeclockPage({
           {orgs.length === 1 ? (
             <input type="hidden" name="organization_id" value={orgs[0].id} />
           ) : (
-            <select name="organization_id" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="organization_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
               {orgs.map((o) => (
                 <option key={o.id} value={o.id}>
                   {o.name}

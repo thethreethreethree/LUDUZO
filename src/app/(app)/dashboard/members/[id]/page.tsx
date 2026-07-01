@@ -242,33 +242,33 @@ export default async function MemberDetailPage({
         <form action={updateMemberDetails} className="flex flex-col gap-3">
           <input type="hidden" name="id" value={member.id} />
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">First name</span>
-              <input name="first_name" required defaultValue={member.first_name} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="first_name" required defaultValue={member.first_name} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">Last name</span>
-              <input name="last_name" required defaultValue={member.last_name} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="last_name" required defaultValue={member.last_name} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
           </div>
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">Email</span>
-              <input name="email" type="email" defaultValue={member.email ?? ""} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="email" type="email" defaultValue={member.email ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">Phone</span>
-              <input name="phone" defaultValue={member.phone ?? ""} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="phone" defaultValue={member.phone ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
           </div>
           <div className="flex gap-3">
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">Member #</span>
-              <input name="member_number" defaultValue={member.member_number ?? ""} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="member_number" defaultValue={member.member_number ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
-            <label className="flex flex-1 flex-col gap-1 text-sm">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
               <span className="text-xs text-zinc-500">Date of birth</span>
-              <input name="date_of_birth" type="date" defaultValue={member.date_of_birth ?? ""} className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="date_of_birth" type="date" defaultValue={member.date_of_birth ?? ""} className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900" />
             </label>
           </div>
           <button className="self-start rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
@@ -299,7 +299,7 @@ export default async function MemberDetailPage({
           <select
             name="status"
             defaultValue={member.status}
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
           >
             {MEMBER_STATUSES.map((s) => (
               <option key={s} value={s}>
@@ -322,7 +322,7 @@ export default async function MemberDetailPage({
             rows={3}
             defaultValue={member.notes ?? ""}
             placeholder="Staff notes about this member…"
-            className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+            className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
           />
           <button className="self-start rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Save notes
@@ -382,7 +382,7 @@ export default async function MemberDetailPage({
           <form action={assignSubscription} className="flex items-center gap-2">
             <input type="hidden" name="organization_id" value={member.organization_id} />
             <input type="hidden" name="member_id" value={member.id} />
-            <select name="plan_id" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="plan_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} — {formatMoney(p.price_cents, p.currency)}/{p.interval}
@@ -443,7 +443,7 @@ export default async function MemberDetailPage({
         <form action={assignDocument} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <select name="template_id" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="template_id" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <option value="">(no template)</option>
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
@@ -451,7 +451,7 @@ export default async function MemberDetailPage({
               </option>
             ))}
           </select>
-          <select name="kind" defaultValue="waiver" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="kind" defaultValue="waiver" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             {DOCUMENT_KINDS.map((k) => (
               <option key={k} value={k}>
                 {k}
@@ -519,7 +519,7 @@ export default async function MemberDetailPage({
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
           <input name="amount" type="number" min="0" step="0.01" placeholder="Amount" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <input name="due_date" type="date" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="due_date" type="date" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Invoice
           </button>

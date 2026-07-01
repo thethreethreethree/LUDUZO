@@ -161,8 +161,8 @@ export default async function InventoryPage({
           <form action={createEquipment} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={orgs} />
             <input name="name" required placeholder="Equipment" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="purchased_at" type="date" title="Purchased" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <select name="status" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <input name="purchased_at" type="date" title="Purchased" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <select name="status" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
               {EQUIPMENT_STATUSES.map((s) => (
                 <option key={s} value={s}>
                   {s}

@@ -92,7 +92,7 @@ export default async function LocationsPage({
         <form action={createLocation} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="text-sm font-medium">Add location</h2>
           <OrgPicker orgs={orgs} />
-          <input name="name" required placeholder="Location name" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="name" required placeholder="Location name" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <div className="flex gap-3">
             <input name="timezone" placeholder="Timezone (e.g. UTC)" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="capacity" type="number" min="0" placeholder="Capacity" className="w-32 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />

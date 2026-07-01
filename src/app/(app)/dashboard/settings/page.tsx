@@ -74,7 +74,7 @@ export default async function SettingsPage({
                       name="name"
                       required
                       defaultValue={r.organization!.name}
-                      className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                      className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
                     />
                     <span className="text-xs text-zinc-500">/{r.organization!.slug}</span>
                   </label>
@@ -88,13 +88,13 @@ export default async function SettingsPage({
                         className="h-10 w-16 rounded-md border border-zinc-300 dark:border-zinc-700"
                       />
                     </label>
-                    <label className="flex flex-1 flex-col gap-1 text-sm">
+                    <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
                       <span className="font-medium">Logo URL</span>
                       <input
                         name="logo_url"
                         defaultValue={r.organization!.settings?.logo_url ?? ""}
                         placeholder="https://…"
-                        className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+                        className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
                       />
                     </label>
                   </div>

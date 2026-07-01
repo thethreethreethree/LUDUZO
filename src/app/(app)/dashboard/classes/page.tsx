@@ -84,7 +84,7 @@ export default async function ClassesPage({
                   <form action={updateClass} className="flex flex-wrap items-center gap-2">
                     <input type="hidden" name="id" value={c.id} />
                     <input name="name" defaultValue={c.name} className="flex-1 rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-                    <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+                    <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-zinc-300 px-3 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
                     <input name="capacity" type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-zinc-300 px-2 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
                     <button className="rounded-md border border-zinc-300 px-3 py-1.5 text-xs font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900">
                       Save
@@ -104,7 +104,7 @@ export default async function ClassesPage({
           <form action={createClass} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={mgmtOrgs} />
             <input name="name" required placeholder="Class name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <input name="instructor_name" placeholder="Instructor" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="instructor_name" placeholder="Instructor" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add class
@@ -117,14 +117,14 @@ export default async function ClassesPage({
         <form action={createSession} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a session</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="class_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule
           </button>
@@ -135,14 +135,14 @@ export default async function ClassesPage({
         <form action={createRecurringSessions} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a weekly series</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="class_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <input name="count" type="number" min="1" max="52" defaultValue={8} className="w-20 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" title="Number of weeks" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule weekly

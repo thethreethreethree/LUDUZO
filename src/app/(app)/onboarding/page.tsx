@@ -44,7 +44,7 @@ export default async function OnboardingPage({
               name="name"
               required
               placeholder="Iron Works Gym"
-              className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">
@@ -53,7 +53,7 @@ export default async function OnboardingPage({
               type="text"
               name="slug"
               placeholder="iron-works"
-              className="rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
+              className="w-full rounded-md border border-zinc-300 px-3 py-2 dark:border-zinc-700 dark:bg-zinc-900"
             />
             <span className="text-xs text-zinc-500">
               Leave blank to derive it from the name.

@@ -89,7 +89,7 @@ export default async function PayrollPage({
         <form action={createCommission} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Record commission</h2>
           <OrgPicker orgs={orgs} />
-          <select name="staff_user_id" required className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="staff_user_id" required className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <option value="">— staff —</option>
             {staff.map((s) => (
               <option key={s.user_id} value={s.user_id}>

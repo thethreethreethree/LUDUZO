@@ -67,7 +67,7 @@ export default async function StaffPage({
           <h2 className="w-full text-sm font-medium">Add staff (existing account)</h2>
           <OrgPicker orgs={adminOrgs} />
           <input name="email" type="email" required placeholder="their@email.com" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <select name="role" defaultValue="front_desk" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="role" defaultValue="front_desk" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             {STAFF_ROLES.map((r) => (
               <option key={r} value={r}>
                 {r}

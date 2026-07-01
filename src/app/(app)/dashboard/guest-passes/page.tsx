@@ -125,7 +125,7 @@ export default async function GuestPassesPage({
                 </option>
               ))}
             </select>
-            <input name="expires_at" type="date" title="Expires" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            <input name="expires_at" type="date" title="Expires" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Issue pass

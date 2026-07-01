@@ -98,7 +98,7 @@ export default async function CouponsPage({
           <h2 className="w-full text-sm font-medium">New coupon</h2>
           <OrgPicker orgs={orgs} />
           <input name="code" required placeholder="CODE" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-          <select name="discount_type" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="discount_type" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             {DISCOUNT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}

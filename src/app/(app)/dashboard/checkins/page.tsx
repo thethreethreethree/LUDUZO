@@ -90,7 +90,7 @@ export default async function CheckinsPage({
       {members.length > 0 ? (
         <form action={recordCheckin} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="text-sm font-medium">Check someone in</h2>
-          <select name="member_id" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="member_id" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <option value="">— pick a member —</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>

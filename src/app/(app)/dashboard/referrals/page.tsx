@@ -112,7 +112,7 @@ export default async function ReferralsPage({
             <input name="referred_name" required placeholder="Referred person's name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="referred_email" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           </div>
-          <select name="referrer_member_id" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+          <select name="referrer_member_id" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
             <option value="">Referred by (optional)</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>

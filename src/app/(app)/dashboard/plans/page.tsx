@@ -95,7 +95,7 @@ export default async function PlansPage({
           <div className="flex gap-3">
             <input name="name" required placeholder="Plan name" className="flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
             <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
-            <select name="interval" defaultValue="month" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
+            <select name="interval" defaultValue="month" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900">
               {PLAN_INTERVALS.map((i) => (
                 <option key={i} value={i}>
                   {i}
@@ -103,7 +103,7 @@ export default async function PlansPage({
               ))}
             </select>
           </div>
-          <input name="description" placeholder="Description (optional)" className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+          <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create plan
           </button>

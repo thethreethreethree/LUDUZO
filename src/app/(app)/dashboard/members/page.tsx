@@ -104,7 +104,7 @@ export default async function MembersPage({
         <select
           name="status"
           defaultValue={status}
-          className="rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
+          className="w-full rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900"
         >
           <option value="">All statuses</option>
           {MEMBER_STATUSES.map((s) => (
