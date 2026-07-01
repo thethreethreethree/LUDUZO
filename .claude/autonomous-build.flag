@@ -1,0 +1,7 @@
+Autonomous build ACTIVE (founder directive: "do not stop building until I say so").
+
+While this file exists, the Stop hook (.claude/hooks/build-continue-guard.mjs, A23)
+blocks silent premature stops and re-injects the Build-Stop Decision protocol.
+
+To end the autonomous build: the founder removes this file (or says "stop"),
+and the agent deletes it.

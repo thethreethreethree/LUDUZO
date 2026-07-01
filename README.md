@@ -6,7 +6,7 @@ platform serves many gyms.
 ## Governance
 This build is governed **strictly** by:
 - **`CLAUDE.md`** — the operating constitution (AMD-006 lives here, as §1.5.1 + §1.5.2).
-- **`ThinkerThinker.md`** — the methodology asset library (A1–A22).
+- **`ThinkerThinker.md`** — the methodology asset library (A1–A23).
 
 See **`docs/DEVELOPMENT-PLAN.md`** for the phase-structured roadmap.
 
@@ -17,23 +17,33 @@ Next.js (App Router) · Vercel · Supabase (Postgres / Auth / RLS / Storage / Re
 **Hybrid** (founder choice C4): conventional relational tables for current entity state **+** an
 append-only, immutable `events` stream (CLAUDE.md §3.1) for lifecycle / audit / analytics.
 
-## Status — Phase 1: Foundation
-Multi-tenancy, identity, RBAC, RLS isolation, append-only events.
+## Status
+- ✅ **Foundation VERIFIED** against live Supabase — `0001_foundation.sql`, 23/23 checks
+  (`supabase/tests/0001_foundation_rls_verify.sql`), applied 2026-06-29.
+- 🚧 **Migrations 0002–0016** authored (members, relationships, documents, billing, POS, check-in,
+  classes, payroll, measurements, member portal, loyalty) — each with a matching probe under
+  `supabase/tests/`. **UNTESTED** until run (founder choice C2, code-first).
+- 🚧 **App** (Next.js 16, App Router) — full staff dashboard + member self-service portal.
+  `npm run build` **passes** (types + compile); runtime against live Supabase is **UNTESTED**.
 
-- ✅ `supabase/migrations/0001_foundation.sql` **applied** to live Supabase (founder, 2026-06-29).
-- ✅ Tenant isolation, role-gating on every writable table, `anon` denial, suspended-access revocation,
-  and append-only `events` **VERIFIED** against the live DB — **23/23** checks pass via
-  `supabase/tests/0001_foundation_rls_verify.sql` (2026-06-29).
-- 🚧 App layer **scaffolded** — Next.js 16 (App Router) + Supabase SSR auth (login / signup / logout) +
-  `proxy` session refresh + protected `/dashboard` that reads the signed-in user's org via RLS.
-  `npm run build` **passes** (types + compile).
+> ⚠️ **Scope of "verified":** only `0001` is proven against the live DB. Everything since **compiles**
+> but is not runtime-tested until the migration/probe queue in `docs/DEVELOPMENT-PLAN.md` is run.
 
-> ⚠️ **Scope of "verified":** (1) the database foundation — proven against the live DB (23/23);
-> (2) the app — **compiles only**. Runtime against live Supabase (sign-in, session, RLS-through-the-app)
-> is **UNTESTED** until run with a populated `.env` (founder choice C2, code-first).
+## Features (built; compile-verified)
+Onboarding (create a gym) · members (search, statuses, notes, QR, documents, subscriptions incl.
+freeze/cancel, progress measurements, loyalty, history, CSV export) · locations · groups (family/corporate)
+· guest passes · referrals · document templates & signing · membership plans · coupons · invoices · POS
+(atomic stock + paid invoice) · QR check-in + kiosk + live occupancy · classes/sessions/bookings with
+capacity enforcement & attendance roster · staff directory · payroll/commissions · time clock · inventory
+& equipment · announcements · reports · activity (event stream) · white-label settings · member portal.
 
-## Setup
+## Setup / local dev
 1. Create a Supabase project; copy keys into `.env` (template: `.env.example`).
-2. Apply `supabase/migrations/0001_foundation.sql`.
-3. (Optional re-check) Run `supabase/tests/0001_foundation_rls_verify.sql`; expect 23/23 + `ALL PASS`.
-4. Scaffold the Next.js app and wire the Supabase client (next).
+2. Apply migrations **in order** `0001` → `0016` from `supabase/migrations/`.
+3. After each, run its probe in `supabase/tests/` (expect `OVERALL = ALL PASS`). See the consolidated
+   run-queue + dependency notes in `docs/DEVELOPMENT-PLAN.md`.
+4. `npm install` then `npm run dev`; open `/` → **Staff dashboard** or **Member portal**.
+
+## Governance note
+Migration `0004` includes Supabase Storage policies (not probe-covered — validate manually). Stripe is
+**not** integrated (schema reserves `stripe_*` columns); the C3 Stripe-Connect decision is pending.

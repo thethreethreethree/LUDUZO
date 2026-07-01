@@ -9,7 +9,7 @@ import { getSupabaseEnv } from "@/lib/env";
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 // Path prefixes that require an authenticated session.
-const PROTECTED_PREFIXES = ["/dashboard"];
+const PROTECTED_PREFIXES = ["/dashboard", "/portal"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });

@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+/* LUDUZO brand — dark-first (Gladiator Black + Plume Gold).
+   Force class-based dark so the whole app renders in the brand dark theme;
+   this activates the dark: variants every component already carries. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Core palette (brand/luduzo-tokens.css) */
+  --luduzo-black: #0a0a0a;
+  --luduzo-gold: #fece00;
+  --luduzo-white: #ffffff;
+  /* Neutrals */
+  --luduzo-onyx: #1c1c1c;
+  --luduzo-iron: #3a3a3a;
+  --luduzo-ash: #8a8a8a;
+  --luduzo-fog: #f4f4f2;
+  /* Status */
+  --luduzo-win: #16a34a;
+  --luduzo-loss: #dc2626;
+
+  --background: #0a0a0a;
+  --foreground: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-gold: #fece00;
+  --color-onyx: #1c1c1c;
+  --color-iron: #3a3a3a;
+  --color-ash: #8a8a8a;
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-montserrat);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  letter-spacing: -0.01em;
 }

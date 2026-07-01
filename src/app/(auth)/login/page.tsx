@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { login, signup } from "./actions";
 
@@ -11,10 +12,11 @@ export default async function LoginPage({
   return (
     <main className="flex flex-1 items-center justify-center p-8">
       <div className="w-full max-w-sm">
-        <Link href="/" className="text-sm text-zinc-500 hover:underline">
-          ← LUDUZO
+        <Link href="/" className="flex items-center gap-2">
+          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={28} height={28} />
+          <span className="font-display font-extrabold tracking-widest">LUDUZO</span>
         </Link>
-        <h1 className="mt-4 text-2xl font-semibold tracking-tight">Sign in</h1>
+        <h1 className="mt-6 text-2xl font-semibold tracking-tight">Sign in</h1>
 
         {error ? (
           <p className="mt-4 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
@@ -27,7 +29,7 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <form className="mt-6 flex flex-col gap-3">
+        <form className="mt-6 flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Email</span>
             <input
@@ -53,7 +55,7 @@ export default async function LoginPage({
           <div className="mt-2 flex gap-3">
             <button
               formAction={login}
-              className="flex-1 rounded-md bg-black px-4 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
+              className="flex-1 rounded-md bg-gold px-4 py-2.5 text-sm font-medium text-black hover:opacity-90"
             >
               Sign in
             </button>

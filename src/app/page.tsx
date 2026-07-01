@@ -1,29 +1,69 @@
+import Image from "next/image";
 import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-8 p-8">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <h1 className="text-4xl font-semibold tracking-tight">LUDUZO</h1>
-        <p className="max-w-md text-zinc-600 dark:text-zinc-400">
-          Multi-tenant gym management. Each gym&apos;s data is isolated at the
-          database level.
+    <div className="flex flex-1 flex-col">
+      <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
+        <div className="flex items-center gap-2.5">
+          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={32} height={32} priority />
+          <span className="font-display text-lg font-extrabold tracking-widest">LUDUZO</span>
+        </div>
+        <nav className="flex items-center gap-3 text-sm">
+          <Link href="/login" className="text-ash hover:text-white">
+            Sign in
+          </Link>
+          <Link
+            href="/login"
+            className="rounded-md bg-gold px-4 py-2 font-display text-sm font-bold text-black hover:opacity-90"
+          >
+            Start free
+          </Link>
+        </nav>
+      </header>
+
+      <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col items-center justify-center gap-8 px-6 py-20 text-center">
+        <span className="rounded-full bg-onyx px-4 py-1.5 font-display text-xs font-bold tracking-widest text-gold">
+          GYM MANAGEMENT, REFORGED
+        </span>
+        <h1 className="font-display text-5xl font-extrabold leading-[1.05] sm:text-6xl">
+          Run your gym like
+          <br />
+          an <span className="text-gold">arena</span>
+        </h1>
+        <p className="max-w-md text-lg text-ash">
+          Memberships, classes, billing, and check-ins in one command center built for gyms that
+          compete to win.
         </p>
-      </div>
-      <div className="flex gap-3">
-        <Link
-          href="/login"
-          className="rounded-md bg-black px-5 py-2.5 text-sm font-medium text-white hover:bg-zinc-800 dark:bg-white dark:text-black dark:hover:bg-zinc-200"
-        >
-          Sign in
-        </Link>
-        <Link
-          href="/dashboard"
-          className="rounded-md border border-zinc-300 px-5 py-2.5 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900"
-        >
-          Go to dashboard
-        </Link>
-      </div>
-    </main>
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/login"
+            className="rounded-md bg-gold px-6 py-3 font-display text-sm font-bold text-black hover:opacity-90"
+          >
+            Start free trial
+          </Link>
+          <Link
+            href="/portal"
+            className="rounded-md border border-iron px-6 py-3 font-display text-sm font-bold hover:bg-onyx"
+          >
+            Member portal
+          </Link>
+        </div>
+        <div className="flex items-center gap-8 pt-4 text-sm">
+          <span>
+            <span className="font-bold text-gold">Multi-tenant</span>
+            <span className="text-ash"> by design</span>
+          </span>
+          <span>
+            <span className="font-bold text-gold">RLS</span>
+            <span className="text-ash"> isolation</span>
+          </span>
+          <span>
+            <span className="font-bold text-gold">Self-serve</span>
+            <span className="text-ash"> portal</span>
+          </span>
+        </div>
+      </main>
+    </div>
   );
 }

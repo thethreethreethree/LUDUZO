@@ -13,8 +13,14 @@ export async function login(formData: FormData) {
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
+
+  // Route staff to the dashboard; customers (no staff role) to the member portal.
+  const { count } = await supabase
+    .from("organization_members")
+    .select("id", { count: "exact", head: true });
+
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(count && count > 0 ? "/dashboard" : "/portal");
 }
 
 export async function signup(formData: FormData) {
