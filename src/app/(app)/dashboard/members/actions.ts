@@ -248,14 +248,24 @@ export async function logMeasurement(formData: FormData) {
   const supabase = await createClient();
   const organization_id = String(formData.get("organization_id") ?? "");
   const member_id = String(formData.get("member_id") ?? "");
-  const wRaw = String(formData.get("weight_kg") ?? "").trim();
-  const fRaw = String(formData.get("body_fat_pct") ?? "").trim();
   const notes = String(formData.get("notes") ?? "").trim() || null;
-  const weight_kg = wRaw && !Number.isNaN(Number(wRaw)) ? Number(wRaw) : null;
-  const body_fat_pct = fRaw && !Number.isNaN(Number(fRaw)) ? Number(fRaw) : null;
+  // Range-check to match the member self-log path (F-E parity, A21): columns are
+  // numeric(6,2)/(5,2), so an out-of-range value would surface a raw Postgres
+  // overflow error. NaN sentinel = "provided but invalid" → reject, don't drop.
+  const num = (k: string, max: number) => {
+    const v = String(formData.get(k) ?? "").trim();
+    if (!v) return null;
+    const n = Number(v);
+    if (!Number.isFinite(n) || n <= 0 || n > max) return NaN;
+    return n;
+  };
+  const weight_kg = num("weight_kg", 999), body_fat_pct = num("body_fat_pct", 100);
 
   if (!organization_id || !member_id) {
     redirect(`/dashboard/members/${member_id}?error=` + encodeURIComponent("Missing data."));
+  }
+  if ([weight_kg, body_fat_pct].some((v) => Number.isNaN(v))) {
+    redirect(`/dashboard/members/${member_id}?error=` + encodeURIComponent("Check the numbers — weight up to 999 kg, body fat 0–100%."));
   }
   const { error } = await supabase
     .from("member_measurements")
