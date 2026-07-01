@@ -117,6 +117,9 @@ export default async function DashboardPage() {
             <nav className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
               {[
                 { href: "/dashboard/members", label: "Members" },
+                { href: "/dashboard/programs", label: "Programs" },
+                { href: "/dashboard/gamification", label: "Gamification" },
+                { href: "/dashboard/retention", label: "Retention" },
                 { href: "/dashboard/locations", label: "Locations" },
                 { href: "/dashboard/groups", label: "Groups" },
                 { href: "/dashboard/guest-passes", label: "Guest passes" },
