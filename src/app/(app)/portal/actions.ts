@@ -73,51 +73,24 @@ export async function addMemberComment(formData: FormData) {
   redirect("/portal/more");
 }
 
-// Member self-books a class session. Uses the live 0034 member-insert RLS +
-// the 0032 capacity trigger as the enforcement point.
-//
-// WHY this shape: a member cannot read OTHER members' bookings (RLS 0022 scopes
-// SELECT to their own rows), so the client can't count how full a session is to
-// decide booked-vs-waitlisted. Instead of a new SECURITY DEFINER RPC, we let the
-// already-tested capacity trigger (0032) be the arbiter: try 'booked'; if the
-// trigger rejects it as full (check_violation / 23514), retry as 'waitlisted'
-// (which the trigger exempts). §1.5.1 L1 — the capacity decision stays in the DB.
+// Member self-books a class session via the book_my_session RPC (0038). The RPC
+// is authoritative: it locks the session, counts capacity to decide booked-vs-
+// waitlisted, and REVIVES a prior cancelled row (the re-book path a member can't
+// take through RLS, since F2 restricts member updates to result-status
+// 'cancelled'). Returns the resulting status. §1.5.1 L1 — the decision lives in
+// the DB, atomically, not in brittle client retry logic.
 export async function bookSession(formData: FormData) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
-  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
-  if (!me) redirect("/portal/book?error=" + encodeURIComponent("No membership on file."));
-
   const session_id = String(formData.get("session_id") ?? "");
   if (!session_id) redirect("/portal/book");
 
-  // Confirm the session is in the member's org (they can read it via 0034) — this
-  // keeps the booking's organization_id consistent with the session it points at.
-  const { data: sessRows } = await supabase.from("class_sessions").select("id, organization_id").eq("id", session_id).limit(1);
-  const sess = ((sessRows ?? []) as { id: string; organization_id: string }[])[0];
-  if (!sess || sess.organization_id !== me.organization_id) {
-    redirect("/portal/book?error=" + encodeURIComponent("That class isn't available."));
-  }
-
-  const row = { organization_id: me.organization_id, session_id, member_id: me.id };
-  const first = await supabase.from("bookings").insert({ ...row, status: "booked" });
-  if (first.error) {
-    // 23514 = capacity trigger rejected (session full) → offer the waitlist.
-    if (first.error.code === "23514") {
-      const wl = await supabase.from("bookings").insert({ ...row, status: "waitlisted" });
-      if (wl.error) redirect("/portal/book?error=" + encodeURIComponent(wl.error.message));
-      revalidatePath("/portal/book"); revalidatePath("/portal");
-      redirect("/portal/book?ok=waitlisted");
-    }
-    // 23505 = unique(session_id, member_id) → already has a booking for this session.
-    if (first.error.code === "23505") redirect("/portal/book?error=" + encodeURIComponent("You're already booked for that class."));
-    redirect("/portal/book?error=" + encodeURIComponent(first.error.message));
-  }
+  const { data, error } = await supabase.rpc("book_my_session", { p_session_id: session_id });
+  if (error) redirect("/portal/book?error=" + encodeURIComponent(error.message));
   revalidatePath("/portal/book"); revalidatePath("/portal");
-  redirect("/portal/book?ok=booked");
+  redirect("/portal/book?ok=" + (data === "waitlisted" ? "waitlisted" : "booked"));
 }
 
 // Member cancels their own booking. RLS bookings_member_cancel (0034) enforces
