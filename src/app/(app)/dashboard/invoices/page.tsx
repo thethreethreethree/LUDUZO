@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getWritableOrgs } from "@/lib/orgs";
 import { formatMoney } from "@/lib/billing";
 import { OrgPicker } from "@/components/OrgPicker";
-import { createInvoice, markInvoicePaid, voidInvoice } from "./actions";
+import { createInvoice, markInvoicePaid, voidInvoice, recordRefund, suspendOverdue } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -21,9 +21,9 @@ type InvoiceRow = {
 export default async function InvoicesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, ok } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -59,6 +59,31 @@ export default async function InvoicesPage({
         <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
           {error}
         </p>
+      ) : null}
+      {ok ? (
+        <p className="rounded-md border border-l-2 border-onyx border-l-gold px-3 py-2 text-sm text-gold">{ok}</p>
+      ) : null}
+
+      {orgs.length > 0 ? (
+        <section className="grid gap-3 sm:grid-cols-2">
+          <form action={recordRefund} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4">
+            <span className="text-sm font-medium">Record a refund</span>
+            <OrgPicker orgs={orgs} />
+            <div className="flex gap-2">
+              <input name="amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+              <input name="reason" placeholder="Reason (optional)" className="min-w-0 flex-1 rounded-md border border-zinc-300 px-3 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-900" />
+            </div>
+            <button className="self-start rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:border-gold hover:text-gold">Record refund</button>
+          </form>
+          <form action={suspendOverdue} className="flex flex-col justify-between gap-2 rounded-md border border-onyx bg-onyx p-4">
+            <div>
+              <span className="text-sm font-medium">Auto-suspension</span>
+              <p className="mt-1 text-xs text-zinc-500">Freeze active members who have a past-due invoice.</p>
+            </div>
+            <OrgPicker orgs={orgs} />
+            <button className="self-start rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:border-gold hover:text-gold">Suspend overdue members</button>
+          </form>
+        </section>
       ) : null}
 
       {invoices.length === 0 ? (

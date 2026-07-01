@@ -127,6 +127,8 @@ export default async function DashboardPage() {
                 { href: "/dashboard/documents", label: "Documents" },
                 { href: "/dashboard/plans", label: "Plans" },
                 { href: "/dashboard/coupons", label: "Coupons" },
+                { href: "/dashboard/gift-cards", label: "Gift cards" },
+                { href: "/dashboard/leads", label: "Leads / CRM" },
                 { href: "/dashboard/invoices", label: "Invoices" },
                 { href: "/dashboard/checkins", label: "Check-ins" },
                 { href: "/dashboard/kiosk", label: "Kiosk" },
