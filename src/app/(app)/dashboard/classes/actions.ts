@@ -142,17 +142,19 @@ export async function createBooking(formData: FormData) {
     redirect("/dashboard/classes?error=" + encodeURIComponent("That session is cancelled."));
   }
 
-  const { error } = await supabase
-    .from("bookings")
-    .insert({ organization_id, session_id, member_id });
+  // Route through book_member_into_session (0039) for parity with member self-book
+  // (0038): the RPC decides booked-vs-waitlisted by capacity, REVIVES a member's
+  // cancelled row (a plain insert hit unique(session_id, member_id) → 23505 and
+  // falsely reported "already booked"), and authorizes the caller as staff of the
+  // session's org. A21 / §1.5.1 L3 — same concept, same behavior across modules.
+  const { data: status, error } = await supabase.rpc("book_member_into_session", {
+    p_session_id: session_id,
+    p_member_id: member_id,
+  });
   if (error) {
-    // The unique (session_id, member_id) constraint (0007) rejects a re-book; the capacity
-    // trigger (0012) raises its own already-friendly "session is full (capacity N)" message.
-    const msg = isUniqueViolation(error)
-      ? "That member is already booked in this session."
-      : error.message;
+    const msg = isUniqueViolation(error) ? "That member is already booked in this session." : error.message;
     redirect("/dashboard/classes?error=" + encodeURIComponent(msg));
   }
   revalidatePath("/dashboard/classes");
-  redirect("/dashboard/classes");
+  redirect("/dashboard/classes?ok=" + (status === "waitlisted" ? "waitlisted" : "booked"));
 }

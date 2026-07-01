@@ -21,9 +21,9 @@ type MemberOpt = { id: string; first_name: string; last_name: string };
 export default async function ClassesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; ok?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, ok } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -69,6 +69,16 @@ export default async function ClassesPage({
       {error ? (
         <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">
           {error}
+        </p>
+      ) : null}
+
+      {ok === "waitlisted" ? (
+        <p className="rounded-md border border-warn/40 bg-warn/10 px-3 py-2 text-sm text-warn">
+          That class was full — the member was added to the waitlist.
+        </p>
+      ) : ok === "booked" ? (
+        <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">
+          Member booked.
         </p>
       ) : null}
 
