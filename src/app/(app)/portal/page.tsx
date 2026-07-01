@@ -170,14 +170,6 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         </section>
       ) : null}
 
-      {/* ---- Bottom tab bar (PWA) ---- */}
-      <nav className="fixed inset-x-0 bottom-0 z-30 mx-auto flex max-w-md items-center justify-around border-t border-iron bg-black/92 px-4 py-2 backdrop-blur">
-        <TabLink href="#pass" label="Home" icon="⌂" active />
-        <TabLink href="#book" label="Book" icon="◲" />
-        <a href="#pass" className="-mt-6 grid h-14 w-14 place-items-center rounded-full bg-gold text-2xl text-black shadow-[0_0_20px_rgba(245,197,24,0.5)]">▢</a>
-        <TabLink href="#more" label="Progress" icon="📈" />
-        <TabLink href="#more" label="More" icon="☰" />
-      </nav>
     </main>
   );
 }
@@ -195,11 +187,4 @@ function Brand({ email }: { email: string }) {
 }
 function ErrBanner({ children }: { children: React.ReactNode }) {
   return <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{children}</p>;
-}
-function TabLink({ href, label, icon, active = false }: { href: string; label: string; icon: string; active?: boolean }) {
-  return (
-    <a href={href} className={`flex flex-col items-center gap-0.5 text-[10px] font-semibold ${active ? "text-gold" : "text-ash-dim"}`}>
-      <span className="text-lg">{icon}</span>{label}
-    </a>
-  );
 }
