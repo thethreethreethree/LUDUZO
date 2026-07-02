@@ -207,6 +207,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         Help &amp; info<span className="text-gold">→</span>
       </Link>
 
+      {/* §12 privacy — download own data (GDPR). GET route, RLS-scoped to own rows. */}
+      <a href="/portal/data-export" className="flex items-center justify-between rounded-2xl border border-iron bg-onyx px-4 py-3 text-sm font-semibold text-bone hover:border-gold">
+        <span>Download my data</span><span className="text-gold">↓</span>
+      </a>
+
       {/* Payment history */}
       <section>
         <div className="mb-2 text-[15px] font-bold text-bone">Payment history</div>
