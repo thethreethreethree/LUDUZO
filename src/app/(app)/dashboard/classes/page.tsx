@@ -35,6 +35,10 @@ export default async function ClassesPage({
     .select("id, name, instructor_name, capacity, organization:organizations(name)")
     .order("name", { ascending: true });
   const classes = (classData ?? []) as unknown as ClassRow[];
+  // §4 type/difficulty tags in a SEPARATE query so a missing column (pre-0056)
+  // can't break the class list. Empty until 0056 is applied.
+  const { data: tagData } = await supabase.from("classes").select("id, class_type, difficulty");
+  const classTags = new Map(((tagData ?? []) as { id: string; class_type: string | null; difficulty: string | null }[]).map((c) => [c.id, c]));
 
   // Recent + upcoming sessions (hide anything older than yesterday).
   const cutoff = new Date();
@@ -96,6 +100,8 @@ export default async function ClassesPage({
                     <input name="name" defaultValue={c.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
                     <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
                     <input name="capacity" type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <input name="class_type" defaultValue={classTags.get(c.id)?.class_type ?? ""} placeholder="Type" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <input name="difficulty" defaultValue={classTags.get(c.id)?.difficulty ?? ""} placeholder="Level" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
                     <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Save
                     </button>
@@ -116,6 +122,8 @@ export default async function ClassesPage({
             <input name="name" required placeholder="Class name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <input name="instructor_name" placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <input name="capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="class_type" placeholder="Type (e.g. Yoga)" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="difficulty" placeholder="Level (e.g. Beginner)" className="w-36 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add class
             </button>

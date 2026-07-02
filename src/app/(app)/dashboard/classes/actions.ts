@@ -12,13 +12,19 @@ export async function updateClass(formData: FormData) {
   const instructor_name = String(formData.get("instructor_name") ?? "").trim() || null;
   const capRaw = String(formData.get("capacity") ?? "").trim();
   const capacity = capRaw && !Number.isNaN(Number(capRaw)) ? Number(capRaw) : null;
+  const class_type = String(formData.get("class_type") ?? "").trim() || null;
+  const difficulty = String(formData.get("difficulty") ?? "").trim() || null;
   if (!id || !name) {
     redirect("/dashboard/classes?error=" + encodeURIComponent("Name is required."));
   }
-  const { error } = await supabase
+  let { error } = await supabase
     .from("classes")
-    .update({ name, instructor_name, capacity })
+    .update({ name, instructor_name, capacity, class_type, difficulty })
     .eq("id", id);
+  // Pre-0056 fallback: if the type/difficulty columns don't exist yet, save the rest.
+  if (error && error.code === "42703") {
+    ({ error } = await supabase.from("classes").update({ name, instructor_name, capacity }).eq("id", id));
+  }
   if (error) redirect("/dashboard/classes?error=" + encodeURIComponent(error.message));
   revalidatePath("/dashboard/classes");
   redirect("/dashboard/classes");
@@ -36,13 +42,18 @@ export async function createClass(formData: FormData) {
   const instructor_name = String(formData.get("instructor_name") ?? "").trim() || null;
   const capRaw = String(formData.get("capacity") ?? "").trim();
   const capacity = capRaw && !Number.isNaN(Number(capRaw)) ? Number(capRaw) : null;
+  const class_type = String(formData.get("class_type") ?? "").trim() || null;
+  const difficulty = String(formData.get("difficulty") ?? "").trim() || null;
 
   if (!organization_id || !name) {
     redirect("/dashboard/classes?error=" + encodeURIComponent("Gym and name are required."));
   }
-  const { error } = await supabase
+  let { error } = await supabase
     .from("classes")
-    .insert({ organization_id, name, instructor_name, capacity });
+    .insert({ organization_id, name, instructor_name, capacity, class_type, difficulty });
+  if (error && error.code === "42703") {
+    ({ error } = await supabase.from("classes").insert({ organization_id, name, instructor_name, capacity }));
+  }
   if (error) redirect("/dashboard/classes?error=" + encodeURIComponent(error.message));
   revalidatePath("/dashboard/classes");
   redirect("/dashboard/classes");

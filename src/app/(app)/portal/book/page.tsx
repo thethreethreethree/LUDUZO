@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 type Booking = { id: string; status: string; session: { id: string; starts_at: string; class: { name: string } | null } | null };
 type Appt = { id: string; title: string | null; starts_at: string; ends_at: string; status: string; trainer_id: string | null };
-type Session = { id: string; starts_at: string; ends_at: string | null; capacity: number | null; class: { name: string; description: string | null; capacity: number | null; instructor_name: string | null } | null };
+type Session = { id: string; starts_at: string; ends_at: string | null; capacity: number | null; class_id: string; class: { name: string; description: string | null; capacity: number | null; instructor_name: string | null } | null };
 
 const OK_MSG: Record<string, string> = {
   booked: "You're booked. See you there.",
@@ -15,8 +15,8 @@ const OK_MSG: Record<string, string> = {
   cancelled: "Booking cancelled.",
 };
 
-export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string; instructor?: string }> }) {
-  const { ok, error, instructor } = await searchParams;
+export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string; instructor?: string; type?: string; level?: string }> }) {
+  const { ok, error, instructor, type, level } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -28,15 +28,17 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   const cancellationPolicy = members[0]?.organization?.settings?.cancellation_policy ?? null;
 
   const nowIso = new Date().toISOString();
-  const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }, { data: availData }] = await Promise.all([
+  const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }, { data: availData }, { data: tagData }] = await Promise.all([
     supabase.from("bookings").select("id, status, session:class_sessions(id, starts_at, class:classes(name))").in("member_id", ids).order("created_at", { ascending: false }).limit(30),
     // trainer_id (not a profiles embed): members can't read staff profiles, so the
     // embed returned null. Names come from gym_staff_directory (0040, name-only).
     supabase.from("appointments").select("id, title, starts_at, ends_at, status, trainer_id").in("member_id", ids).order("starts_at", { ascending: false }).limit(20),
     // Bookable schedule — readable by the member via 0034 (org-scoped). Upcoming only.
-    supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class:classes(name, description, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
+    supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class_id, class:classes(name, description, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
     supabase.from("gym_staff_directory").select("user_id, full_name"),
     supabase.from("class_session_availability").select("session_id, capacity, booked"),
+    // §4 class type/difficulty tags — separate graceful query (pre-0056 → empty → no chips).
+    supabase.from("classes").select("id, class_type, difficulty"),
   ]);
 
   const now = new Date().getTime();
@@ -74,10 +76,29 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
     }),
   );
 
-  // §4: filter by instructor + group the schedule by day (calendar-ish list).
-  // (type/difficulty filters need class columns that don't exist yet — flagged.)
+  // §4: filter by instructor / type / difficulty + group the schedule by day.
+  // Tags come from the separate graceful query (0056); empty → no type/level chips.
+  const classTags = new Map(((tagData ?? []) as { id: string; class_type: string | null; difficulty: string | null }[]).map((c) => [c.id, c]));
+  const typeOf = (s: Session) => classTags.get(s.class_id)?.class_type ?? null;
+  const levelOf = (s: Session) => classTags.get(s.class_id)?.difficulty ?? null;
   const instructors = Array.from(new Set(sessions.map((s) => s.class?.instructor_name).filter(Boolean))) as string[];
-  const filteredSessions = instructor ? sessions.filter((s) => s.class?.instructor_name === instructor) : sessions;
+  const types = Array.from(new Set(sessions.map(typeOf).filter(Boolean))) as string[];
+  const levels = Array.from(new Set(sessions.map(levelOf).filter(Boolean))) as string[];
+  const filteredSessions = sessions.filter((s) =>
+    (!instructor || s.class?.instructor_name === instructor) &&
+    (!type || typeOf(s) === type) &&
+    (!level || levelOf(s) === level));
+  // Build a filter URL preserving the other active filters.
+  const filterHref = (o: { instructor?: string; type?: string; level?: string }) => {
+    const cur = { instructor, type, level, ...o };
+    const p = new URLSearchParams();
+    if (cur.instructor) p.set("instructor", cur.instructor);
+    if (cur.type) p.set("type", cur.type);
+    if (cur.level) p.set("level", cur.level);
+    const qs = p.toString();
+    return "/portal/book" + (qs ? `?${qs}` : "");
+  };
+  const chip = (active: boolean) => `rounded-full px-3 py-1 text-xs font-semibold ${active ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`;
   const todayStr = new Date().toDateString();
   const tomorrowStr = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toDateString(); })();
   const dayLabel = (iso: string) => {
@@ -107,12 +128,26 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
       {/* ---- Browse & book the schedule (grouped by day, filterable by trainer) ---- */}
       <section>
         <div className="mb-2 text-[15px] font-bold text-bone">Schedule</div>
-        {instructors.length > 1 ? (
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            <Link href="/portal/book" className={`rounded-full px-3 py-1 text-xs font-semibold ${!instructor ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`}>All</Link>
-            {instructors.map((i) => (
-              <Link key={i} href={`/portal/book?instructor=${encodeURIComponent(i)}`} className={`rounded-full px-3 py-1 text-xs font-semibold ${instructor === i ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`}>{i}</Link>
-            ))}
+        {(instructors.length > 1 || types.length > 0 || levels.length > 0) ? (
+          <div className="mb-3 flex flex-col gap-1.5">
+            {types.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                <Link href={filterHref({ type: undefined })} className={chip(!type)}>All types</Link>
+                {types.map((t) => (<Link key={t} href={filterHref({ type: t })} className={chip(type === t)}>{t}</Link>))}
+              </div>
+            ) : null}
+            {levels.length > 0 ? (
+              <div className="flex flex-wrap gap-1.5">
+                <Link href={filterHref({ level: undefined })} className={chip(!level)}>All levels</Link>
+                {levels.map((l) => (<Link key={l} href={filterHref({ level: l })} className={chip(level === l)}>{l}</Link>))}
+              </div>
+            ) : null}
+            {instructors.length > 1 ? (
+              <div className="flex flex-wrap gap-1.5">
+                <Link href={filterHref({ instructor: undefined })} className={chip(!instructor)}>All trainers</Link>
+                {instructors.map((i) => (<Link key={i} href={filterHref({ instructor: i })} className={chip(instructor === i)}>{i}</Link>))}
+              </div>
+            ) : null}
           </div>
         ) : null}
         {sessions.length === 0 ? (
@@ -131,6 +166,12 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                       <div className="min-w-0">
                         <div className="mono text-xs font-semibold text-gold">{new Date(s.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
                         <div className="mt-0.5 truncate font-bold text-bone">{s.class?.name ?? "Class"}</div>
+                        {(typeOf(s) || levelOf(s)) ? (
+                          <div className="flex flex-wrap gap-1">
+                            {typeOf(s) ? <span className="rounded bg-iron px-1.5 py-0.5 text-[10px] font-semibold text-ash">{typeOf(s)}</span> : null}
+                            {levelOf(s) ? <span className="rounded bg-iron px-1.5 py-0.5 text-[10px] font-semibold text-ash">{levelOf(s)}</span> : null}
+                          </div>
+                        ) : null}
                         {s.class?.instructor_name ? <div className="truncate text-xs text-ash">with {s.class.instructor_name}</div> : null}
                         {(() => {
                           const left = spotsLeft.get(s.id);
