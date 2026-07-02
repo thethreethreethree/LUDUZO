@@ -97,6 +97,13 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
               </div>
             ) : null}
             <p className="mono mt-2 text-[11px] text-ash-dim">Last {measures.length} readings</p>
+            {weights.length > 1 ? (() => {
+              const deltaKg = weights[weights.length - 1] - weights[0];
+              const d = Math.round(disp(Math.abs(deltaKg)) * 10) / 10;
+              if (d === 0) return <p className="mt-1 text-xs text-ash">No change in weight since your first reading.</p>;
+              const down = deltaKg < 0;
+              return <p className={`mt-1 text-xs font-semibold ${down ? "text-win" : "text-warn"}`}>{down ? "▼" : "▲"} {d} {wUnit} {down ? "down" : "up"} since your first reading</p>;
+            })() : null}
           </>
         )}
         {/* Self-log — uses live 0034 member_measurements_member_insert RLS. */}
