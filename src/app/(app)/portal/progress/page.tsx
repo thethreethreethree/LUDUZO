@@ -28,7 +28,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   const ids = ((memberData ?? []) as { id: string }[]).map((m) => m.id);
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }, { data: chData }, { data: partData }] = await Promise.all([
+  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }, { data: chData }, { data: partData }, { data: lbData }] = await Promise.all([
     supabase.from("workout_plans").select("id, name, workout_exercises(id, name, sets, reps, weight_kg)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("meal_plans").select("id, name, daily_calorie_target, meal_plan_items(id, meal, description, calories)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("member_measurements").select("id, recorded_at, weight_kg, body_fat_pct, muscle_mass_kg").in("member_id", ids).order("recorded_at", { ascending: false }).limit(24),
@@ -37,6 +37,8 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
     // Challenges + own participation now readable via 0036 (member-scoped).
     supabase.from("challenges").select("id, name, description, metric, goal_target, starts_on, ends_on").order("starts_on", { ascending: false }).limit(20),
     supabase.from("challenge_participants").select("challenge_id, progress").in("member_id", ids),
+    // Leaderboard rows (first name + progress) for org challenges — 0046 view.
+    supabase.from("challenge_leaderboard").select("challenge_id, member_id, first_name, progress"),
   ]);
 
   const wplans = (wData ?? []) as unknown as WPlan[];
@@ -47,6 +49,17 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   const challenges = (chData ?? []) as unknown as Challenge[];
   const participation = (partData ?? []) as unknown as Participation[];
   const joinedProgress = new Map(participation.map((p) => [p.challenge_id, p.progress]));
+  const myMemberIds = new Set(ids);
+  // Leaderboard: group rows by challenge, ranked by progress desc (0046 view; empty
+  // until the migration is applied — degrades gracefully).
+  type LbRow = { challenge_id: string; member_id: string; first_name: string | null; progress: number };
+  const leaderboard = new Map<string, LbRow[]>();
+  for (const r of ((lbData ?? []) as unknown as LbRow[])) {
+    const arr = leaderboard.get(r.challenge_id) ?? [];
+    arr.push(r);
+    leaderboard.set(r.challenge_id, arr);
+  }
+  for (const arr of leaderboard.values()) arr.sort((a, b) => b.progress - a.progress);
 
   // §12 units: member weight-unit preference (cookie). DB stores kg; convert for display.
   const units = ((await cookies()).get("units")?.value === "lb") ? "lb" : "kg";
@@ -152,6 +165,20 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
                   ) : joined ? (
                     <div className="mono mt-2 text-[11px] text-ash">Progress: {prog} {c.metric}</div>
                   ) : null}
+                  {(() => {
+                    const board = leaderboard.get(c.id) ?? [];
+                    if (board.length < 2) return null;
+                    return (
+                      <ol className="mt-3 flex flex-col gap-1 border-t border-iron pt-2">
+                        {board.slice(0, 5).map((r, i) => (
+                          <li key={r.member_id} className={`flex items-center justify-between text-xs ${myMemberIds.has(r.member_id) ? "font-bold text-gold" : "text-ash"}`}>
+                            <span className="truncate">{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}.`} {r.first_name ?? "Member"}{myMemberIds.has(r.member_id) ? " (you)" : ""}</span>
+                            <span className="mono shrink-0">{r.progress}</span>
+                          </li>
+                        ))}
+                      </ol>
+                    );
+                  })()}
                 </li>
               );
             })}
