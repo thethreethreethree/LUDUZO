@@ -134,6 +134,13 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         </p>
       </section>
 
+      {/* ---- Quick actions (§2) ---- */}
+      <div className="grid grid-cols-3 gap-2">
+        <Link href="/portal/book" className="flex flex-col items-center gap-1 rounded-xl border border-iron bg-onyx py-3 text-xs font-semibold text-bone hover:border-gold hover:text-gold"><span className="text-lg">📅</span>Book a class</Link>
+        <Link href="/portal/progress" className="flex flex-col items-center gap-1 rounded-xl border border-iron bg-onyx py-3 text-xs font-semibold text-bone hover:border-gold hover:text-gold"><span className="text-lg">💪</span>Log a workout</Link>
+        <Link href="/portal/progress" className="flex flex-col items-center gap-1 rounded-xl border border-iron bg-onyx py-3 text-xs font-semibold text-bone hover:border-gold hover:text-gold"><span className="text-lg">⚖️</span>Log metrics</Link>
+      </div>
+
       {/* ---- Journey: level + streak ---- */}
       <section>
         <div className="mb-2 flex items-center justify-between"><h2 className="text-[15px] font-bold text-bone">Your journey</h2></div>
