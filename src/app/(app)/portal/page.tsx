@@ -66,7 +66,8 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const outstanding = ((invData ?? []) as { amount_cents: number; status: string }[]).filter((i) => i.status === "open").reduce((s, i) => s + i.amount_cents, 0);
   const docs = (docData ?? []) as unknown as Doc[];
 
-  // Live occupancy → busy/quiet label (only when capacity is known).
+  // Live occupancy: always show the head-count; add a busy/quiet label only when
+  // the gym has set location capacity.
   const occRow = ((occData ?? []) as { occupancy: number; capacity: number }[])[0] ?? null;
   const occPct = occRow && occRow.capacity > 0 ? (occRow.occupancy / occRow.capacity) * 100 : null;
   const occLabel = occPct == null ? null
@@ -104,9 +105,10 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         </div>
         <div className="flex flex-col items-end gap-1">
           <form action={portalSignOut}><button className="text-xs text-ash hover:text-gold">Sign out</button></form>
-          {occLabel ? (
+          {occRow ? (
             <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ash">
-              <span className={`h-[7px] w-[7px] rounded-full ${occLabel.c}`} />{occLabel.t}
+              <span className={`h-[7px] w-[7px] rounded-full ${occLabel?.c ?? "bg-ash"} ${occRow.occupancy > 0 ? "animate-[livepulse_2s_infinite]" : ""}`} />
+              {occLabel ? `${occLabel.t} · ` : ""}{occRow.occupancy} in now
             </span>
           ) : null}
         </div>
