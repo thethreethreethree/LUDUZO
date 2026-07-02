@@ -21,10 +21,11 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id);
-  const members = ((memberData ?? []) as { id: string; organization_id: string }[]);
+  const { data: memberData } = await supabase.from("members").select("id, organization_id, organization:organizations(settings)").eq("profile_id", user.id);
+  const members = ((memberData ?? []) as unknown as { id: string; organization_id: string; organization: { settings: { cancellation_policy?: string } | null } | null }[]);
   const ids = members.map((m) => m.id);
   if (ids.length === 0) redirect("/portal");
+  const cancellationPolicy = members[0]?.organization?.settings?.cancellation_policy ?? null;
 
   const nowIso = new Date().toISOString();
   const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }] = await Promise.all([
@@ -82,6 +83,10 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
 
       {ok ? <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">{OK_MSG[ok] ?? "Done."}</p> : null}
       {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
+
+      {cancellationPolicy ? (
+        <p className="rounded-xl border border-iron bg-onyx px-3 py-2 text-xs text-ash">ℹ {cancellationPolicy}</p>
+      ) : null}
 
       {/* ---- Browse & book the schedule (grouped by day, filterable by trainer) ---- */}
       <section>

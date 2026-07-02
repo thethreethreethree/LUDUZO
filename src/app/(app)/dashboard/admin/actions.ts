@@ -19,6 +19,7 @@ export async function updateOrgSettings(formData: FormData) {
   const address = String(formData.get("address") ?? "").trim();
   const hours = String(formData.get("hours") ?? "").trim();
   const amenities = String(formData.get("amenities") ?? "").trim();
+  const cancellation_policy = String(formData.get("cancellation_policy") ?? "").trim();
   if (!id) redirect("/dashboard/admin");
   // Merge member-facing gym info into the settings jsonb without clobbering other
   // keys (branding etc.). Members read these via org_select_member (0041).
@@ -29,6 +30,7 @@ export async function updateOrgSettings(formData: FormData) {
     address: address || undefined,
     hours: hours || undefined,
     amenities: amenities || undefined,
+    cancellation_policy: cancellation_policy || undefined,
   };
   const { error } = await supabase
     .from("organizations")

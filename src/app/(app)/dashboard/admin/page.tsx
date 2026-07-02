@@ -9,7 +9,7 @@ type Org = {
   id: string; name: string; role: string;
   brand_color: string | null; accent_color: string | null; logo_url: string | null;
   plan_tier: string; default_currency: string; locale: string;
-  settings: { phone?: string; address?: string; hours?: string; amenities?: string } | null;
+  settings: { phone?: string; address?: string; hours?: string; amenities?: string; cancellation_policy?: string } | null;
 };
 type ApiKey = { id: string; name: string; key_prefix: string; revoked: boolean; last_used_at: string | null };
 type Webhook = { id: string; url: string; event_types: string[]; active: boolean };
@@ -89,6 +89,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </label>
               <label className="flex flex-col gap-1 text-xs text-ash">Amenities
                 <input name="amenities" defaultValue={o.settings?.amenities ?? ""} placeholder="Sauna · Pool · Free parking" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-ash sm:col-span-2">Class cancellation policy (members see this when booking)
+                <input name="cancellation_policy" defaultValue={o.settings?.cancellation_policy ?? ""} placeholder="e.g. Cancel at least 4 hours before class to avoid a no-show mark." className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
             </div>
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save settings</button>
