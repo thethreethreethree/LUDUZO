@@ -1,6 +1,9 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { logMeasurement, joinChallenge } from "../actions";
+import { logMeasurement, joinChallenge, setUnits } from "../actions";
+
+const LB_PER_KG = 2.20462;
 
 export const dynamic = "force-dynamic";
 
@@ -45,7 +48,12 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   const participation = (partData ?? []) as unknown as Participation[];
   const joinedProgress = new Map(participation.map((p) => [p.challenge_id, p.progress]));
 
-  // weight trend (oldest→newest) for a tiny sparkline
+  // §12 units: member weight-unit preference (cookie). DB stores kg; convert for display.
+  const units = ((await cookies()).get("units")?.value === "lb") ? "lb" : "kg";
+  const wUnit = units === "lb" ? "lb" : "kg";
+  const disp = (kg: number) => (units === "lb" ? Math.round(kg * LB_PER_KG * 10) / 10 : kg);
+
+  // weight trend (oldest→newest) for a tiny sparkline (min/max computed in kg)
   const weights = measures.filter((m) => m.weight_kg != null).map((m) => m.weight_kg as number).reverse();
   const wMin = Math.min(...weights, Infinity), wMax = Math.max(...weights, -Infinity);
   const latest = measures[0];
@@ -59,21 +67,32 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
 
       {/* body metrics */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">
-        <div className="mb-3 text-[15px] font-bold text-bone">Body metrics</div>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="text-[15px] font-bold text-bone">Body metrics</div>
+          {/* §12 kg/lb toggle */}
+          <div className="flex overflow-hidden rounded-md border border-iron text-[11px] font-bold">
+            {(["kg", "lb"] as const).map((u) => (
+              <form key={u} action={setUnits}>
+                <input type="hidden" name="units" value={u} />
+                <button className={u === wUnit ? "bg-gold px-2.5 py-1 text-black" : "px-2.5 py-1 text-ash hover:text-gold"}>{u.toUpperCase()}</button>
+              </form>
+            ))}
+          </div>
+        </div>
         {measures.length === 0 ? (
           <p className="text-sm text-ash">No measurements logged yet — record your first below, or your trainer can add them.</p>
         ) : (
           <>
             <div className="grid grid-cols-3 gap-3 text-center">
-              <Metric label="Weight" value={latest.weight_kg != null ? `${latest.weight_kg}` : "—"} unit="kg" />
+              <Metric label="Weight" value={latest.weight_kg != null ? `${disp(latest.weight_kg)}` : "—"} unit={wUnit} />
               <Metric label="Body fat" value={latest.body_fat_pct != null ? `${latest.body_fat_pct}` : "—"} unit="%" />
-              <Metric label="Muscle" value={latest.muscle_mass_kg != null ? `${latest.muscle_mass_kg}` : "—"} unit="kg" />
+              <Metric label="Muscle" value={latest.muscle_mass_kg != null ? `${disp(latest.muscle_mass_kg)}` : "—"} unit={wUnit} />
             </div>
             {weights.length > 1 ? (
               <div className="mt-4 flex h-16 items-end gap-1">
                 {weights.map((w, i) => {
                   const pct = wMax > wMin ? ((w - wMin) / (wMax - wMin)) * 100 : 50;
-                  return <div key={i} className="flex-1 rounded-t bg-gold" style={{ height: `${20 + pct * 0.8}%` }} title={`${w}kg`} />;
+                  return <div key={i} className="flex-1 rounded-t bg-gold" style={{ height: `${20 + pct * 0.8}%` }} title={`${disp(w)}${wUnit}`} />;
                 })}
               </div>
             ) : null}
@@ -82,11 +101,12 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
         )}
         {/* Self-log — uses live 0034 member_measurements_member_insert RLS. */}
         <form action={logMeasurement} className="mt-4 border-t border-iron pt-4">
-          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.07em] text-ash">Log a measurement</div>
+          <input type="hidden" name="units" value={wUnit} />
+          <div className="mb-2 text-xs font-semibold uppercase tracking-[0.07em] text-ash">Log a measurement ({wUnit})</div>
           <div className="grid grid-cols-3 gap-2">
-            <input name="weight_kg" inputMode="decimal" placeholder="Weight kg" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="weight_kg" inputMode="decimal" placeholder={`Weight ${wUnit}`} className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
             <input name="body_fat_pct" inputMode="decimal" placeholder="Fat %" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
-            <input name="muscle_mass_kg" inputMode="decimal" placeholder="Muscle kg" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="muscle_mass_kg" inputMode="decimal" placeholder={`Muscle ${wUnit}`} className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
           </div>
           <button className="mt-2 w-full rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save today&apos;s reading</button>
         </form>

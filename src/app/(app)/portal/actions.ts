@@ -1,8 +1,20 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+
+const LB_PER_KG = 2.20462;
+
+// §12: member weight-unit preference (kg | lb), stored in a cookie. Display + input
+// both use it; the DB always stores kg.
+export async function setUnits(formData: FormData) {
+  const units = String(formData.get("units") ?? "kg") === "lb" ? "lb" : "kg";
+  (await cookies()).set("units", units, { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  revalidatePath("/portal/progress");
+  redirect("/portal/progress");
+}
 
 export async function signMyDocument(formData: FormData) {
   const supabase = await createClient();
@@ -127,19 +139,25 @@ export async function logMeasurement(formData: FormData) {
   const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
   if (!me) redirect("/portal/progress?error=" + encodeURIComponent("No membership on file."));
 
-  // Parse + range-check. Columns are numeric(6,2)/(5,2), so out-of-range values
-  // would otherwise surface as a raw Postgres overflow error (F-E). A sentinel
-  // (NaN) marks "provided but invalid" so we can reject rather than silently drop.
-  const num = (k: string, max: number) => {
+  // Inputs arrive in the member's unit (kg or lb, hidden field). Parse raw (>0),
+  // convert weight/muscle to kg, then range-check the KG value (columns are
+  // numeric(6,2)/(5,2) → overflow otherwise, F-E). NaN = provided-but-invalid.
+  const units = String(formData.get("units") ?? "kg") === "lb" ? "lb" : "kg";
+  const raw = (k: string) => {
     const v = String(formData.get(k) ?? "").trim();
     if (!v) return null;
     const n = Number(v);
-    if (!Number.isFinite(n) || n <= 0 || n > max) return NaN;
-    return n;
+    return Number.isFinite(n) && n > 0 ? n : NaN;
   };
-  const weight_kg = num("weight_kg", 999), body_fat_pct = num("body_fat_pct", 100), muscle_mass_kg = num("muscle_mass_kg", 999);
-  if ([weight_kg, body_fat_pct, muscle_mass_kg].some((v) => Number.isNaN(v))) {
-    redirect("/portal/progress?error=" + encodeURIComponent("Check your numbers — weight/muscle up to 999 kg, body fat 0–100%."));
+  const rW = raw("weight_kg"), rMu = raw("muscle_mass_kg"), rBf = raw("body_fat_pct");
+  if ([rW, rMu, rBf].some((v) => Number.isNaN(v))) {
+    redirect("/portal/progress?error=" + encodeURIComponent("Enter positive numbers only."));
+  }
+  const toKg = (v: number | null) => (v == null ? null : Math.round((units === "lb" ? v / LB_PER_KG : v) * 100) / 100);
+  const weight_kg = toKg(rW as number | null), muscle_mass_kg = toKg(rMu as number | null);
+  const body_fat_pct = rBf == null ? null : Math.round((rBf as number) * 100) / 100;
+  if ((weight_kg != null && weight_kg > 999) || (muscle_mass_kg != null && muscle_mass_kg > 999) || (body_fat_pct != null && body_fat_pct > 100)) {
+    redirect("/portal/progress?error=" + encodeURIComponent("Check your numbers — weight/muscle up to 999 kg (2200 lb), body fat 0–100%."));
   }
   if (weight_kg == null && body_fat_pct == null && muscle_mass_kg == null) {
     redirect("/portal/progress?error=" + encodeURIComponent("Enter at least one measurement."));
