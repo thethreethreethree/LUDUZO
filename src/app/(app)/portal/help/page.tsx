@@ -28,7 +28,7 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
   // §6 "meet the team" — gym staff via the directory. select("*") so a missing
   // `role` column (before 0052) degrades gracefully (the view holds no PII).
   const { data: staffData } = await supabase.from("gym_staff_directory").select("*");
-  const team = ((staffData ?? []) as { user_id: string; full_name: string | null; role?: string }[]).filter((s) => s.full_name);
+  const team = ((staffData ?? []) as { user_id: string; full_name: string | null; role?: string; specialties?: string | null; bio?: string | null }[]).filter((s) => s.full_name);
   // Audit Finding 1 (A20 safe default): show only member-facing roles; owner/admin/
   // manager render as just a name (don't expose the gym's internal hierarchy).
   // Founder can override to show all roles.
@@ -76,16 +76,19 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
         ) : null}
       </section>
 
-      {/* §6 meet the team (staff names via 0040) */}
+      {/* §6 meet the team (name/role/specialties/bio via gym_staff_directory) */}
       {team.length > 0 ? (
         <section className="rounded-2xl border border-iron bg-onyx p-4">
           <div className="text-[15px] font-bold text-bone">Meet the team</div>
-          <ul className="mt-3 flex flex-wrap gap-3">
+          <ul className="mt-3 flex flex-col gap-3">
             {team.map((s) => (
-              <li key={s.user_id} className="flex w-[72px] flex-col items-center gap-0.5 text-center">
-                <Avatar name={s.full_name ?? "Coach"} size={44} />
-                <span className="w-full truncate text-[11px] text-bone">{s.full_name}</span>
-                {roleLabel(s.role) ? <span className="w-full truncate text-[10px] text-ash-dim">{roleLabel(s.role)}</span> : null}
+              <li key={s.user_id} className="flex items-start gap-3">
+                <Avatar name={s.full_name ?? "Coach"} size={40} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-sm font-semibold text-bone">{s.full_name}{roleLabel(s.role) ? <span className="ml-1.5 text-[11px] font-normal text-ash-dim">· {roleLabel(s.role)}</span> : null}</div>
+                  {s.specialties ? <div className="text-xs text-gold">{s.specialties}</div> : null}
+                  {s.bio ? <p className="mt-0.5 text-xs text-ash">{s.bio}</p> : null}
+                </div>
               </li>
             ))}
           </ul>

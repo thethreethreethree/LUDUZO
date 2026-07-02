@@ -48,6 +48,7 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     title: "Team",
     links: [
+      { href: "/dashboard/profile", label: "My profile" },
       { href: "/dashboard/staff", label: "Team" },
       { href: "/dashboard/shifts", label: "Shifts" },
       { href: "/dashboard/tasks", label: "Tasks" },
