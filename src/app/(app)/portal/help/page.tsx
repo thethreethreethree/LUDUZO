@@ -7,8 +7,8 @@ export const dynamic = "force-dynamic";
 
 const FAQ = [
   { q: "How do I check in?", a: "Open the Home tab and show your Arena Pass QR at the front desk scanner. That's your one-tap entry." },
-  { q: "How do I book a class?", a: "Your booked classes and PT sessions appear under Book. In-app self-booking is rolling out — for now, book at the front desk." },
-  { q: "Where do I see my plan and progress?", a: "Progress shows your assigned workout & nutrition plans, body metrics, badges and visit history." },
+  { q: "How do I book a class?", a: "Open Book to see this week's schedule and tap Book on any class. If it's full you'll be added to the waitlist and moved up automatically when a spot opens. Your booked classes and PT sessions are listed under Book, and you can cancel there too." },
+  { q: "Where do I see my plan and progress?", a: "Progress shows your assigned workout & nutrition plans, body metrics, badges and visit history. You can log your own weight/body-fat/muscle and join gym challenges right from Progress." },
   { q: "How do I pay or check my balance?", a: "More → Membership shows your plan and days left; Payment history lists your invoices. Any balance due appears on Home." },
   { q: "How do streaks work?", a: "Your streak counts consecutive days with a check-in. Keep it alive on the Home tab." },
 ];
