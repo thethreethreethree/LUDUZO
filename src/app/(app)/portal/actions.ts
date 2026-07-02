@@ -331,6 +331,29 @@ export async function setNotifPrefs(formData: FormData) {
   redirect("/portal/more");
 }
 
+// Member redeems points for a reward (0055 redeem_reward RPC — atomic balance check
+// + redemption + negative loyalty txn).
+export async function redeemReward(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const reward_id = String(formData.get("reward_id") ?? "");
+  if (!reward_id) redirect("/portal/more");
+
+  const { error } = await supabase.rpc("redeem_reward", { p_reward_id: reward_id });
+  if (error) {
+    const m = error.message ?? "";
+    const friendly = /not enough/i.test(m) ? "You don't have enough points for that yet."
+      : /not available|not found/i.test(m) ? "That reward isn't available."
+      : error.code === "42883" ? "Rewards are being set up — check back shortly."
+      : "Couldn't redeem. Please try again.";
+    redirect("/portal/more?error=" + encodeURIComponent(friendly));
+  }
+  revalidatePath("/portal/more");
+  redirect("/portal/more?ok=redeemed");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

@@ -52,3 +52,21 @@ export async function createChallenge(formData: FormData) {
   revalidatePath("/dashboard/gamification");
   redirect("/dashboard/gamification");
 }
+
+// Staff create a redeemable reward (0055; members redeem points for it).
+export async function createReward(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+  const organization_id = String(formData.get("organization_id") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim() || null;
+  const cost_points = Number(String(formData.get("cost_points") ?? "").trim());
+  if (!organization_id || !name || !(Number.isInteger(cost_points) && cost_points > 0)) {
+    redirect("/dashboard/gamification?error=" + encodeURIComponent("Reward name and a positive point cost are required."));
+  }
+  const { error } = await supabase.from("rewards").insert({ organization_id, name, description, cost_points });
+  if (error) redirect("/dashboard/gamification?error=" + encodeURIComponent(error.message));
+  revalidatePath("/dashboard/gamification");
+  redirect("/dashboard/gamification");
+}

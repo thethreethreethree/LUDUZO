@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals, setNotifPrefs } from "../actions";
+import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals, setNotifPrefs, redeemReward } from "../actions";
 
 const NOTIF_LABELS: { kind: string; label: string }[] = [
   { kind: "waitlist_promoted", label: "Waitlist spots" },
@@ -13,7 +13,7 @@ const NOTIF_LABELS: { kind: string; label: string }[] = [
 
 export const dynamic = "force-dynamic";
 
-const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!", goals: "Goals saved. 🎯" };
+const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!", goals: "Goals saved. 🎯", redeemed: "Reward redeemed! The front desk will sort you out. 🎉" };
 
 type Referral = { id: string; referred_name: string | null; status: string; created_at: string };
 
@@ -42,7 +42,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const { data: goalsData } = await supabase.from("members").select("goals, fitness_level").eq("profile_id", user.id).limit(1);
   const myGoals = ((goalsData ?? []) as { goals: string | null; fitness_level: string | null }[])[0] ?? null;
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }, { data: loyData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }, { data: loyData }, { data: rewardData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
     supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id, author_member_id)").order("created_at", { ascending: false }).limit(10),
@@ -58,12 +58,15 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
     supabase.from("referrals").select("id, referred_name, status, created_at").in("referrer_member_id", ids).order("created_at", { ascending: false }).limit(10),
     // §9 loyalty points history (own-read, 0016).
     supabase.from("loyalty_transactions").select("id, points, reason, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(50),
+    // §9 rewards catalog (active, member-readable — 0055; empty until applied).
+    supabase.from("rewards").select("id, name, description, cost_points").eq("active", true).order("cost_points", { ascending: true }).limit(20),
   ]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
   const memberName = new Map(((memberDir ?? []) as { member_id: string; first_name: string | null }[]).map((m) => [m.member_id, m.first_name]));
   const referrals = (refData ?? []) as unknown as Referral[];
   const loyalty = (loyData ?? []) as unknown as { id: string; points: number; reason: string | null; created_at: string }[];
   const pointsBalance = loyalty.reduce((s, t) => s + (t.points ?? 0), 0);
+  const rewards = (rewardData ?? []) as unknown as { id: string; name: string; description: string | null; cost_points: number }[];
 
   const subs = (subData ?? []) as unknown as Sub[];
   const invoices = (invData ?? []) as unknown as Inv[];
@@ -253,10 +256,34 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
           <div className="text-[15px] font-bold text-bone">Rewards</div>
           <div className="mono text-lg font-extrabold text-gold">{pointsBalance.toLocaleString()} <span className="text-xs font-semibold text-ash">pts</span></div>
         </div>
+        {rewards.length > 0 ? (
+          <ul className="mt-2 flex flex-col gap-2">
+            {rewards.map((r) => {
+              const affordable = pointsBalance >= r.cost_points;
+              return (
+                <li key={r.id} className="flex items-center justify-between gap-3 rounded-xl border border-iron bg-onyx-2 p-3">
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold text-bone">{r.name}</div>
+                    {r.description ? <div className="truncate text-xs text-ash">{r.description}</div> : null}
+                    <div className="mono text-[11px] text-gold">{r.cost_points} pts</div>
+                  </div>
+                  {affordable ? (
+                    <form action={redeemReward} className="shrink-0">
+                      <input type="hidden" name="reward_id" value={r.id} />
+                      <button className="rounded-md bg-gold px-3 py-1.5 text-xs font-bold text-black hover:brightness-110">Redeem</button>
+                    </form>
+                  ) : (
+                    <span className="mono shrink-0 text-[11px] text-ash-dim">{r.cost_points - pointsBalance} more</span>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
         {loyalty.length === 0 ? (
-          <p className="mt-1 text-sm text-ash">Earn points by training, referring friends, and hitting milestones.</p>
+          <p className="mt-2 text-sm text-ash">Earn points by training, referring friends, and hitting milestones.</p>
         ) : (
-          <ul className="mt-2 flex flex-col divide-y divide-iron">
+          <ul className="mt-3 flex flex-col divide-y divide-iron border-t border-iron pt-2">
             {loyalty.slice(0, 8).map((t) => (
               <li key={t.id} className="flex items-center justify-between py-2 text-sm">
                 <span className="min-w-0 truncate text-bone">{t.reason ?? "Points"}</span>

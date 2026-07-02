@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getWritableOrgs } from "@/lib/orgs";
 import { OrgPicker } from "@/components/OrgPicker";
-import { createBadge, awardBadge, createChallenge } from "./actions";
+import { createBadge, awardBadge, createChallenge, createReward } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -89,6 +89,19 @@ export default async function GamificationPage({ searchParams }: { searchParams:
             <input name="ends_on" type="date" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Create challenge</button>
+        </form>
+      ) : null}
+
+      {orgs.length > 0 ? (
+        <form action={createReward} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-5">
+          <span className="text-sm font-medium">New reward (members redeem points for it)</span>
+          <OrgPicker orgs={orgs} />
+          <div className="flex gap-2">
+            <input name="name" required placeholder="e.g. Free smoothie" className="w-full min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="cost_points" type="number" min="1" required placeholder="Cost (pts)" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          </div>
+          <input name="description" placeholder="Description (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Create reward</button>
         </form>
       ) : null}
 
