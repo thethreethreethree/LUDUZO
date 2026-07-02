@@ -25,9 +25,11 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
   const gymName = org?.name ?? "your gym";
   const gymPhone = org?.settings?.phone ?? null;
 
-  // §6 "meet the team" — gym staff (name only) via the applied 0040 directory.
-  const { data: staffData } = await supabase.from("gym_staff_directory").select("user_id, full_name");
-  const team = ((staffData ?? []) as { user_id: string; full_name: string | null }[]).filter((s) => s.full_name);
+  // §6 "meet the team" — gym staff via the directory. select("*") so a missing
+  // `role` column (before 0052) degrades gracefully (the view holds no PII).
+  const { data: staffData } = await supabase.from("gym_staff_directory").select("*");
+  const team = ((staffData ?? []) as { user_id: string; full_name: string | null; role?: string }[]).filter((s) => s.full_name);
+  const roleLabel = (r?: string) => !r ? "" : ({ front_desk: "Front desk", owner: "Owner", admin: "Admin", manager: "Manager", trainer: "Trainer", coach: "Coach" }[r] ?? r.replace(/_/g, " "));
   const gymAddress = org?.settings?.address ?? null;
   const gymHours = org?.settings?.hours ?? null;
   const gymAmenities = org?.settings?.amenities ?? null;
@@ -77,9 +79,10 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
           <div className="text-[15px] font-bold text-bone">Meet the team</div>
           <ul className="mt-3 flex flex-wrap gap-3">
             {team.map((s) => (
-              <li key={s.user_id} className="flex w-[72px] flex-col items-center gap-1 text-center">
+              <li key={s.user_id} className="flex w-[72px] flex-col items-center gap-0.5 text-center">
                 <Avatar name={s.full_name ?? "Coach"} size={44} />
-                <span className="truncate text-[11px] text-ash">{s.full_name}</span>
+                <span className="w-full truncate text-[11px] text-bone">{s.full_name}</span>
+                {roleLabel(s.role) ? <span className="w-full truncate text-[10px] text-ash-dim">{roleLabel(s.role)}</span> : null}
               </li>
             ))}
           </ul>
