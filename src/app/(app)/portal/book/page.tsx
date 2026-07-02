@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { bookSession, cancelBooking } from "../actions";
@@ -14,8 +15,8 @@ const OK_MSG: Record<string, string> = {
   cancelled: "Booking cancelled.",
 };
 
-export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
-  const { ok, error } = await searchParams;
+export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string; instructor?: string }> }) {
+  const { ok, error, instructor } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -56,6 +57,25 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
     if (b.session && (b.status === "booked" || b.status === "waitlisted")) bookedStatusBySession.set(b.session.id, b.status);
   }
 
+  // §4: filter by instructor + group the schedule by day (calendar-ish list).
+  // (type/difficulty filters need class columns that don't exist yet — flagged.)
+  const instructors = Array.from(new Set(sessions.map((s) => s.class?.instructor_name).filter(Boolean))) as string[];
+  const filteredSessions = instructor ? sessions.filter((s) => s.class?.instructor_name === instructor) : sessions;
+  const todayStr = new Date().toDateString();
+  const tomorrowStr = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toDateString(); })();
+  const dayLabel = (iso: string) => {
+    const d = new Date(iso); const ds = d.toDateString();
+    if (ds === todayStr) return "Today";
+    if (ds === tomorrowStr) return "Tomorrow";
+    return d.toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
+  };
+  const grouped: { label: string; items: Session[] }[] = [];
+  for (const s of filteredSessions) {
+    const label = dayLabel(s.starts_at);
+    const g = grouped.find((x) => x.label === label);
+    if (g) g.items.push(s); else grouped.push({ label, items: [s] });
+  }
+
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 pb-28 pt-8">
       <h1 className="text-2xl font-extrabold text-bone">Classes &amp; bookings</h1>
@@ -63,37 +83,52 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
       {ok ? <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">{OK_MSG[ok] ?? "Done."}</p> : null}
       {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
 
-      {/* ---- Browse & book the schedule ---- */}
+      {/* ---- Browse & book the schedule (grouped by day, filterable by trainer) ---- */}
       <section>
-        <div className="mb-2 text-[15px] font-bold text-bone">This week&apos;s schedule</div>
+        <div className="mb-2 text-[15px] font-bold text-bone">Schedule</div>
+        {instructors.length > 1 ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            <Link href="/portal/book" className={`rounded-full px-3 py-1 text-xs font-semibold ${!instructor ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`}>All</Link>
+            {instructors.map((i) => (
+              <Link key={i} href={`/portal/book?instructor=${encodeURIComponent(i)}`} className={`rounded-full px-3 py-1 text-xs font-semibold ${instructor === i ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`}>{i}</Link>
+            ))}
+          </div>
+        ) : null}
         {sessions.length === 0 ? (
           <div className="rounded-2xl border border-iron bg-onyx p-4 text-sm text-ash">No classes scheduled yet. Check back soon.</div>
+        ) : filteredSessions.length === 0 ? (
+          <div className="rounded-2xl border border-iron bg-onyx p-4 text-sm text-ash">No classes match that filter. <Link href="/portal/book" className="text-gold">Clear</Link></div>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {sessions.map((s) => {
-              const mine = bookedStatusBySession.get(s.id);
-              return (
-                <li key={s.id} className="flex items-center justify-between gap-3 rounded-2xl border border-iron bg-onyx p-4">
-                  <div className="min-w-0">
-                    <div className="mono text-xs font-semibold text-gold">{new Date(s.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
-                    <div className="mt-0.5 truncate font-bold text-bone">{s.class?.name ?? "Class"}</div>
-                    {s.class?.instructor_name ? <div className="truncate text-xs text-ash">with {s.class.instructor_name}</div> : null}
-                    {s.class?.description ? <div className="mt-0.5 line-clamp-2 text-xs text-ash-dim">{s.class.description}</div> : null}
-                  </div>
-                  {mine === "booked" ? (
-                    <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">Booked ✓</span>
-                  ) : mine === "waitlisted" ? (
-                    <span className="shrink-0 rounded-md bg-warn/15 px-3 py-1.5 text-xs font-bold text-warn">Waitlisted</span>
-                  ) : (
-                    <form action={bookSession} className="shrink-0">
-                      <input type="hidden" name="session_id" value={s.id} />
-                      <button className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110">Book</button>
-                    </form>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
+          grouped.map((g) => (
+            <div key={g.label} className="mb-3">
+              <div className="mono mb-1.5 text-[11px] uppercase tracking-[0.07em] text-ash-dim">{g.label}</div>
+              <ul className="flex flex-col gap-2">
+                {g.items.map((s) => {
+                  const mine = bookedStatusBySession.get(s.id);
+                  return (
+                    <li key={s.id} className="flex items-center justify-between gap-3 rounded-2xl border border-iron bg-onyx p-4">
+                      <div className="min-w-0">
+                        <div className="mono text-xs font-semibold text-gold">{new Date(s.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
+                        <div className="mt-0.5 truncate font-bold text-bone">{s.class?.name ?? "Class"}</div>
+                        {s.class?.instructor_name ? <div className="truncate text-xs text-ash">with {s.class.instructor_name}</div> : null}
+                        {s.class?.description ? <div className="mt-0.5 line-clamp-2 text-xs text-ash-dim">{s.class.description}</div> : null}
+                      </div>
+                      {mine === "booked" ? (
+                        <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">Booked ✓</span>
+                      ) : mine === "waitlisted" ? (
+                        <span className="shrink-0 rounded-md bg-warn/15 px-3 py-1.5 text-xs font-bold text-warn">Waitlisted</span>
+                      ) : (
+                        <form action={bookSession} className="shrink-0">
+                          <input type="hidden" name="session_id" value={s.id} />
+                          <button className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110">Book</button>
+                        </form>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
         )}
       </section>
 
