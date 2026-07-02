@@ -58,6 +58,16 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
     if (b.session && (b.status === "booked" || b.status === "waitlisted")) bookedStatusBySession.set(b.session.id, b.status);
   }
 
+  // §4 waitlist position (0053) for the member's upcoming waitlisted bookings.
+  // Graceful: if the function isn't applied, the rpc errors → no position shown.
+  const waitPos = new Map<string, number>();
+  await Promise.all(
+    upcoming.filter((b) => b.status === "waitlisted" && b.session).map(async (b) => {
+      const { data } = await supabase.rpc("my_waitlist_position", { p_session_id: b.session!.id });
+      if (typeof data === "number" && data > 0) waitPos.set(b.id, data);
+    }),
+  );
+
   // §4: filter by instructor + group the schedule by day (calendar-ish list).
   // (type/difficulty filters need class columns that don't exist yet — flagged.)
   const instructors = Array.from(new Set(sessions.map((s) => s.class?.instructor_name).filter(Boolean))) as string[];
@@ -149,7 +159,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                 <div className="min-w-0">
                   <div className="mono text-xs font-semibold text-gold">{new Date(b.session!.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
                   <div className="mt-0.5 truncate font-bold text-bone">{b.session!.class?.name ?? "Class"}</div>
-                  <div className="text-xs text-ash">{b.status === "waitlisted" ? "On the waitlist" : "You're booked"}</div>
+                  <div className="text-xs text-ash">{b.status === "waitlisted" ? `On the waitlist${waitPos.get(b.id) ? ` · #${waitPos.get(b.id)} in line` : ""}` : "You're booked"}</div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {b.status === "booked" ? (
