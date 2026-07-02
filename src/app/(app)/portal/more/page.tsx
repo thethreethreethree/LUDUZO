@@ -238,10 +238,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         ) : (
           <ul className="flex flex-col divide-y divide-iron rounded-2xl border border-iron bg-onyx">
             {invoices.map((inv) => (
-              <li key={inv.id} className="flex items-center justify-between px-4 py-2.5 text-sm">
+              <li key={inv.id} className="flex items-center justify-between gap-2 px-4 py-2.5 text-sm">
                 <span className="mono text-ash">{new Date(inv.created_at).toLocaleDateString()}</span>
                 <span className="mono font-semibold text-bone">{formatMoney(inv.amount_cents, inv.currency)}</span>
                 <span className={`text-xs ${inv.status === "paid" ? "text-win" : inv.status === "open" ? "text-warn" : "text-ash"}`}>{inv.status}</span>
+                <a href={`/portal/receipt/${inv.id}`} target="_blank" rel="noopener noreferrer" className="text-xs text-ash hover:text-gold">Receipt ↗</a>
               </li>
             ))}
           </ul>
