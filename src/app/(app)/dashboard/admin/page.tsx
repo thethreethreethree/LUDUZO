@@ -9,6 +9,7 @@ type Org = {
   id: string; name: string; role: string;
   brand_color: string | null; accent_color: string | null; logo_url: string | null;
   plan_tier: string; default_currency: string; locale: string;
+  settings: { phone?: string } | null;
 };
 type ApiKey = { id: string; name: string; key_prefix: string; revoked: boolean; last_used_at: string | null };
 type Webhook = { id: string; url: string; event_types: string[]; active: boolean };
@@ -24,7 +25,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   // Orgs where the caller is owner/admin (platform admin scope).
   const { data: memData } = await supabase
     .from("organization_members")
-    .select("role, organization:organizations(id, name, brand_color, accent_color, logo_url, plan_tier, default_currency, locale)")
+    .select("role, organization:organizations(id, name, brand_color, accent_color, logo_url, plan_tier, default_currency, locale, settings)")
     .in("role", ["owner", "admin"]);
   const orgs: Org[] = ((memData ?? []) as unknown as { role: string; organization: Omit<Org, "role"> | null }[])
     .filter((m) => m.organization)
@@ -76,6 +77,9 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </label>
               <label className="flex flex-col gap-1 text-xs text-ash">Locale
                 <input name="locale" defaultValue={o.locale} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-ash">Front-desk phone (members can call)
+                <input name="contact_phone" defaultValue={o.settings?.phone ?? ""} placeholder="+1 555 123 4567" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
             </div>
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save settings</button>

@@ -15,10 +15,14 @@ export async function updateOrgSettings(formData: FormData) {
   const plan_tier = String(formData.get("plan_tier") ?? "free");
   const default_currency = String(formData.get("default_currency") ?? "USD").trim().toUpperCase() || "USD";
   const locale = String(formData.get("locale") ?? "en").trim() || "en";
+  const contact_phone = String(formData.get("contact_phone") ?? "").trim();
   if (!id) redirect("/dashboard/admin");
+  // Merge phone into the settings jsonb without clobbering other keys (branding etc.).
+  const { data: cur } = await supabase.from("organizations").select("settings").eq("id", id).maybeSingle();
+  const settings = { ...(((cur as { settings: Record<string, unknown> } | null)?.settings) ?? {}), phone: contact_phone || undefined };
   const { error } = await supabase
     .from("organizations")
-    .update({ brand_color, accent_color, logo_url, plan_tier, default_currency, locale })
+    .update({ brand_color, accent_color, logo_url, plan_tier, default_currency, locale, settings })
     .eq("id", id);
   if (error) redirect("/dashboard/admin?error=" + encodeURIComponent(error.message));
   revalidatePath("/dashboard/admin");
