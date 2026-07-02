@@ -78,7 +78,9 @@ export async function createMember(formData: FormData) {
   }
 
   revalidatePath("/dashboard/members");
-  redirect("/dashboard/members");
+  // Redirect with a success marker so the add is VISIBLE — silent success is why
+  // the same member got added repeatedly (no confirmation → "did it work?" → retry).
+  redirect("/dashboard/members?ok=" + encodeURIComponent(`${first_name} ${last_name}`));
 }
 
 export async function assignDocument(formData: FormData) {

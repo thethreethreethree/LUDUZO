@@ -26,9 +26,9 @@ function currentStreak(daysDesc: string[]): number {
 export default async function MembersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; page?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; page?: string; status?: string; ok?: string }>;
 }) {
-  const { q, page: pageRaw, status: statusRaw } = await searchParams;
+  const { q, page: pageRaw, status: statusRaw, ok } = await searchParams;
   const page = Math.max(1, Number(pageRaw) || 1);
   const from = (page - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
@@ -117,6 +117,10 @@ export default async function MembersPage({
           <Link href="/dashboard/members/new" className={btnGold}>+ Add member</Link>
         </div>
       </div>
+
+      {ok ? (
+        <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">Added {ok} to your members.</p>
+      ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <StatBlock label="Active" value={(activeCount ?? 0).toLocaleString()} />
