@@ -338,6 +338,17 @@ export async function updateMyGoals(formData: FormData) {
   redirect("/portal/more?ok=goals");
 }
 
+// §12 notification preferences: which in-app notification kinds the member wants to
+// see. Stored in a cookie; the /more inbox filters muted kinds out server-side.
+const NOTIF_KINDS = ["waitlist_promoted", "document_assigned", "invoice_created"] as const;
+export async function setNotifPrefs(formData: FormData) {
+  // A checkbox present = "show that kind"; absent = mute it.
+  const muted = NOTIF_KINDS.filter((k) => !formData.get("show_" + k));
+  (await cookies()).set("notif_mute", muted.join(","), { path: "/", maxAge: 60 * 60 * 24 * 365, sameSite: "lax" });
+  revalidatePath("/portal/more");
+  redirect("/portal/more");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

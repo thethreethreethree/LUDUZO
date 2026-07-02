@@ -1,8 +1,15 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals } from "../actions";
+import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals, setNotifPrefs } from "../actions";
+
+const NOTIF_LABELS: { kind: string; label: string }[] = [
+  { kind: "waitlist_promoted", label: "Waitlist spots" },
+  { kind: "document_assigned", label: "Documents to sign" },
+  { kind: "invoice_created", label: "New invoices" },
+];
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +65,8 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const invoices = (invData ?? []) as unknown as Inv[];
   const posts = (postData ?? []) as unknown as Post[];
   const anns = (annData ?? []) as unknown as Ann[];
-  const notifs = (notifData ?? []) as unknown as Notif[];
+  const muted = new Set(((await cookies()).get("notif_mute")?.value ?? "").split(",").filter(Boolean));
+  const notifs = ((notifData ?? []) as unknown as Notif[]).filter((n) => !muted.has(n.kind));
   const unread = notifs.filter((n) => !n.read_at).length;
   const activeSub = subs.find((s) => s.status === "active") ?? subs[0];
   const daysLeft = activeSub?.current_period_end
@@ -98,6 +106,20 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
           </ul>
         </section>
       ) : null}
+
+      {/* §12 notification preferences — always visible so muted types can be re-enabled */}
+      <details className="rounded-2xl border border-iron bg-onyx p-4 [&_summary]:cursor-pointer">
+        <summary className="text-[13px] font-semibold text-ash">Notification settings</summary>
+        <form action={setNotifPrefs} className="mt-3 flex flex-col gap-2">
+          {NOTIF_LABELS.map((n) => (
+            <label key={n.kind} className="flex items-center gap-2 text-sm text-bone">
+              <input type="checkbox" name={`show_${n.kind}`} defaultChecked={!muted.has(n.kind)} className="h-4 w-4 accent-gold" />
+              {n.label}
+            </label>
+          ))}
+          <button className="mt-1 self-start rounded-md border border-iron px-4 py-1.5 text-xs font-semibold text-ash hover:border-gold hover:text-gold">Save preferences</button>
+        </form>
+      </details>
 
       {/* Your details — member self-edit of name + phone (0045 RPC). Email stays
           front-desk-only per founder decision. */}
