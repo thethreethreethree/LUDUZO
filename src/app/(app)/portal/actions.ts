@@ -193,24 +193,6 @@ export async function joinChallenge(formData: FormData) {
   redirect("/portal/progress?ok=joined");
 }
 
-// Member updates their OWN phone number via the column-restricted RPC (0037).
-// Only the phone is writable — name/email/DOB are intentionally not editable here
-// (flagged founder decision).
-export async function updateMyContact(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
-
-  const phone = String(formData.get("phone") ?? "").trim();
-  const { error } = await supabase.rpc("update_my_contact", { p_phone: phone });
-  if (error) {
-    const friendly = /too long/i.test(error.message ?? "") ? "That phone number is too long." : "Couldn't save your number. Please try again.";
-    redirect("/portal/more?error=" + encodeURIComponent(friendly));
-  }
-  revalidatePath("/portal/more");
-  redirect("/portal/more?ok=contact");
-}
-
 // Member marks all their unread notifications as read (0043 update-own RLS).
 export async function markNotificationsRead() {
   const supabase = await createClient();

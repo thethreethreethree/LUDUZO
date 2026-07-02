@@ -247,7 +247,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
                 {p.workout_exercises.map((e) => (
                   <li key={e.id} className="flex justify-between text-sm">
                     <span className="text-bone">{e.name}</span>
-                    <span className="mono text-xs text-ash">{[e.sets && `${e.sets}×`, e.reps, e.weight_kg && `@${e.weight_kg}kg`].filter(Boolean).join(" ")}</span>
+                    <span className="mono text-xs text-ash">{[e.sets && `${e.sets}×`, e.reps, e.weight_kg && `@${disp(e.weight_kg)}${wUnit}`].filter(Boolean).join(" ")}</span>
                   </li>
                 ))}
                 {p.workout_exercises.length === 0 ? <li className="text-xs text-ash-dim">No exercises yet.</li> : null}

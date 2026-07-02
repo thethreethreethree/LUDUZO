@@ -10,7 +10,13 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
-  const { data: memberRows } = await supabase.from("members").select("*").eq("profile_id", user.id);
+  // Explicit columns only — never dump staff-internal `notes` or the `qr_token`
+  // check-in credential into the export (audit Finding 1). Whether members should
+  // see staff notes (A10) is a founder decision, flagged separately.
+  const { data: memberRows } = await supabase
+    .from("members")
+    .select("id, first_name, last_name, email, phone, member_number, date_of_birth, status, member_since, goals, fitness_level, created_at")
+    .eq("profile_id", user.id);
   const ids = ((memberRows ?? []) as { id: string }[]).map((m) => m.id);
   if (ids.length === 0) return new NextResponse("No membership on file.", { status: 404 });
 
