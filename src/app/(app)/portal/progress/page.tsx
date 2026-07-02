@@ -64,6 +64,12 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   for (const arr of leaderboard.values()) arr.sort((a, b) => b.progress - a.progress);
   type WorkoutLog = { id: string; performed_on: string; exercise: string; sets: number | null; reps: number | null; weight_kg: number | null };
   const workouts = (woData ?? []) as unknown as WorkoutLog[];
+  // §5 personal records: heaviest logged weight per exercise (from the last 20 logs).
+  const prs = new Map<string, number>();
+  for (const w of workouts) {
+    if (w.weight_kg != null) prs.set(w.exercise, Math.max(prs.get(w.exercise) ?? 0, w.weight_kg));
+  }
+  const prList = [...prs.entries()].sort((a, b) => b[1] - a[1]).slice(0, 6);
 
   // §12 units: member weight-unit preference (cookie). DB stores kg; convert for display.
   const units = ((await cookies()).get("units")?.value === "lb") ? "lb" : "kg";
@@ -203,6 +209,16 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
           </div>
           <button className="rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save workout</button>
         </form>
+        {prList.length > 0 ? (
+          <div className="mt-3 border-t border-iron pt-3">
+            <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.07em] text-gold">🏆 Personal records</div>
+            <div className="flex flex-wrap gap-1.5">
+              {prList.map(([ex, kg]) => (
+                <span key={ex} className="rounded-full border border-gold-line bg-gold-dim px-2.5 py-1 text-[11px] font-semibold text-gold">{ex} {disp(kg)}{wUnit}</span>
+              ))}
+            </div>
+          </div>
+        ) : null}
         {workouts.length > 0 ? (
           <ul className="mt-3 flex flex-col divide-y divide-iron border-t border-iron">
             {workouts.map((w) => (
