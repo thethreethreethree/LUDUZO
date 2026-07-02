@@ -2,11 +2,13 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead } from "../actions";
+import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated." };
+const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!" };
+
+type Referral = { id: string; referred_name: string | null; status: string; created_at: string };
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
@@ -28,7 +30,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const me0 = memberRows[0];
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
     supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id, author_member_id)").order("created_at", { ascending: false }).limit(10),
@@ -40,9 +42,12 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
     supabase.from("notifications").select("id, kind, title, body, read_at, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(15),
     // Member first names for community comment attribution (0044, first-name-only).
     supabase.from("gym_member_directory").select("member_id, first_name"),
+    // Own referrals (0049; empty until applied).
+    supabase.from("referrals").select("id, referred_name, status, created_at").in("referrer_member_id", ids).order("created_at", { ascending: false }).limit(10),
   ]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
   const memberName = new Map(((memberDir ?? []) as { member_id: string; first_name: string | null }[]).map((m) => [m.member_id, m.first_name]));
+  const referrals = (refData ?? []) as unknown as Referral[];
 
   const subs = (subData ?? []) as unknown as Sub[];
   const invoices = (invData ?? []) as unknown as Inv[];
@@ -104,6 +109,29 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
           </div>
         </form>
         <p className="mt-1.5 text-[11px] text-ash-dim">To change your email, ask the front desk.</p>
+      </section>
+
+      {/* Refer a friend (0049) */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="text-[15px] font-bold text-bone">Refer a friend</div>
+        <p className="mt-0.5 text-xs text-ash">Know someone who&apos;d love {gymName}? Send us their details and we&apos;ll reach out.</p>
+        <form action={submitReferral} className="mt-2 flex flex-col gap-2">
+          <input name="referred_name" required placeholder="Friend's name" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <div className="flex gap-2">
+            <input name="referred_email" type="email" placeholder="Their email (optional)" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Refer</button>
+          </div>
+        </form>
+        {referrals.length > 0 ? (
+          <ul className="mt-3 flex flex-col divide-y divide-iron border-t border-iron">
+            {referrals.map((r) => (
+              <li key={r.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="truncate text-bone">{r.referred_name ?? "Friend"}</span>
+                <span className={`text-xs ${r.status === "converted" || r.status === "joined" ? "text-win" : "text-ash"}`}>{r.status}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </section>
 
       {/* Membership */}

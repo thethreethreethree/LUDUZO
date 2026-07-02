@@ -292,6 +292,33 @@ export async function logWorkout(formData: FormData) {
   redirect("/portal/progress?ok=workout");
 }
 
+// Member refers a friend (0049). Creates a referrals row attributed to the member.
+export async function submitReferral(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/more?error=" + encodeURIComponent("No membership on file."));
+
+  const referred_name = String(formData.get("referred_name") ?? "").trim();
+  const referred_email = String(formData.get("referred_email") ?? "").trim() || null;
+  if (!referred_name) redirect("/portal/more?error=" + encodeURIComponent("Enter your friend's name."));
+  if (referred_name.length > 120) redirect("/portal/more?error=" + encodeURIComponent("That name is too long."));
+
+  const { error } = await supabase.from("referrals").insert({
+    organization_id: me.organization_id, referrer_member_id: me.id, referred_name, referred_email,
+  });
+  if (error) {
+    // 42501 = RLS denied (0049 not applied yet) → friendly.
+    const friendly = error.code === "42501" ? "Referrals are being set up — check back shortly." : "Couldn't send that referral. Please try again.";
+    redirect("/portal/more?error=" + encodeURIComponent(friendly));
+  }
+  revalidatePath("/portal/more");
+  redirect("/portal/more?ok=referred");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {
