@@ -46,7 +46,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     );
   }
 
-  const [{ data: subData }, { data: visitData }, { data: loyData }, { data: openData }, { data: bookingData }, { data: docData }, { data: invData }] = await Promise.all([
+  const [{ data: subData }, { data: visitData }, { data: loyData }, { data: openData }, { data: bookingData }, { data: docData }, { data: invData }, { data: occData }] = await Promise.all([
     supabase.from("subscriptions").select("status, plan:plans(name)").in("member_id", memberIds).eq("status", "active").limit(1),
     supabase.from("checkins").select("checked_in_at").in("member_id", memberIds).order("checked_in_at", { ascending: false }).limit(400),
     supabase.from("loyalty_transactions").select("points").in("member_id", memberIds).limit(2000),
@@ -54,6 +54,9 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
     supabase.from("bookings").select("id, status, session:class_sessions(starts_at, class:classes(name))").in("member_id", memberIds).eq("status", "booked").limit(20),
     supabase.from("member_documents").select("id, kind, status").in("member_id", memberIds).neq("status", "signed").limit(20),
     supabase.from("invoices").select("amount_cents, status").in("member_id", memberIds).limit(500),
+    // Live gym occupancy (0048 SECURITY DEFINER aggregate). Hidden gracefully if the
+    // function isn't applied yet or capacity is unknown.
+    supabase.rpc("member_gym_occupancy"),
   ]);
 
   const planName = ((subData ?? []) as unknown as { plan: { name: string } | null }[])[0]?.plan?.name ?? null;
@@ -62,6 +65,14 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
   const level = Math.max(1, Math.floor(points / 100) + 1);
   const outstanding = ((invData ?? []) as { amount_cents: number; status: string }[]).filter((i) => i.status === "open").reduce((s, i) => s + i.amount_cents, 0);
   const docs = (docData ?? []) as unknown as Doc[];
+
+  // Live occupancy → busy/quiet label (only when capacity is known).
+  const occRow = ((occData ?? []) as { occupancy: number; capacity: number }[])[0] ?? null;
+  const occPct = occRow && occRow.capacity > 0 ? (occRow.occupancy / occRow.capacity) * 100 : null;
+  const occLabel = occPct == null ? null
+    : occPct < 40 ? { t: "Quiet now", c: "bg-win" }
+    : occPct < 75 ? { t: "Moderate", c: "bg-warn" }
+    : { t: "Busy now", c: "bg-loss" };
 
   // current streak from visit days
   const days = new Set(((visitData ?? []) as { checked_in_at: string }[]).map((v) => new Date(v.checked_in_at).toISOString().slice(0, 10)));
@@ -91,7 +102,14 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
           <p className="text-sm text-ash">Ready to train,</p>
           <h1 className="text-2xl font-extrabold text-bone">{me.first_name} 👋</h1>
         </div>
-        <form action={portalSignOut}><button className="text-xs text-ash hover:text-gold">Sign out</button></form>
+        <div className="flex flex-col items-end gap-1">
+          <form action={portalSignOut}><button className="text-xs text-ash hover:text-gold">Sign out</button></form>
+          {occLabel ? (
+            <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ash">
+              <span className={`h-[7px] w-[7px] rounded-full ${occLabel.c}`} />{occLabel.t}
+            </span>
+          ) : null}
+        </div>
       </div>
 
       {error ? <ErrBanner>{error}</ErrBanner> : null}
