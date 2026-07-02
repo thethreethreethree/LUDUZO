@@ -28,7 +28,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   const cancellationPolicy = members[0]?.organization?.settings?.cancellation_policy ?? null;
 
   const nowIso = new Date().toISOString();
-  const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }] = await Promise.all([
+  const [{ data: bookingData }, { data: apptData }, { data: sessionData }, { data: staffData }, { data: availData }] = await Promise.all([
     supabase.from("bookings").select("id, status, session:class_sessions(id, starts_at, class:classes(name))").in("member_id", ids).order("created_at", { ascending: false }).limit(30),
     // trainer_id (not a profiles embed): members can't read staff profiles, so the
     // embed returned null. Names come from gym_staff_directory (0040, name-only).
@@ -36,6 +36,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
     // Bookable schedule — readable by the member via 0034 (org-scoped). Upcoming only.
     supabase.from("class_sessions").select("id, starts_at, ends_at, capacity, class:classes(name, description, capacity, instructor_name)").gte("starts_at", nowIso).eq("status", "scheduled").order("starts_at", { ascending: true }).limit(40),
     supabase.from("gym_staff_directory").select("user_id, full_name"),
+    supabase.from("class_session_availability").select("session_id, capacity, booked"),
   ]);
 
   const now = new Date().getTime();
@@ -43,6 +44,11 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   const appts = (apptData ?? []) as unknown as Appt[];
   const sessions = (sessionData ?? []) as unknown as Session[];
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
+  // §4 availability (0054): session_id → spots left (capacity − booked). null capacity = unlimited.
+  const spotsLeft = new Map<string, number | null>();
+  for (const a of ((availData ?? []) as { session_id: string; capacity: number | null; booked: number }[])) {
+    spotsLeft.set(a.session_id, a.capacity == null ? null : Math.max(0, a.capacity - a.booked));
+  }
   const withSession = allBookings.filter((b) => b.session);
   // Bookings whose class detail is not member-readable — show them anyway (F1).
   const detailsPending = allBookings.filter((b) => !b.session && b.status !== "cancelled");
@@ -126,6 +132,13 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                         <div className="mono text-xs font-semibold text-gold">{new Date(s.starts_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</div>
                         <div className="mt-0.5 truncate font-bold text-bone">{s.class?.name ?? "Class"}</div>
                         {s.class?.instructor_name ? <div className="truncate text-xs text-ash">with {s.class.instructor_name}</div> : null}
+                        {(() => {
+                          const left = spotsLeft.get(s.id);
+                          if (left === undefined || left === null) return null;
+                          return left === 0
+                            ? <div className="text-xs font-semibold text-loss">Full · join the waitlist</div>
+                            : <div className={`text-xs font-semibold ${left <= 3 ? "text-warn" : "text-ash"}`}>{left} spot{left === 1 ? "" : "s"} left</div>;
+                        })()}
                         {s.class?.description ? <div className="mt-0.5 line-clamp-2 text-xs text-ash-dim">{s.class.description}</div> : null}
                       </div>
                       {mine === "booked" ? (
