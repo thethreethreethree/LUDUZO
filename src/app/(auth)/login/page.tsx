@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { login, signup } from "./actions";
+import { OAuthButtons } from "@/components/OAuthButtons";
 
 export default async function LoginPage({
   searchParams,
@@ -29,7 +30,19 @@ export default async function LoginPage({
           </p>
         ) : null}
 
-        <form className="mt-6 flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
+        <div className="mt-6 rounded-md border border-onyx bg-onyx p-5">
+          {/* Gated: only shown once the founder enables Google/Apple providers in
+              Supabase AND sets NEXT_PUBLIC_OAUTH_ENABLED=true — otherwise the buttons
+              would error for real users (§1.5.1 L2). */}
+          {process.env.NEXT_PUBLIC_OAUTH_ENABLED === "true" ? (
+            <>
+              <OAuthButtons />
+              <div className="my-4 flex items-center gap-3 text-[11px] uppercase tracking-[0.07em] text-ash-dim">
+                <span className="h-px flex-1 bg-iron" />or<span className="h-px flex-1 bg-iron" />
+              </div>
+            </>
+          ) : null}
+          <form className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm">
             <span className="font-medium">Email</span>
             <input
@@ -66,7 +79,8 @@ export default async function LoginPage({
               Create account
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </main>
   );
