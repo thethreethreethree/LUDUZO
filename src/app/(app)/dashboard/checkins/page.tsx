@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { StatBlock, ProgressBar, Card, CardHeader, Avatar, btnGold } from "@/components/ui";
+import { ArenaScanner } from "@/components/ArenaScanner";
 import { recordCheckin, checkoutCheckin } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -52,28 +53,10 @@ export default async function CheckinsPage({ searchParams }: { searchParams: Pro
       {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
 
       <div className="grid gap-4 lg:grid-cols-[340px_1fr]">
-        {/* Arena scanner */}
+        {/* Arena scanner (real camera + QR decode; manual is the fallback) */}
         <Card className="flex flex-col gap-3">
           <div className="text-[11px] font-bold uppercase tracking-[0.07em] text-gold">◈ Arena scanner</div>
-          <div className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-lg border border-iron bg-black">
-            <span className="absolute left-3 top-3 h-6 w-6 rounded-tl border-l-2 border-t-2 border-gold" />
-            <span className="absolute right-3 top-3 h-6 w-6 rounded-tr border-r-2 border-t-2 border-gold" />
-            <span className="absolute bottom-3 left-3 h-6 w-6 rounded-bl border-b-2 border-l-2 border-gold" />
-            <span className="absolute bottom-3 right-3 h-6 w-6 rounded-br border-b-2 border-r-2 border-gold" />
-            <span className="absolute left-4 right-4 h-0.5 animate-scanline bg-gold/70" style={{ top: "18%" }} />
-            <span className="absolute inset-0 grid place-items-center text-2xl text-ash-dim">▢</span>
-          </div>
-          <p className="text-center text-xs text-ash-dim">Point the camera at the member&apos;s QR — or use manual check-in below.</p>
-          <form action={recordCheckin} className="flex flex-col gap-2">
-            <select name="member_id" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone">
-              <option value="">Select member…</option>
-              {members.map((m) => (<option key={m.id} value={m.id}>{m.last_name}, {m.first_name}</option>))}
-            </select>
-            <div className="flex gap-2">
-              <input name="qr_token" placeholder="…or type member ID" className="mono min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
-              <button className={btnGold}>Check in</button>
-            </div>
-          </form>
+          <ArenaScanner members={members} action={recordCheckin} btnClass={btnGold} />
         </Card>
 
         {/* Stats + live feed */}
