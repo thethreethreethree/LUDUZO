@@ -10,7 +10,7 @@ const OK_MSG: Record<string, string> = { contact: "Contact details updated." };
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
-type Comment = { id: string; body: string; author_id: string | null };
+type Comment = { id: string; body: string; author_id: string | null; author_member_id: string | null };
 type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; author_id: string | null; community_comments: Comment[] };
 type Ann = { id: string; title: string; body: string | null; created_at: string };
 type Notif = { id: string; kind: string; title: string; body: string | null; read_at: string | null; created_at: string };
@@ -28,18 +28,21 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const currentPhone = memberRows[0]?.phone ?? "";
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
-    supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id)").order("created_at", { ascending: false }).limit(10),
+    supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id, author_member_id)").order("created_at", { ascending: false }).limit(10),
     supabase.from("announcements").select("id, title, body, created_at").order("created_at", { ascending: false }).limit(5),
     // Staff names for post/comment attribution (0040, name-only). Posts are always
     // staff-authored; comments may be staff or member. Member-authored comment
     // attribution is deferred (needs a member-to-member name-visibility decision).
     supabase.from("gym_staff_directory").select("user_id, full_name"),
     supabase.from("notifications").select("id, kind, title, body, read_at, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(15),
+    // Member first names for community comment attribution (0044, first-name-only).
+    supabase.from("gym_member_directory").select("member_id, first_name"),
   ]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
+  const memberName = new Map(((memberDir ?? []) as { member_id: string; first_name: string | null }[]).map((m) => [m.member_id, m.first_name]));
 
   const subs = (subData ?? []) as unknown as Sub[];
   const invoices = (invData ?? []) as unknown as Inv[];
@@ -149,7 +152,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
                 {p.community_comments.length > 0 ? (
                   <ul className="mt-2 flex flex-col gap-1 border-t border-iron pt-2">
                     {p.community_comments.map((c) => {
-                      const who = c.author_id ? staffName.get(c.author_id) : null;
+                      const who = c.author_id ? staffName.get(c.author_id) : c.author_member_id ? memberName.get(c.author_member_id) : null;
                       return <li key={c.id} className="text-xs text-ash">💬 {who ? <span className="font-semibold text-bone">{who}: </span> : null}{c.body}</li>;
                     })}
                   </ul>
