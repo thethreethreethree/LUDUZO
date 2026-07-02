@@ -226,6 +226,27 @@ export async function markNotificationsRead() {
   redirect("/portal/more");
 }
 
+// Member edits their own name + phone via the column-restricted RPC (0045). Email
+// stays front-desk-only (founder decision). Supersedes updateMyContact.
+export async function updateMyProfile(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const first = String(formData.get("first_name") ?? "").trim();
+  const last = String(formData.get("last_name") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  if (!first || !last) redirect("/portal/more?error=" + encodeURIComponent("First and last name are required."));
+
+  const { error } = await supabase.rpc("update_my_profile", { p_first_name: first, p_last_name: last, p_phone: phone });
+  if (error) {
+    const friendly = /too long/i.test(error.message ?? "") ? "One of those values is too long." : "Couldn't save your details. Please try again.";
+    redirect("/portal/more?error=" + encodeURIComponent(friendly));
+  }
+  revalidatePath("/portal/more");
+  redirect("/portal/more?ok=profile");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

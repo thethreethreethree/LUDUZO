@@ -2,11 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyContact, markNotificationsRead } from "../actions";
+import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-const OK_MSG: Record<string, string> = { contact: "Contact details updated." };
+const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated." };
 
 type Sub = { id: string; status: string; current_period_end: string | null; plan: { name: string } | null };
 type Inv = { id: string; amount_cents: number; currency: string; status: string; created_at: string };
@@ -21,11 +21,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const { data: memberData } = await supabase.from("members").select("id, phone, organization:organizations(name)").eq("profile_id", user.id);
-  const memberRows = ((memberData ?? []) as unknown as { id: string; phone: string | null; organization: { name: string } | null }[]);
+  const { data: memberData } = await supabase.from("members").select("id, first_name, last_name, phone, organization:organizations(name)").eq("profile_id", user.id);
+  const memberRows = ((memberData ?? []) as unknown as { id: string; first_name: string; last_name: string; phone: string | null; organization: { name: string } | null }[]);
   const ids = memberRows.map((m) => m.id);
   const gymName = memberRows[0]?.organization?.name ?? "your gym";
-  const currentPhone = memberRows[0]?.phone ?? "";
+  const me0 = memberRows[0];
   if (ids.length === 0) redirect("/portal");
 
   const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }] = await Promise.all([
@@ -89,14 +89,21 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         </section>
       ) : null}
 
-      {/* Contact details — member self-edit of phone only (0037 RPC). */}
+      {/* Your details — member self-edit of name + phone (0045 RPC). Email stays
+          front-desk-only per founder decision. */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">
-        <div className="text-[15px] font-bold text-bone">Contact details</div>
-        <form action={updateMyContact} className="mt-2 flex gap-2">
-          <input name="phone" defaultValue={currentPhone} inputMode="tel" placeholder="Phone number" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
-          <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save</button>
+        <div className="text-[15px] font-bold text-bone">Your details</div>
+        <form action={updateMyProfile} className="mt-2 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <input name="first_name" defaultValue={me0?.first_name ?? ""} required placeholder="First name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="last_name" defaultValue={me0?.last_name ?? ""} required placeholder="Last name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          </div>
+          <div className="flex gap-2">
+            <input name="phone" defaultValue={me0?.phone ?? ""} inputMode="tel" placeholder="Phone number" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save</button>
+          </div>
         </form>
-        <p className="mt-1.5 text-[11px] text-ash-dim">To change your name or email, ask the front desk.</p>
+        <p className="mt-1.5 text-[11px] text-ash-dim">To change your email, ask the front desk.</p>
       </section>
 
       {/* Membership */}
