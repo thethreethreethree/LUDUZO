@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyContact } from "../actions";
+import { portalSignOut, addMemberComment, updateMyContact, markNotificationsRead } from "../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +13,7 @@ type Inv = { id: string; amount_cents: number; currency: string; status: string;
 type Comment = { id: string; body: string; author_id: string | null };
 type Post = { id: string; organization_id: string; title: string | null; body: string; created_at: string; author_id: string | null; community_comments: Comment[] };
 type Ann = { id: string; title: string; body: string | null; created_at: string };
+type Notif = { id: string; kind: string; title: string; body: string | null; read_at: string | null; created_at: string };
 
 export default async function PortalMorePage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { ok, error } = await searchParams;
@@ -27,7 +28,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const currentPhone = memberRows[0]?.phone ?? "";
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
     supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id)").order("created_at", { ascending: false }).limit(10),
@@ -36,6 +37,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
     // staff-authored; comments may be staff or member. Member-authored comment
     // attribution is deferred (needs a member-to-member name-visibility decision).
     supabase.from("gym_staff_directory").select("user_id, full_name"),
+    supabase.from("notifications").select("id, kind, title, body, read_at, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(15),
   ]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
 
@@ -43,6 +45,8 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const invoices = (invData ?? []) as unknown as Inv[];
   const posts = (postData ?? []) as unknown as Post[];
   const anns = (annData ?? []) as unknown as Ann[];
+  const notifs = (notifData ?? []) as unknown as Notif[];
+  const unread = notifs.filter((n) => !n.read_at).length;
   const activeSub = subs.find((s) => s.status === "active") ?? subs[0];
   const daysLeft = activeSub?.current_period_end
     ? Math.ceil((Date.parse(activeSub.current_period_end) - new Date().getTime()) / 86400000)
@@ -57,6 +61,30 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
 
       {ok ? <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">{OK_MSG[ok] ?? "Done."}</p> : null}
       {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
+
+      {/* Notifications inbox (0043) — waitlist spot-opened alerts + future events. */}
+      {notifs.length > 0 ? (
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="text-[15px] font-bold text-bone">Notifications{unread > 0 ? <span className="ml-2 rounded-full bg-gold px-1.5 py-0.5 text-[10px] font-bold text-black">{unread}</span> : null}</div>
+            {unread > 0 ? (
+              <form action={markNotificationsRead}><button className="text-xs text-ash hover:text-gold">Mark all read</button></form>
+            ) : null}
+          </div>
+          <ul className="flex flex-col gap-2">
+            {notifs.map((n) => (
+              <li key={n.id} className={`rounded-2xl border p-4 ${n.read_at ? "border-iron bg-onyx" : "border-gold-line bg-gold-dim"}`}>
+                <div className="flex items-center gap-2">
+                  {!n.read_at ? <span className="h-[7px] w-[7px] shrink-0 rounded-full bg-gold" /> : null}
+                  <span className="font-bold text-bone">{n.title}</span>
+                </div>
+                {n.body ? <p className="mt-0.5 text-sm text-ash">{n.body}</p> : null}
+                <p className="mono mt-1 text-[10px] text-ash-dim">{new Date(n.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Contact details — member self-edit of phone only (0037 RPC). */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">

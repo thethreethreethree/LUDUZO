@@ -193,6 +193,21 @@ export async function updateMyContact(formData: FormData) {
   redirect("/portal/more?ok=contact");
 }
 
+// Member marks all their unread notifications as read (0043 update-own RLS).
+export async function markNotificationsRead() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id").eq("profile_id", user.id);
+  const ids = ((memberData ?? []) as { id: string }[]).map((m) => m.id);
+  if (ids.length === 0) redirect("/portal/more");
+
+  await supabase.from("notifications").update({ read_at: new Date().toISOString() }).in("member_id", ids).is("read_at", null);
+  revalidatePath("/portal/more");
+  redirect("/portal/more");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {
