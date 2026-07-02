@@ -119,7 +119,7 @@ export default async function MembersPage({
       </div>
 
       {ok ? (
-        <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">Added {ok} to your members.</p>
+        <p className="rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">✓ {ok}</p>
       ) : null}
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

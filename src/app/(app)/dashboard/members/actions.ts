@@ -40,7 +40,9 @@ export async function importMembers(formData: FormData) {
     redirect("/dashboard/members/import?error=" + encodeURIComponent(error.message));
   }
   revalidatePath("/dashboard/members");
-  redirect("/dashboard/members");
+  // Same success-confirmation fix as createMember: /import is a dedicated page that
+  // redirects to the list, so a silent success is invisible — surface the count.
+  redirect("/dashboard/members?ok=" + encodeURIComponent(`Imported ${rows.length} member${rows.length === 1 ? "" : "s"}`));
 }
 
 export async function createMember(formData: FormData) {
@@ -80,7 +82,7 @@ export async function createMember(formData: FormData) {
   revalidatePath("/dashboard/members");
   // Redirect with a success marker so the add is VISIBLE — silent success is why
   // the same member got added repeatedly (no confirmation → "did it work?" → retry).
-  redirect("/dashboard/members?ok=" + encodeURIComponent(`${first_name} ${last_name}`));
+  redirect("/dashboard/members?ok=" + encodeURIComponent(`Added ${first_name} ${last_name}`));
 }
 
 export async function assignDocument(formData: FormData) {
