@@ -126,7 +126,13 @@ export function ArenaScanner({
           </span>
         ) : null}
         {state === "idle" ? (
-          <span className="absolute inset-0 grid place-items-center text-2xl text-ash-dim">▢</span>
+          // Tappable: mobile browsers (esp. iOS Safari) grant camera reliably only
+          // from a user gesture, so a tap is the robust path when auto-start on
+          // mount doesn't prompt. §1.5.2 (mobile is the front-desk target).
+          <button type="button" onClick={start} className="absolute inset-0 grid place-items-center gap-1 text-ash-dim">
+            <span className="text-2xl">▢</span>
+            <span className="text-xs font-semibold text-gold">Tap to start camera</span>
+          </button>
         ) : null}
       </div>
 
