@@ -42,7 +42,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const { data: goalsData } = await supabase.from("members").select("goals, fitness_level").eq("profile_id", user.id).limit(1);
   const myGoals = ((goalsData ?? []) as { goals: string | null; fitness_level: string | null }[])[0] ?? null;
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }, { data: loyData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
     supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id, author_member_id)").order("created_at", { ascending: false }).limit(10),
@@ -56,10 +56,14 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
     supabase.from("gym_member_directory").select("member_id, first_name"),
     // Own referrals (0049; empty until applied).
     supabase.from("referrals").select("id, referred_name, status, created_at").in("referrer_member_id", ids).order("created_at", { ascending: false }).limit(10),
+    // §9 loyalty points history (own-read, 0016).
+    supabase.from("loyalty_transactions").select("id, points, reason, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(50),
   ]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
   const memberName = new Map(((memberDir ?? []) as { member_id: string; first_name: string | null }[]).map((m) => [m.member_id, m.first_name]));
   const referrals = (refData ?? []) as unknown as Referral[];
+  const loyalty = (loyData ?? []) as unknown as { id: string; points: number; reason: string | null; created_at: string }[];
+  const pointsBalance = loyalty.reduce((s, t) => s + (t.points ?? 0), 0);
 
   const subs = (subData ?? []) as unknown as Sub[];
   const invoices = (invData ?? []) as unknown as Inv[];
@@ -237,6 +241,26 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
                   <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-1.5 text-xs text-bone placeholder:text-ash-dim" />
                   <button className="rounded-md border border-iron px-3 py-1 text-xs font-semibold text-ash hover:border-gold hover:text-gold">Send</button>
                 </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* §9 rewards / points wallet (loyalty_transactions own-read, 0016) */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="flex items-center justify-between">
+          <div className="text-[15px] font-bold text-bone">Rewards</div>
+          <div className="mono text-lg font-extrabold text-gold">{pointsBalance.toLocaleString()} <span className="text-xs font-semibold text-ash">pts</span></div>
+        </div>
+        {loyalty.length === 0 ? (
+          <p className="mt-1 text-sm text-ash">Earn points by training, referring friends, and hitting milestones.</p>
+        ) : (
+          <ul className="mt-2 flex flex-col divide-y divide-iron">
+            {loyalty.slice(0, 8).map((t) => (
+              <li key={t.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="min-w-0 truncate text-bone">{t.reason ?? "Points"}</span>
+                <span className={`mono shrink-0 font-semibold ${t.points >= 0 ? "text-win" : "text-loss"}`}>{t.points >= 0 ? "+" : ""}{t.points}</span>
               </li>
             ))}
           </ul>
