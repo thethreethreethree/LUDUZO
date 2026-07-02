@@ -247,6 +247,51 @@ export async function updateMyProfile(formData: FormData) {
   redirect("/portal/more?ok=profile");
 }
 
+// Member logs a self-recorded workout entry (0047). Exercise required; sets/reps/
+// weight optional. Weight arrives in the member's unit (kg|lb) → stored as kg.
+export async function logWorkout(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const { data: memberData } = await supabase.from("members").select("id, organization_id").eq("profile_id", user.id).limit(1);
+  const me = ((memberData ?? []) as { id: string; organization_id: string }[])[0];
+  if (!me) redirect("/portal/progress?error=" + encodeURIComponent("No membership on file."));
+
+  const exercise = String(formData.get("exercise") ?? "").trim();
+  if (!exercise) redirect("/portal/progress?error=" + encodeURIComponent("Name the exercise."));
+  if (exercise.length > 80) redirect("/portal/progress?error=" + encodeURIComponent("Exercise name is too long."));
+
+  const units = String(formData.get("units") ?? "kg") === "lb" ? "lb" : "kg";
+  const int = (k: string, max: number) => {
+    const v = String(formData.get(k) ?? "").trim();
+    if (!v) return null;
+    const n = Number(v);
+    return Number.isInteger(n) && n >= 0 && n <= max ? n : NaN;
+  };
+  const sets = int("sets", 99), reps = int("reps", 999);
+  const wRaw = String(formData.get("weight") ?? "").trim();
+  let weight_kg: number | null | typeof NaN = null;
+  if (wRaw) {
+    const n = Number(wRaw);
+    weight_kg = Number.isFinite(n) && n >= 0 ? Math.round((units === "lb" ? n / LB_PER_KG : n) * 100) / 100 : NaN;
+  }
+  if ([sets, reps, weight_kg].some((v) => typeof v === "number" && Number.isNaN(v)) || (typeof weight_kg === "number" && weight_kg > 999)) {
+    redirect("/portal/progress?error=" + encodeURIComponent("Check the numbers — sets ≤99, reps ≤999, weight ≤999 kg."));
+  }
+
+  const { error } = await supabase.from("member_workout_logs").insert({
+    organization_id: me.organization_id, member_id: me.id, exercise, sets, reps, weight_kg: weight_kg as number | null,
+  });
+  if (error) {
+    // 42P01 = table not created yet (0047 not applied) → friendly, not a raw error.
+    const friendly = error.code === "42P01" ? "Workout logging is being set up — check back shortly." : "Couldn't save that workout. Please try again.";
+    redirect("/portal/progress?error=" + encodeURIComponent(friendly));
+  }
+  revalidatePath("/portal/progress");
+  redirect("/portal/progress?ok=workout");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {

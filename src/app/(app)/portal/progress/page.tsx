@@ -1,7 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { logMeasurement, joinChallenge, setUnits } from "../actions";
+import { logMeasurement, joinChallenge, setUnits, logWorkout } from "../actions";
 
 const LB_PER_KG = 2.20462;
 
@@ -16,7 +16,7 @@ type Badge = { id: string; awarded_at: string; badge: { name: string; icon: stri
 type Challenge = { id: string; name: string; description: string | null; metric: string; goal_target: number | null; starts_on: string | null; ends_on: string | null };
 type Participation = { challenge_id: string; progress: number };
 
-const OK_MSG: Record<string, string> = { logged: "Measurement logged.", joined: "You're in — good luck." };
+const OK_MSG: Record<string, string> = { logged: "Measurement logged.", joined: "You're in — good luck.", workout: "Workout logged. 💪" };
 
 export default async function PortalProgressPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { ok, error } = await searchParams;
@@ -28,7 +28,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   const ids = ((memberData ?? []) as { id: string }[]).map((m) => m.id);
   if (ids.length === 0) redirect("/portal");
 
-  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }, { data: chData }, { data: partData }, { data: lbData }] = await Promise.all([
+  const [{ data: wData }, { data: mpData }, { data: measData }, { data: badgeData }, { data: visitData }, { data: chData }, { data: partData }, { data: lbData }, { data: woData }] = await Promise.all([
     supabase.from("workout_plans").select("id, name, workout_exercises(id, name, sets, reps, weight_kg)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("meal_plans").select("id, name, daily_calorie_target, meal_plan_items(id, meal, description, calories)").in("member_id", ids).order("created_at", { ascending: false }).limit(10),
     supabase.from("member_measurements").select("id, recorded_at, weight_kg, body_fat_pct, muscle_mass_kg").in("member_id", ids).order("recorded_at", { ascending: false }).limit(24),
@@ -39,6 +39,8 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
     supabase.from("challenge_participants").select("challenge_id, progress").in("member_id", ids),
     // Leaderboard rows (first name + progress) for org challenges — 0046 view.
     supabase.from("challenge_leaderboard").select("challenge_id, member_id, first_name, progress"),
+    // Self-logged workouts (0047, member-owned).
+    supabase.from("member_workout_logs").select("id, performed_on, exercise, sets, reps, weight_kg").in("member_id", ids).order("performed_on", { ascending: false }).order("created_at", { ascending: false }).limit(20),
   ]);
 
   const wplans = (wData ?? []) as unknown as WPlan[];
@@ -60,6 +62,8 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
     leaderboard.set(r.challenge_id, arr);
   }
   for (const arr of leaderboard.values()) arr.sort((a, b) => b.progress - a.progress);
+  type WorkoutLog = { id: string; performed_on: string; exercise: string; sets: number | null; reps: number | null; weight_kg: number | null };
+  const workouts = (woData ?? []) as unknown as WorkoutLog[];
 
   // §12 units: member weight-unit preference (cookie). DB stores kg; convert for display.
   const units = ((await cookies()).get("units")?.value === "lb") ? "lb" : "kg";
@@ -185,6 +189,34 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
           </ul>
         </section>
       ) : null}
+
+      {/* self-logged workouts (0047) */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="mb-2 text-[15px] font-bold text-bone">Log a workout</div>
+        <form action={logWorkout} className="flex flex-col gap-2">
+          <input type="hidden" name="units" value={wUnit} />
+          <input name="exercise" required placeholder="Exercise (e.g. Bench press)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <div className="grid grid-cols-3 gap-2">
+            <input name="sets" inputMode="numeric" placeholder="Sets" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="reps" inputMode="numeric" placeholder="Reps" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="weight" inputMode="decimal" placeholder={`Weight ${wUnit}`} className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          </div>
+          <button className="rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save workout</button>
+        </form>
+        {workouts.length > 0 ? (
+          <ul className="mt-3 flex flex-col divide-y divide-iron border-t border-iron">
+            {workouts.map((w) => (
+              <li key={w.id} className="flex items-center justify-between py-2 text-sm">
+                <span className="min-w-0 truncate text-bone">{w.exercise}</span>
+                <span className="mono shrink-0 text-xs text-ash">
+                  {[w.sets && `${w.sets}×`, w.reps, w.weight_kg != null && `@${disp(w.weight_kg)}${wUnit}`].filter(Boolean).join(" ") || "logged"}
+                  <span className="ml-2 text-ash-dim">{new Date(w.performed_on).toLocaleDateString([], { month: "short", day: "numeric" })}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
 
       {/* workout plans */}
       <section>
