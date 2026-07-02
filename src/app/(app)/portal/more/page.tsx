@@ -2,11 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
-import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral } from "../actions";
+import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals } from "../actions";
 
 export const dynamic = "force-dynamic";
 
-const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!" };
+const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!", goals: "Goals saved. 🎯" };
 
 type Referral = { id: string; referred_name: string | null; status: string; created_at: string };
 
@@ -29,6 +29,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const gymName = memberRows[0]?.organization?.name ?? "your gym";
   const me0 = memberRows[0];
   if (ids.length === 0) redirect("/portal");
+
+  // Goals/fitness_level in a SEPARATE query so a missing column (0050 unapplied)
+  // fails only here, never breaking the page.
+  const { data: goalsData } = await supabase.from("members").select("goals, fitness_level").eq("profile_id", user.id).limit(1);
+  const myGoals = ((goalsData ?? []) as { goals: string | null; fitness_level: string | null }[])[0] ?? null;
 
   const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
@@ -109,6 +114,19 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
           </div>
         </form>
         <p className="mt-1.5 text-[11px] text-ash-dim">To change your email, ask the front desk.</p>
+      </section>
+
+      {/* Goals + fitness level — member self-set (0050) */}
+      <section className="rounded-2xl border border-iron bg-onyx p-4">
+        <div className="text-[15px] font-bold text-bone">Your goals</div>
+        <form action={updateMyGoals} className="mt-2 flex flex-col gap-2">
+          <select name="fitness_level" defaultValue={myGoals?.fitness_level ?? ""} className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone">
+            <option value="">Fitness level…</option>
+            {["Beginner", "Intermediate", "Advanced"].map((l) => (<option key={l} value={l}>{l}</option>))}
+          </select>
+          <textarea name="goals" rows={2} defaultValue={myGoals?.goals ?? ""} placeholder="What are you training for? (e.g. lose 5kg, first 5k, build strength)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save goals</button>
+        </form>
       </section>
 
       {/* Refer a friend (0049) */}

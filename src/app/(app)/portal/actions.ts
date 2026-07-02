@@ -319,6 +319,25 @@ export async function submitReferral(formData: FormData) {
   redirect("/portal/more?ok=referred");
 }
 
+// Member sets their own goals + fitness level (0050 RPC, column-restricted).
+export async function updateMyGoals(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const goals = String(formData.get("goals") ?? "").trim();
+  const fitness_level = String(formData.get("fitness_level") ?? "").trim();
+  const { error } = await supabase.rpc("update_my_goals", { p_goals: goals, p_fitness_level: fitness_level });
+  if (error) {
+    // 42883 fn missing / 42703 column missing → 0050 not applied yet.
+    const friendly = error.code === "42883" || error.code === "42703" ? "Profile goals are being set up — check back shortly."
+      : /too long/i.test(error.message ?? "") ? "That's a bit long — shorten it." : "Couldn't save. Please try again.";
+    redirect("/portal/more?error=" + encodeURIComponent(friendly));
+  }
+  revalidatePath("/portal/more");
+  redirect("/portal/more?ok=goals");
+}
+
 export async function claimRecords() {
   const supabase = await createClient();
   const {
