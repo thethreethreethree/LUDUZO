@@ -9,7 +9,7 @@ import { claimRecords, signMyDocument, portalSignOut } from "./actions";
 
 export const dynamic = "force-dynamic";
 
-type MyMember = { id: string; first_name: string; last_name: string; qr_token: string | null; member_number: string | null; organization: { name: string } | null };
+type MyMember = { id: string; first_name: string; last_name: string; qr_token: string | null; member_number: string | null; goals: string | null; organization: { name: string } | null };
 type Booking = { id: string; status: string; session: { starts_at: string; class: { name: string } | null } | null };
 type Doc = { id: string; kind: string; status: string };
 
@@ -21,7 +21,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
 
   const { data: memberData } = await supabase
     .from("members")
-    .select("id, first_name, last_name, qr_token, member_number, organization:organizations(name)")
+    .select("id, first_name, last_name, qr_token, member_number, goals, organization:organizations(name)")
     .eq("profile_id", user.id);
   const members = (memberData ?? []) as unknown as MyMember[];
   const me = members[0] ?? null;
@@ -142,6 +142,13 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         <Link href="/portal/progress" className="flex flex-col items-center gap-1 rounded-xl border border-iron bg-onyx py-3 text-xs font-semibold text-bone hover:border-gold hover:text-gold"><span className="text-lg">💪</span>Log a workout</Link>
         <Link href="/portal/progress" className="flex flex-col items-center gap-1 rounded-xl border border-iron bg-onyx py-3 text-xs font-semibold text-bone hover:border-gold hover:text-gold"><span className="text-lg">⚖️</span>Log metrics</Link>
       </div>
+
+      {me.goals ? (
+        <div className="rounded-xl border border-l-2 border-iron border-l-gold bg-onyx px-4 py-3">
+          <div className="text-[10px] font-bold uppercase tracking-[0.07em] text-gold">🎯 Your goal</div>
+          <p className="mt-0.5 text-sm text-bone">{me.goals}</p>
+        </div>
+      ) : null}
 
       {/* ---- Journey: level + streak ---- */}
       <section>
