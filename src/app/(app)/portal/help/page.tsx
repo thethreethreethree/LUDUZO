@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Avatar } from "@/components/ui";
 import { submitFeedback } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +24,10 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
   const org = ((memberData ?? []) as unknown as { organization: { name: string; settings: { phone?: string; address?: string; hours?: string; amenities?: string } | null } | null }[])[0]?.organization ?? null;
   const gymName = org?.name ?? "your gym";
   const gymPhone = org?.settings?.phone ?? null;
+
+  // §6 "meet the team" — gym staff (name only) via the applied 0040 directory.
+  const { data: staffData } = await supabase.from("gym_staff_directory").select("user_id, full_name");
+  const team = ((staffData ?? []) as { user_id: string; full_name: string | null }[]).filter((s) => s.full_name);
   const gymAddress = org?.settings?.address ?? null;
   const gymHours = org?.settings?.hours ?? null;
   const gymAmenities = org?.settings?.amenities ?? null;
@@ -65,6 +70,21 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
           <p className="mt-2 text-[11px] text-ash-dim">Your gym hasn&apos;t added contact details yet.</p>
         ) : null}
       </section>
+
+      {/* §6 meet the team (staff names via 0040) */}
+      {team.length > 0 ? (
+        <section className="rounded-2xl border border-iron bg-onyx p-4">
+          <div className="text-[15px] font-bold text-bone">Meet the team</div>
+          <ul className="mt-3 flex flex-wrap gap-3">
+            {team.map((s) => (
+              <li key={s.user_id} className="flex w-[72px] flex-col items-center gap-1 text-center">
+                <Avatar name={s.full_name ?? "Coach"} size={44} />
+                <span className="truncate text-[11px] text-ash">{s.full_name}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
       {/* Feedback / report — functional now (member-insert RLS live) */}
       <section className="rounded-2xl border border-iron bg-onyx p-4">
