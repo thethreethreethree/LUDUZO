@@ -27,9 +27,14 @@ export function ArenaScanner({
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
   const submittedRef = useRef(false);
+  // Run token: incremented on every start() and on cleanup. An in-flight start()
+  // whose token goes stale (unmount / restart / StrictMode double-fire) stops the
+  // stream it acquired and bails — fixes the getUserMedia-after-unmount leak (G-1).
+  const runRef = useRef(0);
   const [state, setState] = useState<"idle" | "on" | "denied" | "error" | "found">("idle");
 
   const stop = useCallback(() => {
+    runRef.current++;
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     rafRef.current = null;
     streamRef.current?.getTracks().forEach((t) => t.stop());
@@ -38,6 +43,7 @@ export function ArenaScanner({
 
   const start = useCallback(async () => {
     submittedRef.current = false;
+    const myRun = ++runRef.current;
     if (!navigator.mediaDevices?.getUserMedia) {
       setState("error");
       return;
@@ -47,21 +53,28 @@ export function ArenaScanner({
         video: { facingMode: "environment" },
         audio: false,
       });
+      // If this start() was superseded/cancelled while awaiting, release the stream.
+      if (myRun !== runRef.current || !videoRef.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
       streamRef.current = stream;
       const video = videoRef.current;
-      if (!video) return;
       video.srcObject = stream;
       video.setAttribute("playsinline", "true");
       await video.play();
+      if (myRun !== runRef.current) return; // cancelled during play()
       setState("on");
 
       const canvas = canvasRef.current!;
       const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
 
+      let frame = 0;
       const tick = () => {
-        if (submittedRef.current) return;
-        if (video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
+        if (submittedRef.current || myRun !== runRef.current) return;
+        // Decode every 3rd frame — jsQR at full resolution is CPU-heavy (G-2).
+        if (frame++ % 3 === 0 && video.readyState === video.HAVE_ENOUGH_DATA && video.videoWidth > 0) {
           canvas.width = video.videoWidth;
           canvas.height = video.videoHeight;
           ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -80,6 +93,7 @@ export function ArenaScanner({
       };
       rafRef.current = requestAnimationFrame(tick);
     } catch (e) {
+      if (myRun !== runRef.current) return;
       setState((e as Error)?.name === "NotAllowedError" ? "denied" : "error");
     }
   }, [stop]);
