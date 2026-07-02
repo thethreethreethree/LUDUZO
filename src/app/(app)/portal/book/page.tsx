@@ -146,10 +146,15 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                   <div className="mt-0.5 truncate font-bold text-bone">{b.session!.class?.name ?? "Class"}</div>
                   <div className="text-xs text-ash">{b.status === "waitlisted" ? "On the waitlist" : "You're booked"}</div>
                 </div>
-                <form action={cancelBooking} className="shrink-0">
-                  <input type="hidden" name="id" value={b.id} />
-                  <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-loss hover:text-loss">Cancel</button>
-                </form>
+                <div className="flex shrink-0 items-center gap-2">
+                  {b.status === "booked" ? (
+                    <a href={`/portal/calendar/${b.id}`} className="rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-gold hover:text-gold">＋ Calendar</a>
+                  ) : null}
+                  <form action={cancelBooking}>
+                    <input type="hidden" name="id" value={b.id} />
+                    <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-loss hover:text-loss">Cancel</button>
+                  </form>
+                </div>
               </li>
             ))}
           </ul>
