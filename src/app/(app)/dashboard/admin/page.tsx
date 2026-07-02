@@ -9,7 +9,7 @@ type Org = {
   id: string; name: string; role: string;
   brand_color: string | null; accent_color: string | null; logo_url: string | null;
   plan_tier: string; default_currency: string; locale: string;
-  settings: { phone?: string } | null;
+  settings: { phone?: string; address?: string; hours?: string; amenities?: string } | null;
 };
 type ApiKey = { id: string; name: string; key_prefix: string; revoked: boolean; last_used_at: string | null };
 type Webhook = { id: string; url: string; event_types: string[]; active: boolean };
@@ -80,6 +80,15 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               </label>
               <label className="flex flex-col gap-1 text-xs text-ash">Front-desk phone (members can call)
                 <input name="contact_phone" defaultValue={o.settings?.phone ?? ""} placeholder="+1 555 123 4567" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-ash">Address (members see this)
+                <input name="address" defaultValue={o.settings?.address ?? ""} placeholder="123 Main St, City" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-ash">Opening hours
+                <input name="hours" defaultValue={o.settings?.hours ?? ""} placeholder="Mon–Fri 6am–10pm · Sat–Sun 8am–6pm" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              </label>
+              <label className="flex flex-col gap-1 text-xs text-ash">Amenities
+                <input name="amenities" defaultValue={o.settings?.amenities ?? ""} placeholder="Sauna · Pool · Free parking" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </label>
             </div>
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save settings</button>

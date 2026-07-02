@@ -16,10 +16,20 @@ export async function updateOrgSettings(formData: FormData) {
   const default_currency = String(formData.get("default_currency") ?? "USD").trim().toUpperCase() || "USD";
   const locale = String(formData.get("locale") ?? "en").trim() || "en";
   const contact_phone = String(formData.get("contact_phone") ?? "").trim();
+  const address = String(formData.get("address") ?? "").trim();
+  const hours = String(formData.get("hours") ?? "").trim();
+  const amenities = String(formData.get("amenities") ?? "").trim();
   if (!id) redirect("/dashboard/admin");
-  // Merge phone into the settings jsonb without clobbering other keys (branding etc.).
+  // Merge member-facing gym info into the settings jsonb without clobbering other
+  // keys (branding etc.). Members read these via org_select_member (0041).
   const { data: cur } = await supabase.from("organizations").select("settings").eq("id", id).maybeSingle();
-  const settings = { ...(((cur as { settings: Record<string, unknown> } | null)?.settings) ?? {}), phone: contact_phone || undefined };
+  const settings = {
+    ...(((cur as { settings: Record<string, unknown> } | null)?.settings) ?? {}),
+    phone: contact_phone || undefined,
+    address: address || undefined,
+    hours: hours || undefined,
+    amenities: amenities || undefined,
+  };
   const { error } = await supabase
     .from("organizations")
     .update({ brand_color, accent_color, logo_url, plan_tier, default_currency, locale, settings })

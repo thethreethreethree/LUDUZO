@@ -20,9 +20,12 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
   if (!user) redirect("/login");
 
   const { data: memberData } = await supabase.from("members").select("organization:organizations(name, settings)").eq("profile_id", user.id).limit(1);
-  const org = ((memberData ?? []) as unknown as { organization: { name: string; settings: { phone?: string } | null } | null }[])[0]?.organization ?? null;
+  const org = ((memberData ?? []) as unknown as { organization: { name: string; settings: { phone?: string; address?: string; hours?: string; amenities?: string } | null } | null }[])[0]?.organization ?? null;
   const gymName = org?.name ?? "your gym";
   const gymPhone = org?.settings?.phone ?? null;
+  const gymAddress = org?.settings?.address ?? null;
+  const gymHours = org?.settings?.hours ?? null;
+  const gymAmenities = org?.settings?.amenities ?? null;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 px-5 pb-28 pt-8">
@@ -50,9 +53,17 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
           <div className="mt-3">
             <a href={`tel:${gymPhone.replace(/\s+/g, "")}`} className="block rounded-xl border border-iron bg-onyx-2 px-4 py-2.5 text-center text-sm font-semibold text-bone hover:border-gold">📞 Call the front desk · {gymPhone}</a>
           </div>
-        ) : (
-          <p className="mt-2 text-[11px] text-ash-dim">Your gym hasn&apos;t added a phone number yet.</p>
-        )}
+        ) : null}
+        {(gymAddress || gymHours || gymAmenities) ? (
+          <dl className="mt-3 flex flex-col gap-2 text-sm">
+            {gymHours ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Hours</dt><dd className="text-bone">🕐 {gymHours}</dd></div>) : null}
+            {gymAddress ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Location</dt><dd className="text-bone">📍 <a href={`https://maps.google.com/?q=${encodeURIComponent(gymAddress)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gold">{gymAddress}</a></dd></div>) : null}
+            {gymAmenities ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Amenities</dt><dd className="text-bone">🏋 {gymAmenities}</dd></div>) : null}
+          </dl>
+        ) : null}
+        {!gymPhone && !gymAddress && !gymHours && !gymAmenities ? (
+          <p className="mt-2 text-[11px] text-ash-dim">Your gym hasn&apos;t added contact details yet.</p>
+        ) : null}
       </section>
 
       {/* Feedback / report — functional now (member-insert RLS live) */}
