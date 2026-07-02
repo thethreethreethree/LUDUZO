@@ -85,6 +85,30 @@ export async function createMember(formData: FormData) {
   redirect("/dashboard/members?ok=" + encodeURIComponent(`Added ${first_name} ${last_name}`));
 }
 
+// Hard-delete a member. RLS members_write (0002) restricts delete to staff of the
+// member's org. Deletion cascades (bookings, check-ins, measurements, etc. — 14
+// tables) and nulls member links elsewhere; it is intentionally destructive and
+// gated by a client confirm. For a real member with financial/legal history,
+// prefer archiving (status → cancelled/inactive) — flagged, not enforced here.
+export async function deleteMember(formData: FormData) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect("/login");
+
+  const id = String(formData.get("id") ?? "");
+  if (!id) redirect("/dashboard/members");
+
+  const { data: m } = await supabase.from("members").select("first_name, last_name").eq("id", id).maybeSingle();
+  const name = m ? `${(m as { first_name: string; last_name: string }).first_name} ${(m as { first_name: string; last_name: string }).last_name}` : "Member";
+
+  const { error } = await supabase.from("members").delete().eq("id", id);
+  if (error) {
+    redirect("/dashboard/members?error=" + encodeURIComponent(`Couldn't delete: ${error.message}`));
+  }
+  revalidatePath("/dashboard/members");
+  redirect("/dashboard/members?ok=" + encodeURIComponent(`Deleted ${name}`));
+}
+
 export async function assignDocument(formData: FormData) {
   const supabase = await createClient();
   const organization_id = String(formData.get("organization_id") ?? "");

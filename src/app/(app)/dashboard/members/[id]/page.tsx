@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { updateMemberStatus, assignDocument, signMemberDocument, assignSubscription, updateMemberNotes, updateSubscriptionStatus, renewSubscription, logMeasurement, awardPoints, logCommunication, createMemberInvoice, checkInMember, checkOutMember, updateMemberDetails, removeMemberDocument, addMemberToGroup, removeMemberFromGroup, rotateCheckInCode } from "../actions";
+import { updateMemberStatus, assignDocument, signMemberDocument, assignSubscription, updateMemberNotes, updateSubscriptionStatus, renewSubscription, logMeasurement, awardPoints, logCommunication, createMemberInvoice, checkInMember, checkOutMember, updateMemberDetails, removeMemberDocument, addMemberToGroup, removeMemberFromGroup, rotateCheckInCode, deleteMember } from "../actions";
+import { DeleteMemberButton } from "@/components/DeleteMemberButton";
 import { MEMBER_STATUSES } from "@/lib/members";
 import { DOCUMENT_KINDS } from "@/lib/documents";
 import { formatMoney, SUBSCRIPTION_STATUSES } from "@/lib/billing";
@@ -641,6 +642,12 @@ export default async function MemberDetailPage({
             ))}
           </ul>
         )}
+      </section>
+
+      <section className="mt-2 flex flex-col gap-2 rounded-md border border-loss/30 p-4">
+        <h2 className="text-sm font-medium text-loss">Danger zone</h2>
+        <p className="text-xs text-ash">Permanently delete this member and all of their history (bookings, check-ins, measurements). This cannot be undone — to keep the record, set their status to “cancelled” instead.</p>
+        <DeleteMemberButton action={deleteMember} id={member.id} name={`${member.first_name} ${member.last_name}`} />
       </section>
     </main>
   );
