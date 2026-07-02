@@ -249,10 +249,15 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
           <div className="mb-2 text-[15px] font-bold text-bone">Personal training</div>
           <ul className="flex flex-col gap-2">
             {appts.map((a) => (
-              <li key={a.id} className="rounded-2xl border border-iron bg-onyx p-4">
-                <div className="mono text-xs font-semibold text-gold">{new Date(a.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
-                <div className="mt-0.5 font-bold text-bone">{a.title ?? "PT session"}</div>
-                <div className="text-xs text-ash">{a.trainer_id && staffName.get(a.trainer_id) ? `with ${staffName.get(a.trainer_id)} · ` : ""}{a.status}</div>
+              <li key={a.id} className="flex items-center justify-between gap-3 rounded-2xl border border-iron bg-onyx p-4">
+                <div className="min-w-0">
+                  <div className="mono text-xs font-semibold text-gold">{new Date(a.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
+                  <div className="mt-0.5 font-bold text-bone">{a.title ?? "PT session"}</div>
+                  <div className="text-xs text-ash">{a.trainer_id && staffName.get(a.trainer_id) ? `with ${staffName.get(a.trainer_id)} · ` : ""}{a.status}</div>
+                </div>
+                {Date.parse(a.starts_at) > now ? (
+                  <a href={`/portal/calendar/${a.id}?kind=appt`} className="shrink-0 rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-gold hover:text-gold">＋ Calendar</a>
+                ) : null}
               </li>
             ))}
           </ul>

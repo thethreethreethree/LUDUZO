@@ -2,54 +2,57 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-// §4 calendar sync: download an .ics for one of the member's booked class sessions.
-// RLS (bookings_select_own, 0022) scopes the fetch to the caller's own booking, so
-// a member can only export their own. No DB write.
-type Row = { id: string; status: string; session: { starts_at: string; ends_at: string | null; class: { name: string } | null } | null };
+// §4 calendar sync: download an .ics for one of the member's own bookings
+// (default) or PT appointments (?kind=appt). RLS scopes the fetch to the caller's
+// own row (bookings 0022 / appointments 0024), so a member can only export their
+// own. No DB write.
+type Booking = { id: string; session: { starts_at: string; ends_at: string | null; class: { name: string } | null } | null };
+type Appt = { id: string; title: string | null; starts_at: string; ends_at: string | null };
 
 const icsDate = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 const esc = (s: string) => s.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
 
+function ics(uid: string, start: string, end: string | null, summary: string, description: string) {
+  const dtEnd = end ?? new Date(new Date(start).getTime() + 60 * 60 * 1000).toISOString();
+  return [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LUDUZO//Member Portal//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${uid}@luduzo`,
+    `DTSTAMP:${icsDate(new Date().toISOString())}`,
+    `DTSTART:${icsDate(start)}`,
+    `DTEND:${icsDate(dtEnd)}`,
+    `SUMMARY:${esc(summary)}`,
+    `DESCRIPTION:${esc(description)}`,
+    "END:VEVENT", "END:VCALENDAR",
+  ].join("\r\n");
+}
+
 export async function GET(request: NextRequest, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
+  const kind = new URL(request.url).searchParams.get("kind");
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.redirect(new URL("/login", request.url));
 
-  const { data } = await supabase
-    .from("bookings")
-    .select("id, status, session:class_sessions(starts_at, ends_at, class:classes(name))")
-    .eq("id", id)
-    .maybeSingle();
-  const row = data as unknown as Row | null;
-  if (!row || !row.session) {
-    return new NextResponse("Booking not found.", { status: 404 });
+  let body: string;
+  if (kind === "appt") {
+    const { data } = await supabase.from("appointments").select("id, title, starts_at, ends_at").eq("id", id).maybeSingle();
+    const a = data as unknown as Appt | null;
+    if (!a) return new NextResponse("Appointment not found.", { status: 404 });
+    const name = a.title ?? "PT session";
+    body = ics(`appt-${a.id}`, a.starts_at, a.ends_at, name, `Your ${name}, booked via LUDUZO.`);
+  } else {
+    const { data } = await supabase.from("bookings").select("id, session:class_sessions(starts_at, ends_at, class:classes(name))").eq("id", id).maybeSingle();
+    const row = data as unknown as Booking | null;
+    if (!row || !row.session) return new NextResponse("Booking not found.", { status: 404 });
+    const name = row.session.class?.name ?? "Class";
+    body = ics(`booking-${row.id}`, row.session.starts_at, row.session.ends_at, name, `Your ${name} class, booked via LUDUZO.`);
   }
 
-  const start = row.session.starts_at;
-  const end = row.session.ends_at ?? new Date(new Date(start).getTime() + 60 * 60 * 1000).toISOString();
-  const name = row.session.class?.name ?? "Class";
-  const ics = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//LUDUZO//Member Portal//EN",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    "BEGIN:VEVENT",
-    `UID:booking-${row.id}@luduzo`,
-    `DTSTAMP:${icsDate(new Date().toISOString())}`,
-    `DTSTART:${icsDate(start)}`,
-    `DTEND:${icsDate(end)}`,
-    `SUMMARY:${esc(name)}`,
-    `DESCRIPTION:${esc(`Your ${name} class, booked via LUDUZO.`)}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
-
-  return new NextResponse(ics, {
+  return new NextResponse(body, {
     headers: {
       "content-type": "text/calendar; charset=utf-8",
-      "content-disposition": `attachment; filename="luduzo-class.ics"`,
+      "content-disposition": `attachment; filename="luduzo-session.ics"`,
     },
   });
 }
