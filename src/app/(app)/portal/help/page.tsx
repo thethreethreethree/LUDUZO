@@ -29,7 +29,10 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
   // `role` column (before 0052) degrades gracefully (the view holds no PII).
   const { data: staffData } = await supabase.from("gym_staff_directory").select("*");
   const team = ((staffData ?? []) as { user_id: string; full_name: string | null; role?: string }[]).filter((s) => s.full_name);
-  const roleLabel = (r?: string) => !r ? "" : ({ front_desk: "Front desk", owner: "Owner", admin: "Admin", manager: "Manager", trainer: "Trainer", coach: "Coach" }[r] ?? r.replace(/_/g, " "));
+  // Audit Finding 1 (A20 safe default): show only member-facing roles; owner/admin/
+  // manager render as just a name (don't expose the gym's internal hierarchy).
+  // Founder can override to show all roles.
+  const roleLabel = (r?: string) => (({ trainer: "Trainer", coach: "Coach", front_desk: "Front desk" } as Record<string, string>)[r ?? ""] ?? "");
   const gymAddress = org?.settings?.address ?? null;
   const gymHours = org?.settings?.hours ?? null;
   const gymAmenities = org?.settings?.amenities ?? null;
