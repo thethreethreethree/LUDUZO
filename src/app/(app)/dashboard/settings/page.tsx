@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { BrandColorFields } from "@/components/BrandColorFields";
+import { DEFAULT_PRIMARY, DEFAULT_SECONDARY, DEFAULT_BACKGROUND } from "@/lib/gymTheme";
 import { updateOrganization } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +15,7 @@ type Row = {
     id: string;
     name: string;
     slug: string;
-    settings: { brand_color?: string; logo_url?: string } | null;
+    settings: { brand_color?: string; brand_primary?: string; brand_secondary?: string; brand_background?: string; logo_url?: string } | null;
   } | null;
 };
 
@@ -43,7 +45,7 @@ export default async function SettingsPage({
           ← Dashboard
         </Link>
         <h1 className="mt-1 text-h1 text-bone">Settings</h1>
-        <p className="text-sm text-ash">Rename the gyms you own or administer.</p>
+        <p className="text-sm text-ash">Rename and brand the gyms you own or administer — your colours and logo appear in your members&apos; app.</p>
       </div>
 
       {error ? (
@@ -78,26 +80,20 @@ export default async function SettingsPage({
                     />
                     <span className="text-xs text-ash">/{r.organization!.slug}</span>
                   </label>
-                  <div className="flex gap-3">
-                    <label className="flex flex-col gap-1 text-sm">
-                      <span className="font-medium">Brand color</span>
-                      <input
-                        name="brand_color"
-                        type="color"
-                        defaultValue={r.organization!.settings?.brand_color ?? "#000000"}
-                        className="h-10 w-16 rounded-md border border-iron"
-                      />
-                    </label>
-                    <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                      <span className="font-medium">Logo URL</span>
-                      <input
-                        name="logo_url"
-                        defaultValue={r.organization!.settings?.logo_url ?? ""}
-                        placeholder="https://…"
-                        className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
-                      />
-                    </label>
-                  </div>
+                  <BrandColorFields
+                    primary={r.organization!.settings?.brand_primary ?? r.organization!.settings?.brand_color ?? DEFAULT_PRIMARY}
+                    secondary={r.organization!.settings?.brand_secondary ?? DEFAULT_SECONDARY}
+                    background={r.organization!.settings?.brand_background ?? DEFAULT_BACKGROUND}
+                  />
+                  <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+                    <span className="font-medium">Logo URL</span>
+                    <input
+                      name="logo_url"
+                      defaultValue={r.organization!.settings?.logo_url ?? ""}
+                      placeholder="https://…"
+                      className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
+                    />
+                  </label>
                 </div>
                 <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
                   Save
