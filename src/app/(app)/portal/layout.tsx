@@ -1,7 +1,39 @@
+import type { Metadata } from "next";
 import { PortalTabBar } from "@/components/PortalTabBar";
 import { PWARegister } from "@/components/PWARegister";
 import { createClient } from "@/lib/supabase/server";
 import { okHex, textColors, DEFAULT_PRIMARY, DEFAULT_SECONDARY, DEFAULT_BACKGROUND } from "@/lib/gymTheme";
+
+// The member PWA is client-branded: point the manifest at the per-gym route (with the
+// gym's public branding in the query so the manifest fetch needs no session), and set
+// the installed-app title to the gym's name. Falls back to LUDUZO defaults.
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  let gymName = "Luduzo";
+  let manifest = "/site.webmanifest";
+  if (user) {
+    const { data } = await supabase
+      .from("members")
+      .select("organization:organizations(name, settings)")
+      .eq("profile_id", user.id)
+      .limit(1);
+    const org = ((data ?? []) as unknown as { organization: { name: string; settings: Record<string, string> | null } | null }[])[0]?.organization ?? null;
+    if (org?.name) {
+      gymName = org.name;
+      const s = org.settings ?? {};
+      const params = new URLSearchParams({ name: gymName });
+      if (typeof s.logo_url === "string" && s.logo_url) params.set("logo", s.logo_url);
+      if (okHex(s.brand_background)) params.set("bg", okHex(s.brand_background)!);
+      manifest = "/portal/manifest?" + params.toString();
+    }
+  }
+  return {
+    manifest,
+    title: gymName,
+    appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: gymName },
+  };
+}
 
 // Per-gym theming: the owner sets Primary/Secondary/Background + logo in dashboard
 // settings; the member webapp reflects them here. Because the Tailwind theme uses
@@ -75,16 +107,16 @@ body{background:${background};--nav-progress-bg:linear-gradient(90deg,color-mix(
 
       {/* Gym logo + name, top-right of the member webapp. */}
       {(logo || gymName) ? (
-        <div className="mx-auto flex max-w-md items-center justify-end gap-2 px-5 pt-4">
+        <div className="mx-auto flex max-w-md items-center justify-end gap-3 px-5 pt-4">
           {logo ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="" className="h-7 w-7 rounded object-cover" />
+            <img src={logo} alt="" className="h-14 w-14 rounded object-cover" />
           ) : null}
-          {gymName ? <span className="text-sm font-bold text-bone">{gymName}</span> : null}
+          {gymName ? <span className="text-2xl font-extrabold text-bone">{gymName}</span> : null}
         </div>
       ) : null}
 
-      <div className="mx-auto max-w-md px-5 pt-2"><PWARegister /></div>
+      <div className="mx-auto max-w-md px-5 pt-2"><PWARegister gymName={gymName || "Luduzo"} /></div>
       {children}
       <PortalTabBar />
     </div>
