@@ -17,7 +17,7 @@ type Badge = { id: string; awarded_at: string; badge: { name: string; icon: stri
 type Challenge = { id: string; name: string; description: string | null; metric: string; goal_target: number | null; starts_on: string | null; ends_on: string | null };
 type Participation = { challenge_id: string; progress: number };
 
-const OK_MSG: Record<string, string> = { logged: "Measurement logged.", joined: "You're in — good luck.", workout: "Workout logged. 💪" };
+const OK_MSG: Record<string, string> = { logged: "Measurement logged.", joined: "You're in — good luck.", workout: "Workout logged." };
 
 export default async function PortalProgressPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string }> }) {
   const { ok, error } = await searchParams;

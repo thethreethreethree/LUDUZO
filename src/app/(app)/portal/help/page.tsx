@@ -100,7 +100,7 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
       <section className="rounded-2xl border border-iron bg-onyx p-4">
         <div className="text-[15px] font-bold text-bone">Share feedback</div>
         <p className="mt-1 text-sm text-ash">How likely are you to recommend {gymName}? (0–10)</p>
-        {ok ? <p className="mt-2 rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">Thanks — feedback sent. 🙌</p> : null}
+        {ok ? <p className="mt-2 rounded-md border border-win/40 bg-win/10 px-3 py-2 text-sm text-win">Thanks — feedback sent.</p> : null}
         {error ? <p className="mt-2 rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
         <form action={submitFeedback} className="mt-3 flex flex-col gap-2">
           <div className="flex flex-wrap gap-1.5">

@@ -14,7 +14,7 @@ const NOTIF_LABELS: { kind: string; label: string }[] = [
 
 export const dynamic = "force-dynamic";
 
-const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word!", goals: "Goals saved. 🎯", redeemed: "Reward redeemed! The front desk will sort you out. 🎉" };
+const OK_MSG: Record<string, string> = { contact: "Contact details updated.", profile: "Your details were updated.", referred: "Referral sent — thanks for spreading the word.", goals: "Goals saved.", redeemed: "Reward redeemed. The front desk will sort you out." };
 
 type Referral = { id: string; referred_name: string | null; status: string; created_at: string };
 
