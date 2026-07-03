@@ -72,7 +72,7 @@ export async function GET(request: NextRequest) {
   return new NextResponse(JSON.stringify(bundle, null, 2), {
     headers: {
       "content-type": "application/json; charset=utf-8",
-      "content-disposition": `attachment; filename="luduzo-my-data.json"`,
+      "content-disposition": `attachment; filename="my-data.json"`,
     },
   });
 }

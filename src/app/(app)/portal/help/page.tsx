@@ -117,7 +117,7 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
         </form>
       </section>
 
-      <p className="text-center text-[11px] text-ash-dim">Luduzo — run your gym like an arena.</p>
+      <p className="text-center text-[11px] text-ash-dim">{gymName}</p>
     </main>
   );
 }
