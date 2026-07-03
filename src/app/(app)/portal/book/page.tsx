@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { SubmitButton } from "@/components/SubmitButton";
 import { bookSession, cancelBooking } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -228,7 +229,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                       ) : (
                         <form action={bookSession} className="shrink-0">
                           <input type="hidden" name="session_id" value={s.id} />
-                          <button className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110">Book</button>
+                          <SubmitButton className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110" pendingLabel="Booking…">Book</SubmitButton>
                         </form>
                       )}
                     </li>
@@ -260,7 +261,7 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
                   ) : null}
                   <form action={cancelBooking}>
                     <input type="hidden" name="id" value={b.id} />
-                    <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-loss hover:text-loss">Cancel</button>
+                    <SubmitButton className="rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-loss hover:text-loss" pendingLabel="Cancelling…">Cancel</SubmitButton>
                   </form>
                 </div>
               </li>

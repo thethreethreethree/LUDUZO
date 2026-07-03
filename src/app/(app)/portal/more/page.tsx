@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
 import { Icon } from "@/components/Icon";
+import { SubmitButton } from "@/components/SubmitButton";
 import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals, setNotifPrefs, redeemReward } from "../actions";
 
 const NOTIF_LABELS: { kind: string; label: string }[] = [
@@ -320,7 +321,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
                   {affordable ? (
                     <form action={redeemReward} className="shrink-0">
                       <input type="hidden" name="reward_id" value={r.id} />
-                      <button className="rounded-md bg-gold px-3 py-1.5 text-xs font-bold text-black hover:brightness-110">Redeem</button>
+                      <SubmitButton className="rounded-md bg-gold px-3 py-1.5 text-xs font-bold text-black hover:brightness-110" pendingLabel="Redeeming…">Redeem</SubmitButton>
                     </form>
                   ) : (
                     <span className="mono shrink-0 text-[11px] text-ash-dim">{r.cost_points - pointsBalance} more</span>
