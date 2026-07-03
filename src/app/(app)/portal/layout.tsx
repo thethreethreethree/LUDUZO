@@ -12,6 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const { data: { user } } = await supabase.auth.getUser();
   let gymName = "Luduzo";
   let manifest = "/site.webmanifest";
+  let appleIcon: string | null = null;
   if (user) {
     const { data } = await supabase
       .from("members")
@@ -23,7 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
       gymName = org.name;
       const s = org.settings ?? {};
       const params = new URLSearchParams({ name: gymName });
-      if (typeof s.logo_url === "string" && s.logo_url) params.set("logo", s.logo_url);
+      if (typeof s.logo_url === "string" && s.logo_url) { params.set("logo", s.logo_url); appleIcon = s.logo_url; }
       if (okHex(s.brand_background)) params.set("bg", okHex(s.brand_background)!);
       manifest = "/portal/manifest?" + params.toString();
     }
@@ -32,6 +33,9 @@ export async function generateMetadata(): Promise<Metadata> {
     manifest,
     title: gymName,
     appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: gymName },
+    // iOS home-screen icon comes from apple-touch-icon (not the manifest); point it at
+    // the gym's logo so iOS installs are client-branded too.
+    ...(appleIcon ? { icons: { apple: appleIcon } } : {}),
   };
 }
 
