@@ -3,83 +3,87 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
-// Top-of-viewport navigation progress bar. Zero runtime deps (react + next/navigation
-// only). Gives instant motion feedback the moment a link is tapped — before the server
-// does any work — so a slow network still feels responsive.
+// Top-of-viewport navigation progress bar. Zero runtime deps (react + next/navigation).
+// Gives instant motion feedback the moment a link is tapped — before the server does
+// any work — so a slow network still feels responsive.
 //
-// Trigger model (per spec): intercept document clicks on the CAPTURE phase, walk to the
-// nearest <a>, and start only for a real internal same-origin navigation. This covers
-// <Link>, router.push()-backed anchors, and <form action> targets that render anchors —
-// unlike Next's experimental useLinkStatus, which only sees <Link>. Finish is driven by
-// a real route commit (pathname/searchParams change), never by internal router events.
+// SMOOTHNESS: the fill is animated with `transform: scaleX()`, not `width`. Width
+// animation runs on the main thread and stutters precisely while Next renders the new
+// route; a transform is composited on the GPU, so the sweep stays buttery even mid-
+// navigation. The motion is one CONTINUOUS ease-out (fast off the mark, decelerating
+// to a crawl, never quite reaching 90%) rather than stepped intervals. On commit it
+// fills to 100% quickly, holds a beat, then fades. A minimum-visible window keeps
+// instant (prefetched) navigations from blinking.
+
+const CREEP_MS = 14000; // slow asymptotic creep toward 90% (never reached in practice)
+const FILL_MS = 280;    // quick, confident fill to 100% on commit
+const FADE_MS = 320;    // fade-out after the fill
+const MIN_VISIBLE = 550; // guarantee the sweep is perceptible even on instant commits
+
+type Phase = "creep" | "fill" | "fade";
+
 export function NavigationProgress() {
   const [active, setActive] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [fading, setFading] = useState(false);
+  const [scale, setScale] = useState(0); // 0..1 → scaleX of a full-width bar
+  const [phase, setPhase] = useState<Phase>("creep");
 
   const activeRef = useRef(false);
   const startedAtRef = useRef(0);
-  const tickRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const bumpRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const safetyRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const doneRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Minimum on-screen time. Without this, a prefetched (instant) route commit fires
-  // finish() a few ms after start() and the bar flashes invisibly — the "it doesn't
-  // appear" case. Added to the original spec deliberately (see build note).
-  const MIN_VISIBLE = 400;
-
   const clearTimers = useCallback(() => {
-    if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null; }
-    if (safetyRef.current) { clearTimeout(safetyRef.current); safetyRef.current = null; }
+    for (const r of [bumpRef, safetyRef, doneRef]) {
+      if (r.current) { clearTimeout(r.current); r.current = null; }
+    }
   }, []);
 
-  // The visual close: jump to 100%, fade, then unmount one 220ms window later so the
-  // user sees the bar fill and fade. Only this ever reaches 100%.
+  // Fill to 100%, hold a beat so the full bar registers, then fade and unmount.
   const complete = useCallback(() => {
-    setProgress(100);
-    setFading(true);
+    setPhase("fill");
+    setScale(1);
     doneRef.current = setTimeout(() => {
-      activeRef.current = false;
-      setActive(false);
-      setProgress(0);
-      setFading(false);
-      doneRef.current = null;
-    }, 220);
+      setPhase("fade");
+      doneRef.current = setTimeout(() => {
+        activeRef.current = false;
+        setActive(false);
+        setScale(0);
+        setPhase("creep");
+        doneRef.current = null;
+      }, FADE_MS);
+    }, FILL_MS);
   }, []);
 
-  // Called on route commit. Hold the bar until it's had its minimum visible time, so
-  // instant navigations still register as motion feedback instead of a blink.
+  // Called on route commit. Hold until the sweep has had its minimum visible time so
+  // instant navigations still read as motion instead of a flash.
   const finish = useCallback(() => {
     if (!activeRef.current) return;
-    clearTimers();
+    if (bumpRef.current) { clearTimeout(bumpRef.current); bumpRef.current = null; }
+    if (safetyRef.current) { clearTimeout(safetyRef.current); safetyRef.current = null; }
     const elapsed = Date.now() - startedAtRef.current;
     if (elapsed < MIN_VISIBLE) {
       doneRef.current = setTimeout(complete, MIN_VISIBLE - elapsed);
     } else {
       complete();
     }
-  }, [clearTimers, complete]);
+  }, [complete]);
 
   // Begin a run. No-op if one is already in flight (rapid re-clicks keep the running
-  // bar rather than snapping back). Eases asymptotically toward 85% and holds there.
+  // bar rather than restarting the sweep).
   const start = useCallback(() => {
     if (activeRef.current) return;
-    if (doneRef.current) { clearTimeout(doneRef.current); doneRef.current = null; }
+    clearTimers();
     activeRef.current = true;
     startedAtRef.current = Date.now();
-    setFading(false);
+    setPhase("creep");
     setActive(true);
-    setProgress(8);
-    tickRef.current = setInterval(() => {
-      setProgress((p) => {
-        if (p >= 85) return p;
-        const step = (85 - p) * 0.12;
-        return p + Math.max(0.6, step);
-      });
-    }, 180);
-    // Safety valve: if the navigation truly hangs, drop the bar rather than stick.
+    setScale(0.06); // appear
+    // Next paint: kick off the smooth GPU-composited creep toward 90%.
+    bumpRef.current = setTimeout(() => setScale(0.9), 40);
+    // Safety valve: if the navigation truly hangs, close the bar rather than stick.
     safetyRef.current = setTimeout(() => finish(), 10000);
-  }, [finish]);
+  }, [clearTimers, finish]);
 
   // ---- Start trigger: capture-phase document click on a real internal navigation ----
   useEffect(() => {
@@ -114,15 +118,12 @@ export function NavigationProgress() {
   const searchParams = useSearchParams();
   useEffect(() => {
     if (activeRef.current) finish();
-    // Depend only on the commit signals per spec; finish is stable (useCallback).
+    // Depend only on the commit signals; finish is stable (useCallback).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, searchParams]);
 
   // Clean up any pending timers on unmount.
-  useEffect(() => () => {
-    clearTimers();
-    if (doneRef.current) { clearTimeout(doneRef.current); doneRef.current = null; }
-  }, [clearTimers]);
+  useEffect(() => () => clearTimers(), [clearTimers]);
 
   if (!active) return null;
 
@@ -137,17 +138,23 @@ export function NavigationProgress() {
         height: 6,
         zIndex: 2147483646,
         pointerEvents: "none",
-        opacity: fading ? 0 : 1,
-        transition: "opacity 220ms ease-out",
+        opacity: phase === "fade" ? 0 : 1,
+        transition: `opacity ${FADE_MS}ms ease-out`,
       }}
     >
       <div
         style={{
           height: "100%",
-          width: `${progress}%`,
+          width: "100%",
+          transformOrigin: "left center",
+          transform: `scaleX(${scale})`,
+          willChange: "transform",
           background: "linear-gradient(90deg, #C9950F 0%, #F5C518 45%, #FFE083 100%)",
           boxShadow: "0 0 14px 2px rgba(245, 197, 24, 0.85), 0 1px 0 rgba(255, 255, 255, 0.35) inset",
-          transition: "width 180ms ease-out",
+          transition:
+            phase === "creep"
+              ? `transform ${CREEP_MS}ms cubic-bezier(0.05, 0.7, 0.1, 1)`
+              : `transform ${FILL_MS}ms ease-out`,
         }}
       />
     </div>
