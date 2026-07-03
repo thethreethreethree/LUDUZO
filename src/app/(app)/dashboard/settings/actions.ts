@@ -53,6 +53,16 @@ export async function updateOrganization(formData: FormData) {
     if (upErr) {
       redirect("/dashboard/settings?error=" + encodeURIComponent("Logo upload failed — " + upErr.message));
     }
+    // Best-effort: remove the previous logo so old files don't accumulate in the
+    // bucket. Failure here must never fail the save.
+    const prevUrl = typeof prev.logo_url === "string" ? prev.logo_url : "";
+    const at = prevUrl.indexOf("/brand/");
+    if (at >= 0) {
+      const oldPath = prevUrl.slice(at + "/brand/".length).split("?")[0];
+      if (oldPath && oldPath !== path) {
+        try { await supabase.storage.from("brand").remove([oldPath]); } catch { /* ignore */ }
+      }
+    }
     logo_url = supabase.storage.from("brand").getPublicUrl(path).data.publicUrl;
   }
 
