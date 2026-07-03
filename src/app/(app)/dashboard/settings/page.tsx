@@ -85,14 +85,21 @@ export default async function SettingsPage({
                     secondary={r.organization!.settings?.brand_secondary ?? DEFAULT_SECONDARY}
                     background={r.organization!.settings?.brand_background ?? DEFAULT_BACKGROUND}
                   />
-                  <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-                    <span className="font-medium">Logo URL</span>
-                    <input
-                      name="logo_url"
-                      defaultValue={r.organization!.settings?.logo_url ?? ""}
-                      placeholder="https://…"
-                      className="w-full rounded-md border border-iron px-3 py-2 bg-onyx-2"
-                    />
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-medium">Logo</span>
+                    <div className="flex items-center gap-3">
+                      {r.organization!.settings?.logo_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={r.organization!.settings.logo_url} alt="Current logo" className="h-10 w-10 rounded border border-iron object-cover" />
+                      ) : null}
+                      <input
+                        type="file"
+                        name="logo"
+                        accept="image/*"
+                        className="min-w-0 flex-1 text-xs text-ash file:mr-2 file:cursor-pointer file:rounded-md file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black"
+                      />
+                    </div>
+                    <span className="text-xs text-ash-dim">PNG, JPG or SVG under 2 MB. Leave empty to keep the current logo.</span>
                   </label>
                 </div>
                 <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
