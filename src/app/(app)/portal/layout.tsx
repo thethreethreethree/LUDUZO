@@ -48,7 +48,7 @@ export default async function PortalLayout({ children }: { children: React.React
   // from the portal). Selector specificity (.gym-theme .x) beats the base utility, so
   // no !important is needed. Backslashes escape Tailwind's `/` and `:` in class names.
   const css = `
-body{background:${background};}
+body{background:${background};--nav-progress-bg:linear-gradient(90deg,color-mix(in srgb,${primary} 75%,black) 0%,${primary} 45%,color-mix(in srgb,${primary} 55%,white) 100%);--nav-progress-glow:0 0 14px 2px color-mix(in srgb,${primary} 85%,transparent),0 1px 0 rgba(255,255,255,0.35) inset;}
 .gym-theme{background:${background};min-height:100dvh;--glow-strong:color-mix(in srgb,${primary} 50%,transparent);--glow-soft:color-mix(in srgb,${primary} 25%,transparent);}
 .gym-theme .ring-gold{--tw-ring-color:${primary};}
 .gym-theme .gold-gradient{background:linear-gradient(160deg,color-mix(in srgb,${primary} 10%,${secondary}),${secondary});}

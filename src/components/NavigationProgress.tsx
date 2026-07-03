@@ -153,8 +153,10 @@ export function NavigationProgress() {
           transformOrigin: "left center",
           transform: `scaleX(${scale})`,
           willChange: "transform",
-          background: "linear-gradient(90deg, #C9950F 0%, #F5C518 45%, #FFE083 100%)",
-          boxShadow: "0 0 14px 2px rgba(245, 197, 24, 0.85), 0 1px 0 rgba(255, 255, 255, 0.35) inset",
+          // Themed per gym in the member app via --nav-progress-* (set by the portal
+          // layout); falls back to the exact LUDUZO gold on the owner dashboard.
+          background: "var(--nav-progress-bg, linear-gradient(90deg, #C9950F 0%, #F5C518 45%, #FFE083 100%))",
+          boxShadow: "var(--nav-progress-glow, 0 0 14px 2px rgba(245, 197, 24, 0.85), 0 1px 0 rgba(255, 255, 255, 0.35) inset)",
           transition:
             phase === "creep"
               ? `transform ${CREEP_MS}ms cubic-bezier(0.1, 0.5, 0.25, 1)`
