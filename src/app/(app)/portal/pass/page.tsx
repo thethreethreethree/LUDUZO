@@ -58,7 +58,7 @@ export default async function ArenaPassPage() {
       </div>
 
       {/* The scan target — as large + bright as the viewport allows. */}
-      <div className="rounded-3xl bg-white p-5 shadow-[0_0_40px_rgba(245,197,24,0.25)]">
+      <div className="rounded-3xl bg-white p-5 shadow-[0_0_40px_var(--glow-soft)]">
         {qrDataUrl ? (
           <Image src={qrDataUrl} alt="Your Arena Pass QR code" width={320} height={320} unoptimized className="h-[min(78vw,320px)] w-[min(78vw,320px)]" />
         ) : (

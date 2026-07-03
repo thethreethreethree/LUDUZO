@@ -21,7 +21,7 @@ export function PortalTabBar() {
         href="/portal/pass"
         aria-label="Arena Pass"
         aria-current={pathname.startsWith("/portal/pass") ? "page" : undefined}
-        className={`-mt-6 grid h-14 w-14 place-items-center rounded-full bg-gold text-black shadow-[0_0_20px_rgba(245,197,24,0.5)] ${pathname.startsWith("/portal/pass") ? "ring-2 ring-gold ring-offset-2 ring-offset-black" : ""}`}
+        className={`-mt-6 grid h-14 w-14 place-items-center rounded-full bg-gold text-black shadow-[0_0_20px_var(--glow-strong)] ${pathname.startsWith("/portal/pass") ? "ring-2 ring-gold ring-offset-2 ring-offset-black" : ""}`}
       >
         <Icon name="pass" size={26} />
       </Link>

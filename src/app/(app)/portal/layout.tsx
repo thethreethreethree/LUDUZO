@@ -49,7 +49,8 @@ export default async function PortalLayout({ children }: { children: React.React
   // no !important is needed. Backslashes escape Tailwind's `/` and `:` in class names.
   const css = `
 body{background:${background};}
-.gym-theme{background:${background};min-height:100dvh;}
+.gym-theme{background:${background};min-height:100dvh;--glow-strong:color-mix(in srgb,${primary} 50%,transparent);--glow-soft:color-mix(in srgb,${primary} 25%,transparent);}
+.gym-theme .ring-gold{--tw-ring-color:${primary};}
 .gym-theme .gold-gradient{background:linear-gradient(160deg,color-mix(in srgb,${primary} 10%,${secondary}),${secondary});}
 .gym-theme .gold-fill{background:linear-gradient(90deg,${primary},color-mix(in srgb,${primary} 65%,black));}
 .gym-theme .bg-onyx{background-color:${secondary};}
