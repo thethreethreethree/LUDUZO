@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Icon } from "@/components/Icon";
+import { SubmitButton } from "@/components/SubmitButton";
 import { logMeasurement, joinChallenge, setUnits, logWorkout } from "../actions";
 
 const LB_PER_KG = 2.20462;
@@ -148,7 +149,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
             <input name="body_fat_pct" inputMode="decimal" placeholder="Fat %" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
             <input name="muscle_mass_kg" inputMode="decimal" placeholder={`Muscle ${wUnit}`} className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
           </div>
-          <button className="mt-2 w-full rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save today&apos;s reading</button>
+          <SubmitButton className="mt-2 w-full rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110" pendingLabel="Saving…">Save today&apos;s reading</SubmitButton>
         </form>
       </section>
 
@@ -176,7 +177,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
                     ) : (
                       <form action={joinChallenge} className="shrink-0">
                         <input type="hidden" name="challenge_id" value={c.id} />
-                        <button className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110">Join</button>
+                        <SubmitButton className="rounded-md bg-gold px-4 py-1.5 text-xs font-bold text-black hover:brightness-110" pendingLabel="Joining…">Join</SubmitButton>
                       </form>
                     )}
                   </div>
@@ -220,7 +221,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
             <input name="reps" inputMode="numeric" placeholder="Reps" className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
             <input name="weight" inputMode="decimal" placeholder={`Weight ${wUnit}`} className="min-w-0 rounded-md border border-iron bg-onyx-2 px-2.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
           </div>
-          <button className="rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110">Save workout</button>
+          <SubmitButton className="rounded-md bg-gold py-2 text-sm font-bold text-black hover:brightness-110" pendingLabel="Saving…">Save workout</SubmitButton>
         </form>
         {prList.length > 0 ? (
           <div className="mt-3 border-t border-iron pt-3">

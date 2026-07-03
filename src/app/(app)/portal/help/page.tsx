@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui";
 import { Icon } from "@/components/Icon";
+import { SubmitButton } from "@/components/SubmitButton";
 import { submitFeedback } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -112,7 +113,7 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
             ))}
           </div>
           <textarea name="comment" rows={2} placeholder="Anything else? (optional)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
-          <button className="self-start rounded-xl bg-gold px-4 py-2 text-sm font-bold text-black">Send feedback</button>
+          <SubmitButton className="self-start rounded-xl bg-gold px-4 py-2 text-sm font-bold text-black" pendingLabel="Sending…">Send feedback</SubmitButton>
         </form>
       </section>
 

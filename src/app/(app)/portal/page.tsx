@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
 import { btnGold, btnSecondary } from "@/components/ui";
 import { Icon } from "@/components/Icon";
+import { SubmitButton } from "@/components/SubmitButton";
 import { claimRecords, signMyDocument, portalSignOut } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -231,7 +232,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
             <form key={d.id} action={signMyDocument} className="flex items-center justify-between rounded-xl border border-gold-line bg-gold-dim px-4 py-3 text-sm">
               <span className="font-semibold text-bone">Sign your {d.kind}</span>
               <input type="hidden" name="id" value={d.id} />
-              <button className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-black">Sign</button>
+              <SubmitButton className="rounded-md bg-gold px-3 py-1 text-xs font-bold text-black" pendingLabel="Signing…">Sign</SubmitButton>
             </form>
           ))}
         </section>
