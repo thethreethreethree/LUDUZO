@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Montserrat, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { NavigationProgress } from "@/components/NavigationProgress";
 
 // Display + UI + body face (design guide §3: Montserrat 500–900, no separate body face).
 const montserrat = Montserrat({
@@ -46,7 +48,12 @@ export default function RootLayout({
       lang="en"
       className={`dark ${montserrat.variable} ${jetbrains.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Suspense fallback={null}>
+          <NavigationProgress />
+        </Suspense>
+        {children}
+      </body>
     </html>
   );
 }

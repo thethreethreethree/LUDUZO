@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { Icon } from "@/components/Icon";
 import { logMeasurement, joinChallenge, setUnits, logWorkout } from "../actions";
 
 const LB_PER_KG = 2.20462;
@@ -39,8 +40,10 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
     supabase.from("challenge_participants").select("challenge_id, progress").in("member_id", ids),
     // Leaderboard rows (first name + progress) for org challenges — 0046 view.
     supabase.from("challenge_leaderboard").select("challenge_id, member_id, first_name, progress"),
-    // Self-logged workouts (0047, member-owned).
-    supabase.from("member_workout_logs").select("id, performed_on, exercise, sets, reps, weight_kg").in("member_id", ids).order("performed_on", { ascending: false }).order("created_at", { ascending: false }).limit(20),
+    // Self-logged workouts (0047, member-owned). High limit so "Personal records"
+    // reflect the member's true all-time best, not just the last 20 logs (audit:
+    // same aggregate-over-capped-fetch class as the loyalty-balance finding).
+    supabase.from("member_workout_logs").select("id, performed_on, exercise, sets, reps, weight_kg").in("member_id", ids).order("performed_on", { ascending: false }).order("created_at", { ascending: false }).limit(500),
   ]);
 
   const wplans = (wData ?? []) as unknown as WPlan[];
@@ -52,6 +55,13 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
   const participation = (partData ?? []) as unknown as Participation[];
   const joinedProgress = new Map(participation.map((p) => [p.challenge_id, p.progress]));
   const myMemberIds = new Set(ids);
+  // A challenge whose end date has passed can't be joined. Show ended ones only if
+  // the member joined (so they can see their final standing — A10 transparency);
+  // hide ended challenges they never joined (noise). Never offer "Join" on an ended
+  // one (L2/L3: stale item shown as a live action — same class as cancelled PT).
+  const todayISO = new Date().toISOString().slice(0, 10);
+  const isEnded = (c: Challenge) => c.ends_on != null && c.ends_on < todayISO;
+  const visibleChallenges = challenges.filter((c) => !isEnded(c) || joinedProgress.has(c.id));
   // Leaderboard: group rows by challenge, ranked by progress desc (0046 view; empty
   // until the migration is applied — degrades gracefully).
   type LbRow = { challenge_id: string; member_id: string; first_name: string | null; progress: number };
@@ -143,12 +153,13 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
       </section>
 
       {/* challenges — browse + join (0036 read, 0034 join) */}
-      {challenges.length > 0 ? (
+      {visibleChallenges.length > 0 ? (
         <section>
           <div className="mb-2 text-[15px] font-bold text-bone">Challenges</div>
           <ul className="flex flex-col gap-2">
-            {challenges.map((c) => {
+            {visibleChallenges.map((c) => {
               const joined = joinedProgress.has(c.id);
+              const ended = isEnded(c);
               const prog = joinedProgress.get(c.id) ?? 0;
               const pct = c.goal_target && c.goal_target > 0 ? Math.min(100, Math.round((prog / c.goal_target) * 100)) : null;
               return (
@@ -159,7 +170,9 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
                       {c.description ? <div className="truncate text-xs text-ash">{c.description}</div> : null}
                     </div>
                     {joined ? (
-                      <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">Joined ✓</span>
+                      <span className="shrink-0 rounded-md bg-win/15 px-3 py-1.5 text-xs font-bold text-win">{ended ? "Final ✓" : "Joined ✓"}</span>
+                    ) : ended ? (
+                      <span className="shrink-0 rounded-md bg-iron px-3 py-1.5 text-xs font-bold text-ash-dim">Ended</span>
                     ) : (
                       <form action={joinChallenge} className="shrink-0">
                         <input type="hidden" name="challenge_id" value={c.id} />
@@ -211,7 +224,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
         </form>
         {prList.length > 0 ? (
           <div className="mt-3 border-t border-iron pt-3">
-            <div className="mb-1.5 text-xs font-semibold uppercase tracking-[0.07em] text-gold">🏆 Personal records</div>
+            <div className="mb-1.5 flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.07em] text-gold"><Icon name="records" size={13} /> Personal records</div>
             <div className="flex flex-wrap gap-1.5">
               {prList.map(([ex, kg]) => (
                 <span key={ex} className="rounded-full border border-gold-line bg-gold-dim px-2.5 py-1 text-[11px] font-semibold text-gold">{ex} {disp(kg)}{wUnit}</span>
@@ -221,7 +234,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
         ) : null}
         {workouts.length > 0 ? (
           <ul className="mt-3 flex flex-col divide-y divide-iron border-t border-iron">
-            {workouts.map((w) => (
+            {workouts.slice(0, 12).map((w) => (
               <li key={w.id} className="flex items-center justify-between py-2 text-sm">
                 <span className="min-w-0 truncate text-bone">{w.exercise}</span>
                 <span className="mono shrink-0 text-xs text-ash">
@@ -278,7 +291,7 @@ export default async function PortalProgressPage({ searchParams }: { searchParam
       <section>
         <div className="mb-2 text-[15px] font-bold text-bone">Badges</div>
         {badges.length === 0 ? (
-          <div className="rounded-2xl border border-iron bg-onyx p-4 text-sm text-ash">Earn badges by training. 🏅</div>
+          <div className="flex items-center gap-1.5 rounded-2xl border border-iron bg-onyx p-4 text-sm text-ash">Earn badges by training. <Icon name="badges" size={15} /></div>
         ) : (
           <div className="flex flex-wrap gap-2">
             {badges.map((b) => (

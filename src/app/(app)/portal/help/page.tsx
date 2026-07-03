@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui";
+import { Icon } from "@/components/Icon";
 import { submitFeedback } from "../actions";
 
 export const dynamic = "force-dynamic";
@@ -61,14 +62,14 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
         <p className="mt-1 text-sm text-ash">Reach the team at the front desk during opening hours, or send feedback below.</p>
         {gymPhone ? (
           <div className="mt-3">
-            <a href={`tel:${gymPhone.replace(/\s+/g, "")}`} className="block rounded-xl border border-iron bg-onyx-2 px-4 py-2.5 text-center text-sm font-semibold text-bone hover:border-gold">📞 Call the front desk · {gymPhone}</a>
+            <a href={`tel:${gymPhone.replace(/\s+/g, "")}`} className="flex items-center justify-center gap-1.5 rounded-xl border border-iron bg-onyx-2 px-4 py-2.5 text-center text-sm font-semibold text-bone hover:border-gold"><Icon name="call" size={15} /> Call the front desk · {gymPhone}</a>
           </div>
         ) : null}
         {(gymAddress || gymHours || gymAmenities) ? (
           <dl className="mt-3 flex flex-col gap-2 text-sm">
-            {gymHours ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Hours</dt><dd className="text-bone">🕐 {gymHours}</dd></div>) : null}
-            {gymAddress ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Location</dt><dd className="text-bone">📍 <a href={`https://maps.google.com/?q=${encodeURIComponent(gymAddress)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gold">{gymAddress}</a></dd></div>) : null}
-            {gymAmenities ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Amenities</dt><dd className="text-bone">🏋 {gymAmenities}</dd></div>) : null}
+            {gymHours ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Hours</dt><dd className="flex items-center gap-1.5 text-bone"><Icon name="hours" size={13} /> {gymHours}</dd></div>) : null}
+            {gymAddress ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Location</dt><dd className="flex items-center gap-1.5 text-bone"><Icon name="location" size={13} /> <a href={`https://maps.google.com/?q=${encodeURIComponent(gymAddress)}`} target="_blank" rel="noopener noreferrer" className="hover:text-gold">{gymAddress}</a></dd></div>) : null}
+            {gymAmenities ? (<div><dt className="text-[11px] uppercase tracking-[0.07em] text-ash-dim">Amenities</dt><dd className="flex items-center gap-1.5 text-bone"><Icon name="amenities" size={13} /> {gymAmenities}</dd></div>) : null}
           </dl>
         ) : null}
         {!gymPhone && !gymAddress && !gymHours && !gymAmenities ? (

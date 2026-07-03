@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatMoney } from "@/lib/billing";
+import { Icon } from "@/components/Icon";
 import { portalSignOut, addMemberComment, updateMyProfile, markNotificationsRead, submitReferral, updateMyGoals, setNotifPrefs, redeemReward } from "../actions";
 
 const NOTIF_LABELS: { kind: string; label: string }[] = [
@@ -42,7 +43,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
   const { data: goalsData } = await supabase.from("members").select("goals, fitness_level").eq("profile_id", user.id).limit(1);
   const myGoals = ((goalsData ?? []) as { goals: string | null; fitness_level: string | null }[])[0] ?? null;
 
-  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }, { data: loyData }, { data: rewardData }] = await Promise.all([
+  const [{ data: subData }, { data: invData }, { data: postData }, { data: annData }, { data: staffData }, { data: notifData }, { data: memberDir }, { data: refData }, { data: loyData }, { data: rewardData }, { data: lockerData }, { data: myDocData }] = await Promise.all([
     supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").in("member_id", ids).order("created_at", { ascending: false }).limit(5),
     supabase.from("invoices").select("id, amount_cents, currency, status, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
     supabase.from("community_posts").select("id, organization_id, title, body, created_at, author_id, community_comments(id, body, author_id, author_member_id)").order("created_at", { ascending: false }).limit(10),
@@ -56,16 +57,29 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
     supabase.from("gym_member_directory").select("member_id, first_name"),
     // Own referrals (0049; empty until applied).
     supabase.from("referrals").select("id, referred_name, status, created_at").in("referrer_member_id", ids).order("created_at", { ascending: false }).limit(10),
-    // §9 loyalty points history (own-read, 0016).
-    supabase.from("loyalty_transactions").select("id, points, reason, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(50),
+    // §9 loyalty points history (own-read, 0016). High limit so the balance sum +
+    // affordability are accurate for active members, not just the last 50 (audit F2).
+    supabase.from("loyalty_transactions").select("id, points, reason, created_at").in("member_id", ids).order("created_at", { ascending: false }).limit(2000),
     // §9 rewards catalog (active, member-readable — 0055; empty until applied).
     supabase.from("rewards").select("id, name, description, cost_points").eq("active", true).order("cost_points", { ascending: true }).limit(20),
+    // Own active locker rental (0060 member-read; empty until applied — cat 3).
+    supabase.from("locker_rentals").select("locker_label, monthly_fee_cents, status, ends_on").in("member_id", ids).eq("status", "active").order("starts_on", { ascending: false }).limit(1),
+    // Own documents — signed AND pending. Home only shows UNSIGNED (to prompt); this
+    // gives the member a surface to see waivers/contracts they've signed (A10).
+    supabase.from("member_documents").select("id, kind, status, signed_at").in("member_id", ids).order("created_at", { ascending: false }).limit(20),
   ]);
+  const locker = ((lockerData ?? []) as { locker_label: string; monthly_fee_cents: number; status: string; ends_on: string | null }[])[0] ?? null;
+  const documents = ((myDocData ?? []) as { id: string; kind: string; status: string; signed_at: string | null }[]);
   const staffName = new Map(((staffData ?? []) as { user_id: string; full_name: string | null }[]).map((s) => [s.user_id, s.full_name]));
   const memberName = new Map(((memberDir ?? []) as { member_id: string; first_name: string | null }[]).map((m) => [m.member_id, m.first_name]));
   const referrals = (refData ?? []) as unknown as Referral[];
   const loyalty = (loyData ?? []) as unknown as { id: string; points: number; reason: string | null; created_at: string }[];
-  const pointsBalance = loyalty.reduce((s, t) => s + (t.points ?? 0), 0);
+  // TRUE balance from the 0059 aggregate view; fall back to summing the fetched
+  // history if the view isn't applied. The history query above still drives the list.
+  const { data: balData, error: balErr } = await supabase.from("member_points_balance").select("balance").in("member_id", ids);
+  const pointsBalance = (!balErr && balData)
+    ? (balData as { balance: number }[]).reduce((s, r) => s + (r.balance ?? 0), 0)
+    : loyalty.reduce((s, t) => s + (t.points ?? 0), 0);
   const rewards = (rewardData ?? []) as unknown as { id: string; name: string; description: string | null; cost_points: number }[];
 
   const subs = (subData ?? []) as unknown as Sub[];
@@ -202,6 +216,42 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         )}
       </section>
 
+      {/* Your locker (0060 member-read; cat 3 — renders only if you rent one) */}
+      {locker ? (
+        <section className="rounded-2xl border border-iron bg-onyx p-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-[15px] font-bold text-bone">Your locker</div>
+              <div className="mono mt-0.5 text-xs text-ash">{formatMoney(locker.monthly_fee_cents)}/mo{locker.ends_on ? ` · term ends ${new Date(locker.ends_on).toLocaleDateString()}` : ""}</div>
+            </div>
+            <div className="text-right">
+              <div className="mono text-2xl font-extrabold text-gold">{locker.locker_label}</div>
+              <div className="text-[10px] uppercase tracking-[0.07em] text-ash">locker</div>
+            </div>
+          </div>
+        </section>
+      ) : null}
+
+      {/* Your documents (A10 — see signed waivers/contracts, not just pending) */}
+      {documents.length > 0 ? (
+        <section className="rounded-2xl border border-iron bg-onyx p-4">
+          <div className="text-[15px] font-bold text-bone">Your documents</div>
+          <ul className="mt-2 flex flex-col divide-y divide-iron">
+            {documents.map((d) => {
+              const signed = d.status === "signed";
+              return (
+                <li key={d.id} className="flex items-center justify-between py-2 text-sm">
+                  <span className="capitalize text-bone">{d.kind.replace(/_/g, " ")}</span>
+                  <span className={`mono text-xs ${signed ? "text-win" : "text-warn"}`}>
+                    {signed ? `Signed${d.signed_at ? ` · ${new Date(d.signed_at).toLocaleDateString()}` : ""}` : d.status.replace(/_/g, " ")}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      ) : null}
+
       {/* Gym news */}
       {anns.length > 0 ? (
         <section>
@@ -235,7 +285,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
                   <ul className="mt-2 flex flex-col gap-1 border-t border-iron pt-2">
                     {p.community_comments.map((c) => {
                       const who = c.author_id ? staffName.get(c.author_id) : c.author_member_id ? memberName.get(c.author_member_id) : null;
-                      return <li key={c.id} className="text-xs text-ash">💬 {who ? <span className="font-semibold text-bone">{who}: </span> : null}{c.body}</li>;
+                      return <li key={c.id} className="text-xs text-ash"><Icon name="community" size={12} className="mr-1 inline-block align-[-1px] text-ash-dim" /> {who ? <span className="font-semibold text-bone">{who}: </span> : null}{c.body}</li>;
                     })}
                   </ul>
                 ) : null}

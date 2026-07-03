@@ -779,3 +779,29 @@ A22 was caught when the founder forced *"please review thinkerthinker.MD and Cla
 
 **The lesson about the lesson.** A19–A22 each caught the agent operating *in the language of the discipline while violating it at the meta-altitude*. A23 is the same shape applied to the **decision to stop**: the agent cited a real rule (§1.5.1) as cover for halting when told not to. The structural fix is, again, a pre-action artifact plus a harness forcing function — not a promise to "remember to keep going." A23's test: does the next autonomous build run to a founder-defined stop (or a true hard block) without the founder having to say "I didn't tell you to stop"?
 
+
+---
+
+## A24 · Aggregate-over-capped-fetch — a total summed from a `.limit(N)` or unfiltered read, shown as complete/live
+
+**Tags:** discipline under temptation · proactive audit · data-render integrity · methodology evolution
+
+**Captured:** 2026-07-03
+
+**Context.** A single audit of the member PWA surfaced the *same* defect six times, in code that all type-checked and looked correct: (1) `/more` loyalty balance summed the last `.limit(50)` transactions and gated the Redeem button on it; (2) portal home + staff member-detail did the same at `.limit(2000)`/`.limit(1000)`; (3) "Personal records" were computed as the max over the last `.limit(20)` workout logs — so a real PR set earlier displayed as a *lower* weight; (4) the "Personal training" list rendered ALL appointment statuses with no filter, so a *cancelled* PT session showed as live with a "＋ Calendar" button; (5) challenges rendered with no `ends_on` filter, so an ended challenge still offered "Join"; (6) the analytics KPIs and the reports "Revenue (all paid)" total summed capped, *unordered* row fetches — and reports' "Outstanding" queried a non-existent enum value, silently reading **$0** for any gym with real open invoices. Every one was invisible on the founder's month-1-small DB (≈no data → all sums 0 → looked fine); each becomes wrong the moment real history accrues.
+
+**Insight.** Whenever a value shown to a user as **complete** ("your balance", "all revenue", "your PR") or **current** ("upcoming", "join") is derived by **reducing a row set that was fetched with a `.limit(N)` cap or without a status/time filter**, the display is a latent lie: correct on small/fresh data, wrong at scale or once an item goes stale. Two sub-shapes: (a) *capped aggregate* — `sum`/`max`/`count` over `.limit(N)` under-reports past N (fix: a server-side aggregate the page reads; a limit-raise is only a stopgap — see [[A13]]); (b) *unfiltered list* — a list that should exclude stale states (cancelled/ended/void/expired/past) shown as live-actionable (fix: filter them, or render them unmistakably not-actionable — never offer Join/Book/Calendar/Redeem on a dead item). The tell is that the bug hides on empty data, so tests and demos never catch it; only a *what-happens-with-real-history* reading does.
+
+**Constitutional bearing.** Direct application of §1.5.1 L2 (does it actually work, end-to-end — not just "the query returns rows") and §3.4 (a total labelled "all" must BE all; a "PR" that isn't the record is a claim the data doesn't support). Companion to [[A13]] (author the space, not the instance — the *cure* for sub-shape (a) is one shared server-side aggregate, not a limit-raise per page; raising N in six places IS the A13 anti-pattern) and to [[A14]] (data-path ≠ render-path — here the render shows a number the data doesn't back). Also a case of [[A21]] within-module parity: the class-booking side already excluded cancelled/past; the PT and challenge sides didn't. Candidate amendment companion: a pre-ship check that every user-visible aggregate is either a server-side total or explicitly labelled as a window.
+
+**Future-use note.** Pre-ship check for any user-visible number or list derived from a row fetch:
+
+1. Is this value presented as **complete** (a balance, a total, a record, a count)? If yes and it is a client-side `reduce`/`max` over a `.limit(N)` fetch a real user will exceed — it is wrong at scale. Use a server-side aggregate (view/RPC) and bound only the *display* slice, or label it "recent N" honestly.
+2. Is this a **list of actionable items**? Enumerate the stale states for its table (cancelled/ended/void/expired/past/redeemed). Are they filtered, or shown non-actionable? A live action (Join/Book/Calendar/Redeem/Pay) on a stale row is the defect.
+3. Does a status filter use a **literal** (`'past_due'`, `'paid'`)? Confirm it is a valid value of *that column's* enum — a wrong literal can error the whole query and silently zero the result (the reports "Outstanding = $0" shape).
+4. Would this read correctly on a DB with **years** of the member's/gym's history, not just the fresh demo row? If you cannot answer yes from the query alone, it is not done.
+
+The temptation is to raise the limit and move on — it makes the symptom recede far enough to look fixed. Per [[A13]], that is the wrong altitude when the shape recurs; the limit-raise is a stopgap you ship *while* building the shared aggregate, not the resolution.
+
+**The lesson about the lesson.** A24 is a *content*-altitude sibling to the A19–A23 *meta*-altitude assets: where those caught the agent violating the discipline while speaking it, A24 catches a concrete code pattern that passes every type-check and demo yet fails on real data. It shares the A12/A13/A14 shape — *a recurring local fix signals a missing structural discipline* — and its own test is whether the next new list/aggregate surface is built server-side-or-labelled and stale-filtered by default, or whether the sixth-instance pattern recurs a seventh time because "the limit is high enough for now."
+

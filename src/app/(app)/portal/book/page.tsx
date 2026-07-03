@@ -15,8 +15,17 @@ const OK_MSG: Record<string, string> = {
   cancelled: "Booking cancelled.",
 };
 
-export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string; instructor?: string; type?: string; level?: string }> }) {
-  const { ok, error, instructor, type, level } = await searchParams;
+// Member-facing PT status labels (A18: never leak the raw `appointment_status`
+// enum — scheduled/completed/cancelled/no_show — to the member).
+const APPT_STATUS: Record<string, string> = {
+  scheduled: "Confirmed",
+  completed: "Completed",
+  cancelled: "Cancelled",
+  no_show: "Missed",
+};
+
+export default async function PortalBookPage({ searchParams }: { searchParams: Promise<{ ok?: string; error?: string; instructor?: string; type?: string; level?: string; day?: string }> }) {
+  const { ok, error, instructor, type, level, day } = await searchParams;
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
@@ -84,21 +93,31 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
   const instructors = Array.from(new Set(sessions.map((s) => s.class?.instructor_name).filter(Boolean))) as string[];
   const types = Array.from(new Set(sessions.map(typeOf).filter(Boolean))) as string[];
   const levels = Array.from(new Set(sessions.map(levelOf).filter(Boolean))) as string[];
+  // Local YYYY-MM-DD key (matches the day-grouping below, which uses local dates).
+  const dayKey = (iso: string) => new Date(iso).toLocaleDateString("en-CA");
   const filteredSessions = sessions.filter((s) =>
     (!instructor || s.class?.instructor_name === instructor) &&
     (!type || typeOf(s) === type) &&
-    (!level || levelOf(s) === level));
+    (!level || levelOf(s) === level) &&
+    (!day || dayKey(s.starts_at) === day));
   // Build a filter URL preserving the other active filters.
-  const filterHref = (o: { instructor?: string; type?: string; level?: string }) => {
-    const cur = { instructor, type, level, ...o };
+  const filterHref = (o: { instructor?: string; type?: string; level?: string; day?: string }) => {
+    const cur = { instructor, type, level, day, ...o };
     const p = new URLSearchParams();
     if (cur.instructor) p.set("instructor", cur.instructor);
     if (cur.type) p.set("type", cur.type);
     if (cur.level) p.set("level", cur.level);
+    if (cur.day) p.set("day", cur.day);
     const qs = p.toString();
     return "/portal/book" + (qs ? `?${qs}` : "");
   };
   const chip = (active: boolean) => `rounded-full px-3 py-1 text-xs font-semibold ${active ? "bg-gold text-black" : "border border-iron text-ash hover:text-gold"}`;
+  // Next 7 days for the quick day-strip, each with its class count from the full schedule.
+  const weekStrip = [...Array(7)].map((_, i) => {
+    const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() + i);
+    const key = d.toLocaleDateString("en-CA");
+    return { key, count: sessions.filter((s) => dayKey(s.starts_at) === key).length, wd: ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"][d.getDay()], dnum: d.getDate() };
+  });
   const todayStr = new Date().toDateString();
   const tomorrowStr = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return d.toDateString(); })();
   const dayLabel = (iso: string) => {
@@ -128,6 +147,26 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
       {/* ---- Browse & book the schedule (grouped by day, filterable by trainer) ---- */}
       <section>
         <div className="mb-2 text-[15px] font-bold text-bone">Schedule</div>
+        {/* §4 quick day strip — jump the schedule to one day; days with no classes are dimmed. */}
+        {sessions.length > 0 ? (
+          <div className="-mx-5 mb-3 flex gap-1.5 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link href={filterHref({ day: undefined })} className={`flex shrink-0 flex-col items-center justify-center rounded-xl border px-3 py-1.5 ${!day ? "border-gold bg-gold/10" : "border-iron"}`}>
+              <span className={`text-[11px] font-bold ${!day ? "text-gold" : "text-ash"}`}>All</span>
+              <span className="text-[9px] text-ash-dim">week</span>
+            </Link>
+            {weekStrip.map((d) => {
+              const on = day === d.key;
+              return (
+                <Link key={d.key} href={d.count === 0 ? filterHref({ day: undefined }) : filterHref({ day: d.key })} aria-disabled={d.count === 0}
+                  className={`flex shrink-0 flex-col items-center justify-center rounded-xl border px-3 py-1.5 ${on ? "border-gold bg-gold/10" : d.count === 0 ? "border-iron opacity-40" : "border-iron hover:border-gold"}`}>
+                  <span className={`text-[11px] font-bold ${on ? "text-gold" : "text-bone"}`}>{d.wd}</span>
+                  <span className={`mono text-[13px] font-extrabold ${on ? "text-gold" : "text-bone"}`}>{d.dnum}</span>
+                  <span className="text-[9px] text-ash-dim">{d.count > 0 ? `${d.count} class${d.count === 1 ? "" : "es"}` : "—"}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
         {(instructors.length > 1 || types.length > 0 || levels.length > 0) ? (
           <div className="mb-3 flex flex-col gap-1.5">
             {types.length > 0 ? (
@@ -248,18 +287,26 @@ export default async function PortalBookPage({ searchParams }: { searchParams: P
         <section>
           <div className="mb-2 text-[15px] font-bold text-bone">Personal training</div>
           <ul className="flex flex-col gap-2">
-            {appts.map((a) => (
-              <li key={a.id} className="flex items-center justify-between gap-3 rounded-2xl border border-iron bg-onyx p-4">
-                <div className="min-w-0">
-                  <div className="mono text-xs font-semibold text-gold">{new Date(a.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
-                  <div className="mt-0.5 font-bold text-bone">{a.title ?? "PT session"}</div>
-                  <div className="text-xs text-ash">{a.trainer_id && staffName.get(a.trainer_id) ? `with ${staffName.get(a.trainer_id)} · ` : ""}{a.status}</div>
-                </div>
-                {Date.parse(a.starts_at) > now ? (
-                  <a href={`/portal/calendar/${a.id}?kind=appt`} className="shrink-0 rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-gold hover:text-gold">＋ Calendar</a>
-                ) : null}
-              </li>
-            ))}
+            {appts.map((a) => {
+              // A21 within-module parity: the class side never treats a cancelled
+              // booking as live. A cancelled PT session is shown (A10 transparency —
+              // it may be trainer-initiated) but dimmed, clearly labelled, and never
+              // offered a calendar add.
+              const cancelled = a.status === "cancelled";
+              const upcoming = Date.parse(a.starts_at) > now;
+              return (
+                <li key={a.id} className={`flex items-center justify-between gap-3 rounded-2xl border border-iron bg-onyx p-4 ${cancelled ? "opacity-60" : ""}`}>
+                  <div className="min-w-0">
+                    <div className="mono text-xs font-semibold text-gold">{new Date(a.starts_at).toLocaleString([], { weekday: "short", hour: "numeric", minute: "2-digit" })}</div>
+                    <div className={`mt-0.5 font-bold text-bone ${cancelled ? "line-through" : ""}`}>{a.title ?? "PT session"}</div>
+                    <div className="text-xs text-ash">{a.trainer_id && staffName.get(a.trainer_id) ? `with ${staffName.get(a.trainer_id)} · ` : ""}<span className={cancelled ? "text-loss" : ""}>{APPT_STATUS[a.status] ?? a.status}</span></div>
+                  </div>
+                  {upcoming && !cancelled ? (
+                    <a href={`/portal/calendar/${a.id}?kind=appt`} className="shrink-0 rounded-md border border-iron px-3 py-1.5 text-xs font-semibold text-ash hover:border-gold hover:text-gold">＋ Calendar</a>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}

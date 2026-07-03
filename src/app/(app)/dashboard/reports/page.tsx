@@ -12,7 +12,7 @@ export default async function ReportsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [membersC, activeC, occupancyC, upcomingC, subsC, paidInv, memberStatuses, openInv] = await Promise.all([
+  const [membersC, activeC, occupancyC, upcomingC, subsC, paidInv, memberStatuses, openInv, revSummary] = await Promise.all([
     supabase.from("members").select("id", { count: "exact", head: true }),
     supabase.from("members").select("id", { count: "exact", head: true }).eq("status", "active"),
     supabase.from("checkins").select("id", { count: "exact", head: true }).is("checked_out_at", null),
@@ -21,12 +21,23 @@ export default async function ReportsPage() {
       .select("id", { count: "exact", head: true })
       .gte("starts_at", new Date().toISOString()),
     supabase.from("subscriptions").select("id", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("invoices").select("amount_cents, paid_at").eq("status", "paid").limit(5000),
+    // Ordered desc so the retained 5k (if a gym exceeds it) are the RECENT paid
+    // invoices the by-month chart + today's-revenue actually plot — not an arbitrary
+    // subset. (The headline totals now come from gym_revenue_summary, below — these
+    // rows are only for the recent-window chart + today.)
+    supabase.from("invoices").select("amount_cents, paid_at").eq("status", "paid").order("paid_at", { ascending: false, nullsFirst: false }).limit(5000),
     supabase.from("members").select("status").limit(5000),
-    supabase.from("invoices").select("amount_cents").in("status", ["open", "past_due"]).limit(5000),
+    // 'open' is the only unpaid invoice_status ('past_due' is a SUBSCRIPTION status,
+    // not an invoice one — see 0033; querying it here errored the whole query, so
+    // Outstanding silently read $0 for every gym with real open invoices). Kept as the
+    // graceful fallback if the aggregate view (0059) isn't applied.
+    supabase.from("invoices").select("amount_cents").eq("status", "open").limit(5000),
+    // 0059: TRUE lifetime paid + outstanding (server-side SUM, org-scoped). Falls back
+    // to the capped row sums below if the view is absent.
+    supabase.from("gym_revenue_summary").select("paid_cents, outstanding_cents"),
   ]);
 
-  const outstandingCents = ((openInv.data ?? []) as { amount_cents: number }[]).reduce(
+  const outstandingCentsCapped = ((openInv.data ?? []) as { amount_cents: number }[]).reduce(
     (sum, r) => sum + (r.amount_cents ?? 0),
     0,
   );
@@ -70,7 +81,13 @@ export default async function ReportsPage() {
   const maxDay = Math.max(1, ...days.map((d) => d.count));
 
   const paidRows = (paidInv.data ?? []) as { amount_cents: number; paid_at: string | null }[];
-  const revenueCents = paidRows.reduce((sum, r) => sum + (r.amount_cents ?? 0), 0);
+  const revenueCentsCapped = paidRows.reduce((sum, r) => sum + (r.amount_cents ?? 0), 0);
+
+  // Headline lifetime totals from the 0059 aggregate view (TRUE sums). If the view
+  // isn't applied (error), fall back to the capped row sums so the page still renders.
+  const revView = revSummary.error ? null : ((revSummary.data ?? []) as { paid_cents: number | string; outstanding_cents: number | string }[]);
+  const revenueCents = revView ? revView.reduce((s, r) => s + Number(r.paid_cents), 0) : revenueCentsCapped;
+  const outstandingCents = revView ? revView.reduce((s, r) => s + Number(r.outstanding_cents), 0) : outstandingCentsCapped;
 
   // Revenue by month (last 6 calendar months, most recent first).
   const byMonth = new Map<string, number>();

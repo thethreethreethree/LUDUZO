@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { NAV_GROUPS } from "@/lib/nav";
 import { formatMoney } from "@/lib/billing";
+import { Icon, type IconName } from "@/components/Icon";
 import {
   StatBlock, ProgressBar, AlertItem, Avatar, Card, CardHeader,
   SectionLabel, btnGold, btnSecondary,
@@ -111,9 +112,9 @@ export default async function DashboardPage() {
   }
 
   const alerts = [
-    overdueCount ? { icon: "⚠", title: `${overdueCount} overdue payment${overdueCount > 1 ? "s" : ""}`, subtext: "Collect at the desk or suspend", href: "/dashboard/invoices" } : null,
-    unsignedCount ? { icon: "📄", title: `${unsignedCount} unsigned waiver${unsignedCount > 1 ? "s" : ""}`, subtext: "New members need to sign", href: "/dashboard/documents" } : null,
-  ].filter(Boolean) as { icon: string; title: string; subtext: string; href: string }[];
+    overdueCount ? { icon: "alert", title: `${overdueCount} overdue payment${overdueCount > 1 ? "s" : ""}`, subtext: "Collect at the desk or suspend", href: "/dashboard/invoices" } : null,
+    unsignedCount ? { icon: "document", title: `${unsignedCount} unsigned waiver${unsignedCount > 1 ? "s" : ""}`, subtext: "New members need to sign", href: "/dashboard/documents" } : null,
+  ].filter(Boolean) as { icon: IconName; title: string; subtext: string; href: string }[];
 
   return (
     <main className="mx-auto flex w-full max-w-content flex-1 flex-col gap-6 px-7 py-8">
@@ -199,10 +200,10 @@ export default async function DashboardPage() {
           <Card>
             <CardHeader title="Needs your attention" />
             {alerts.length === 0 ? (
-              <p className="py-3 text-center text-sm text-ash">All clear — nothing needs you right now. 💪</p>
+              <p className="py-3 text-center text-sm text-ash">All clear — nothing needs you right now.</p>
             ) : (
               <div className="flex flex-col gap-2.5">
-                {alerts.map((a, i) => <AlertItem key={i} icon={a.icon} title={a.title} subtext={a.subtext} href={a.href} />)}
+                {alerts.map((a, i) => <AlertItem key={i} icon={<Icon name={a.icon} size={16} />} title={a.title} subtext={a.subtext} href={a.href} />)}
               </div>
             )}
           </Card>

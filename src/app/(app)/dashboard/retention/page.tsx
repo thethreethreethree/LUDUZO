@@ -78,7 +78,7 @@ export default async function RetentionPage() {
         <h2 className="text-sm font-medium text-ash">Reach out</h2>
         {atRisk.length === 0 ? (
           <p className="rounded-md border border-onyx bg-onyx p-6 text-center text-sm text-ash">
-            No at-risk members — everyone active has visited recently. 💪
+            No at-risk members — everyone active has visited recently.
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-onyx rounded-md border border-onyx">

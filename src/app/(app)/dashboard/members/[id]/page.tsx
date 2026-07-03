@@ -127,15 +127,23 @@ export default async function MemberDetailPage({
     .limit(12);
   const measurements = (measureData ?? []) as unknown as Measurement[];
 
-  const { data: loyaltyData } = await supabase
-    .from("loyalty_transactions")
-    .select("points")
-    .eq("member_id", id)
-    .limit(1000);
-  const loyaltyBalance = ((loyaltyData ?? []) as { points: number }[]).reduce(
-    (sum, r) => sum + (r.points ?? 0),
-    0,
-  );
+  // TRUE balance from the 0059 aggregate view; fall back to the capped row sum if the
+  // view isn't applied. (member_points_balance is org-scoped, so staff read is allowed.)
+  const { data: balData, error: balErr } = await supabase
+    .from("member_points_balance")
+    .select("balance")
+    .eq("member_id", id);
+  let loyaltyBalance: number;
+  if (!balErr && balData) {
+    loyaltyBalance = (balData as { balance: number }[]).reduce((sum, r) => sum + (r.balance ?? 0), 0);
+  } else {
+    const { data: loyaltyData } = await supabase
+      .from("loyalty_transactions")
+      .select("points")
+      .eq("member_id", id)
+      .limit(2000);
+    loyaltyBalance = ((loyaltyData ?? []) as { points: number }[]).reduce((sum, r) => sum + (r.points ?? 0), 0);
+  }
 
   const { data: commsData } = await supabase
     .from("member_communications")
@@ -152,8 +160,9 @@ export default async function MemberDetailPage({
     .order("created_at", { ascending: false })
     .limit(50);
   const invoices = (invoiceData ?? []) as unknown as Invoice[];
+  // 'open' is the only unpaid invoice_status (past_due is a subscription status — 0033).
   const outstanding = invoices
-    .filter((inv) => inv.status === "open" || inv.status === "past_due")
+    .filter((inv) => inv.status === "open")
     .reduce((sum, inv) => sum + (inv.amount_cents ?? 0), 0);
 
   const { data: lastVisitData } = await supabase

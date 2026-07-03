@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (ids.length === 0) return new NextResponse("No membership on file.", { status: 404 });
 
   const inMine = (t: string, cols = "*") => supabase.from(t).select(cols).in("member_id", ids);
-  const [bookings, measurements, workouts, invoices, subscriptions, checkins, notifications, badges] = await Promise.all([
+  const [bookings, measurements, workouts, invoices, subscriptions, checkins, notifications, badges, appointments, loyalty, redemptions, documents, referrals, comments, reviews, nps] = await Promise.all([
     inMine("bookings"),
     inMine("member_measurements"),
     inMine("member_workout_logs"),
@@ -30,6 +30,19 @@ export async function GET(request: NextRequest) {
     inMine("checkins"),
     inMine("notifications"),
     inMine("member_badges"),
+    // Explicit columns for the newly-added types: exclude appointments.notes (staff),
+    // member_documents.file_path/signature (storage/internal), referrals.referred_email
+    // (third-party PII) — completeness without leaking beyond the member's own data.
+    inMine("appointments", "title, starts_at, ends_at, status, price_cents, created_at"),
+    inMine("loyalty_transactions", "points, reason, created_at"),
+    inMine("reward_redemptions", "reward_name, points_spent, status, created_at"),
+    inMine("member_documents", "kind, status, signed_at, expires_at, created_at"),
+    supabase.from("referrals").select("referred_name, status, created_at").in("referrer_member_id", ids),
+    // Member-authored content (their own comments + feedback). reviews/nps populate
+    // only if a member-read RLS exists; otherwise they degrade to [] (graceful).
+    supabase.from("community_comments").select("body, created_at").in("author_member_id", ids),
+    inMine("reviews", "rating, comment, created_at"),
+    inMine("nps_responses", "score, comment, created_at"),
   ]);
 
   // Absent tables (unapplied migrations) resolve to error/null → emit [] not a crash.
@@ -46,6 +59,14 @@ export async function GET(request: NextRequest) {
     checkins: rows(checkins),
     notifications: rows(notifications),
     badges: rows(badges),
+    appointments: rows(appointments),
+    loyalty_transactions: rows(loyalty),
+    reward_redemptions: rows(redemptions),
+    documents: rows(documents),
+    referrals: rows(referrals),
+    community_comments: rows(comments),
+    reviews: rows(reviews),
+    nps_responses: rows(nps),
   };
 
   return new NextResponse(JSON.stringify(bundle, null, 2), {

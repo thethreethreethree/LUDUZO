@@ -19,11 +19,23 @@ export default async function AnalyticsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const [{ data: memberRows }, { data: checkinRows }, { data: invoiceRows }, { data: apptRows }] = await Promise.all([
-    supabase.from("members").select("id, status, member_since").limit(5000),
+  // Headline totals come from server-side count:exact (never from the capped row
+  // fetches below — those cap at 5k/20k and would under-report for a large gym; same
+  // aggregate-over-capped-fetch class as the portal findings). The row fetches feed
+  // the recent-window charts/heatmap and are ORDERED desc so that, when a gym exceeds
+  // the cap, the retained rows are the recent ones the charts actually plot — not an
+  // arbitrary subset that could drop the current months.
+  const [
+    { data: memberRows }, { data: checkinRows }, { data: invoiceRows }, { data: apptRows },
+    { count: membersTotal }, { count: activeTotal }, { count: checkinsTotal },
+  ] = await Promise.all([
+    supabase.from("members").select("id, status, member_since").order("member_since", { ascending: false, nullsFirst: false }).limit(5000),
     supabase.from("checkins").select("checked_in_at").order("checked_in_at", { ascending: false }).limit(20000),
-    supabase.from("invoices").select("amount_cents, status, created_at").limit(5000),
+    supabase.from("invoices").select("amount_cents, status, created_at").order("created_at", { ascending: false, nullsFirst: false }).limit(5000),
     supabase.from("appointments").select("trainer_id, status, trainer:profiles(full_name)").limit(5000),
+    supabase.from("members").select("id", { count: "exact", head: true }),
+    supabase.from("members").select("id", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("checkins").select("id", { count: "exact", head: true }),
   ]);
   const members = (memberRows ?? []) as { id: string; status: string; member_since: string | null }[];
   const checkins = (checkinRows ?? []) as { checked_in_at: string }[];
@@ -81,9 +93,9 @@ export default async function AnalyticsPage() {
 
       <div className="grid grid-cols-4 gap-3">
         {[
-          { k: "Members", v: members.length },
-          { k: "Active", v: active },
-          { k: "Check-ins", v: checkins.length },
+          { k: "Members", v: membersTotal ?? members.length },
+          { k: "Active", v: activeTotal ?? active },
+          { k: "Check-ins", v: checkinsTotal ?? checkins.length },
           { k: "Forecast rev.", v: formatMoney(forecast) },
         ].map((c) => (
           <div key={c.k} className="rounded-md border border-onyx bg-onyx p-4">

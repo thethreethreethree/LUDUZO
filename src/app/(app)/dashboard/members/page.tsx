@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { MEMBER_STATUSES } from "@/lib/members";
 import { StatBlock, Avatar, PlanBadge, StatusPill, memberStatusKind, btnGold, btnSecondary } from "@/components/ui";
+import { Icon } from "@/components/Icon";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ function currentStreak(daysDesc: string[]): number {
   const today = new Date(); today.setHours(0, 0, 0, 0);
   const set = new Set(daysDesc);
   // streak counts back from today or yesterday
-  let cursor = new Date(today);
+  const cursor = new Date(today);
   const iso = (d: Date) => d.toISOString().slice(0, 10);
   if (!set.has(iso(cursor))) { cursor.setDate(cursor.getDate() - 1); if (!set.has(iso(cursor))) return 0; }
   let n = 0;
@@ -171,7 +172,7 @@ export default async function MembersPage({
                 <span>{plan ? <PlanBadge label={plan} /> : <span className="text-xs text-ash-dim">—</span>}</span>
                 <span><StatusPill status={memberStatusKind(m.status)} label={m.status[0].toUpperCase() + m.status.slice(1)} /></span>
                 <span className="mono text-xs text-ash">{lv ? new Date(lv).toLocaleDateString([], { month: "short", day: "numeric" }) : "never"}</span>
-                <span className="mono text-xs text-bone">{streak > 0 ? `🔥 ${streak}` : "—"}</span>
+                <span className="mono inline-flex items-center gap-0.5 text-xs text-bone">{streak > 0 ? <><Icon name="streak" size={11} className="text-gold" />{streak}</> : "—"}</span>
                 <span className="text-ash-dim group-hover:text-gold">→</span>
               </Link>
             );
