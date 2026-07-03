@@ -53,16 +53,10 @@ export async function updateOrganization(formData: FormData) {
     if (upErr) {
       redirect("/dashboard/settings?error=" + encodeURIComponent("Logo upload failed — " + upErr.message));
     }
-    // Best-effort: remove the previous logo so old files don't accumulate in the
-    // bucket. Failure here must never fail the save.
-    const prevUrl = typeof prev.logo_url === "string" ? prev.logo_url : "";
-    const at = prevUrl.indexOf("/brand/");
-    if (at >= 0) {
-      const oldPath = prevUrl.slice(at + "/brand/".length).split("?")[0];
-      if (oldPath && oldPath !== path) {
-        try { await supabase.storage.from("brand").remove([oldPath]); } catch { /* ignore */ }
-      }
-    }
+    // NOTE: we intentionally do NOT delete the previous logo. Installed member PWAs
+    // and cached manifests reference the old file by URL; deleting it 404s their app
+    // icon (it reverted to the default). Orphaned files are a cheap trade for stable
+    // icons.
     logo_url = supabase.storage.from("brand").getPublicUrl(path).data.publicUrl;
   }
 

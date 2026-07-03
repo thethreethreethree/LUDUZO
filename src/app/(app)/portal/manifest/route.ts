@@ -54,6 +54,11 @@ export async function GET(request: Request) {
   };
 
   return Response.json(manifest, {
-    headers: { "content-type": "application/manifest+json; charset=utf-8" },
+    headers: {
+      "content-type": "application/manifest+json; charset=utf-8",
+      // Never serve a stale manifest — otherwise a cached (pre-logo) response keeps
+      // showing the LUDUZO default icon after a gym sets its own.
+      "cache-control": "no-store, max-age=0, must-revalidate",
+    },
   });
 }
