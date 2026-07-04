@@ -17,16 +17,17 @@ export async function GET(request: Request) {
   const logo = url.searchParams.get("logo");
   const background = okHex(url.searchParams.get("bg")) || DEFAULT_BACKGROUND;
 
-  // The gym's logo becomes the installed-app icon. SVG → single "any" entry; a raster
-  // logo is declared at 192/512 (browsers scale it — best results with a square
-  // image). No gym logo → the LUDUZO default icons.
+  // The gym's logo becomes the installed-app icon. CRITICAL: declare it as scalable
+  // (sizes:"any") with NO fixed type. Declaring a fixed 192/512 size or image/png type
+  // that didn't match the actual uploaded image made the browser REJECT the icon and
+  // fall back to LUDUZO's static favicon/apple-touch-icon (the "shows gym logo then
+  // reverts to LUDUZO" bug). "any" + inferred content-type is accepted as-is. No gym
+  // logo → the LUDUZO default icons (properly sized).
   const icons = logo
-    ? /\.svg(\?|$)/i.test(logo)
-      ? [{ src: logo, sizes: "any", type: "image/svg+xml", purpose: "any" as const }]
-      : [
-          { src: logo, sizes: "192x192", type: "image/png", purpose: "any" as const },
-          { src: logo, sizes: "512x512", type: "image/png", purpose: "any" as const },
-        ]
+    ? [
+        { src: logo, sizes: "any", purpose: "any" as const },
+        { src: logo, sizes: "any", purpose: "maskable" as const },
+      ]
     : [
         { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" as const },
         { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" as const },
