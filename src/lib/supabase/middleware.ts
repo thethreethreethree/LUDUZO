@@ -10,6 +10,10 @@ type CookieToSet = { name: string; value: string; options: CookieOptions };
 
 // Path prefixes that require an authenticated session.
 const PROTECTED_PREFIXES = ["/dashboard", "/portal"];
+// Public exceptions under a protected prefix: the PWA manifest + generated app icon.
+// The OS fetches these during install WITHOUT the session cookie, and they only emit
+// the gym's public branding (name/logo/colours) from query params — nothing sensitive.
+const PUBLIC_EXCEPTIONS = ["/portal/manifest", "/portal/icon"];
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -37,7 +41,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const needsAuth = PROTECTED_PREFIXES.some((p) => path.startsWith(p));
+  const needsAuth =
+    PROTECTED_PREFIXES.some((p) => path.startsWith(p)) &&
+    !PUBLIC_EXCEPTIONS.some((p) => path.startsWith(p));
   if (needsAuth && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";

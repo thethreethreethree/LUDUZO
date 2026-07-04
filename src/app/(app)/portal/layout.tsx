@@ -23,11 +23,19 @@ export async function generateMetadata(): Promise<Metadata> {
     if (org?.name) {
       gymName = org.name;
       const s = org.settings ?? {};
+      const bgHex = okHex(s.brand_background) ?? DEFAULT_BACKGROUND;
       const params = new URLSearchParams({ name: gymName });
       // PWA/app icon prefers a dedicated app-icon upload, else the main logo.
       const icon = (typeof s.pwa_icon_url === "string" && s.pwa_icon_url) || (typeof s.logo_url === "string" && s.logo_url) || null;
-      if (icon) { params.set("logo", icon); appleIcon = icon; }
-      if (okHex(s.brand_background)) params.set("bg", okHex(s.brand_background)!);
+      if (icon) {
+        params.set("logo", icon);
+        // apple-touch-icon → SVG served raw (already valid), raster → the generated
+        // square PNG, so iOS installs get a valid, client-branded icon.
+        appleIcon = /\.svg(\?|$)/i.test(icon)
+          ? icon
+          : `/portal/icon?s=180&logo=${encodeURIComponent(icon)}&bg=${encodeURIComponent(bgHex)}`;
+      }
+      if (okHex(s.brand_background)) params.set("bg", bgHex);
       manifest = "/portal/manifest?" + params.toString();
     }
   }

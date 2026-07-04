@@ -17,17 +17,26 @@ export async function GET(request: Request) {
   const logo = url.searchParams.get("logo");
   const background = okHex(url.searchParams.get("bg")) || DEFAULT_BACKGROUND;
 
-  // The gym's logo becomes the installed-app icon. CRITICAL: declare it as scalable
-  // (sizes:"any") with NO fixed type. Declaring a fixed 192/512 size or image/png type
-  // that didn't match the actual uploaded image made the browser REJECT the icon and
-  // fall back to LUDUZO's static favicon/apple-touch-icon (the "shows gym logo then
-  // reverts to LUDUZO" bug). "any" + inferred content-type is accepted as-is. No gym
-  // logo → the LUDUZO default icons (properly sized).
+  // The gym's logo becomes the installed-app icon — but pointed at /portal/icon, which
+  // RENDERS a guaranteed 192/512 square PNG from the (arbitrary-size) upload. Pointing
+  // the manifest straight at the raw upload let Android/iOS reject a non-square/odd-
+  // format image and fall back to the LUDUZO static icons (the "reverts to LUDUZO"
+  // bug). A real PNG at the declared size can't be rejected. No logo → LUDUZO defaults.
+  const iconUrl = (px: number) =>
+    `/portal/icon?s=${px}&logo=${encodeURIComponent(logo!)}&bg=${encodeURIComponent(background)}`;
+  const isSvg = logo ? /\.svg(\?|$)/i.test(logo) : false;
   const icons = logo
-    ? [
-        { src: logo, sizes: "any", purpose: "any" as const },
-        { src: logo, sizes: "any", purpose: "maskable" as const },
-      ]
+    ? isSvg
+      ? // SVG is already a scalable, valid icon — serve it directly.
+        [
+          { src: logo, sizes: "any", type: "image/svg+xml", purpose: "any" as const },
+          { src: logo, sizes: "any", type: "image/svg+xml", purpose: "maskable" as const },
+        ]
+      : [
+          { src: iconUrl(192), sizes: "192x192", type: "image/png", purpose: "any" as const },
+          { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "any" as const },
+          { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "maskable" as const },
+        ]
     : [
         { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" as const },
         { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" as const },
