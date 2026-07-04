@@ -15,9 +15,9 @@ const esc = (s: string) => s.replace(/([,;\\])/g, "\\$1").replace(/\n/g, "\\n");
 function ics(uid: string, start: string, end: string | null, summary: string, description: string) {
   const dtEnd = end ?? new Date(new Date(start).getTime() + 60 * 60 * 1000).toISOString();
   return [
-    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//LUDUZO//Member Portal//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Member Portal//EN", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
     "BEGIN:VEVENT",
-    `UID:${uid}@luduzo`,
+    `UID:${uid}@portal`,
     `DTSTAMP:${icsDate(new Date().toISOString())}`,
     `DTSTART:${icsDate(start)}`,
     `DTEND:${icsDate(dtEnd)}`,
