@@ -79,8 +79,8 @@ export default async function PortalLayout({ children }: { children: React.React
     }
   }
 
-  // Legible text against whatever colours were picked (shared math with the settings preview).
-  const { textMain, textSec, onPrimary } = textColors(primary, secondary, background);
+  // Legible text per surface (page background vs cards) — shared math with the preview.
+  const { bg: bgText, card: cardText, onPrimary } = textColors(primary, secondary, background);
 
   // Scoped override of the branded utilities the member app actually uses (enumerated
   // from the portal). Selector specificity (.gym-theme .x) beats the base utility, so
@@ -102,8 +102,10 @@ body{background:${background};--nav-progress-bg:linear-gradient(90deg,color-mix(
 .gym-theme .hover\\:text-gold:hover{color:${primary};}
 .gym-theme .hover\\:border-gold:hover{border-color:${primary};}
 .gym-theme .bg-black\\/92{background-color:color-mix(in srgb,${background} 92%,transparent);}
-.gym-theme .text-bone{color:${textMain};}
-.gym-theme .text-ash{color:${textSec};}
+.gym-theme .text-bone{color:${bgText.text};}
+.gym-theme .text-ash{color:${bgText.textSec};}
+.gym-theme .bg-onyx .text-bone,.gym-theme .bg-onyx-2 .text-bone,.gym-theme .gold-gradient .text-bone{color:${cardText.text};}
+.gym-theme .bg-onyx .text-ash,.gym-theme .bg-onyx-2 .text-ash,.gym-theme .gold-gradient .text-ash{color:${cardText.textSec};}
 .gym-theme .text-black{color:${onPrimary};}
 `.trim();
 

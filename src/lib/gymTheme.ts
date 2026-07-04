@@ -18,15 +18,21 @@ export function luminance(hex: string): number {
   return 0.2126 * v(1) + 0.7152 * v(3) + 0.0722 * v(5);
 }
 
-// Legible text colours derived from the chosen palette. Defaults (#0a0a0a bg,
-// #f5c518 primary) resolve to today's exact colours — so nothing changes until a
-// gym picks custom colours.
+// Legible text for one surface colour: dark text on a light surface, light on dark.
+function textFor(surface: string) {
+  const light = luminance(surface) > 0.5;
+  return { text: light ? "#141414" : "#ededed", textSec: light ? "#565656" : "#8a8a8a" };
+}
+
+// Legible text colours derived PER SURFACE — text on the page background is judged
+// against Background, text inside cards against Secondary. This lets a gym pick a
+// Background and Secondary on opposite luminance sides (e.g. dark page + light cards)
+// and stay readable on both. Defaults (#0a0a0a bg, #161616 cards, #f5c518 primary)
+// resolve to today's exact colours — nothing changes until a gym picks custom ones.
 export function textColors(primary: string, secondary: string, background: string) {
-  const lightSurface = luminance(background) > 0.5 || luminance(secondary) > 0.5;
   return {
-    lightSurface,
-    textMain: lightSurface ? "#141414" : "#ededed", // bone
-    textSec: lightSurface ? "#565656" : "#8a8a8a",  // ash
-    onPrimary: luminance(primary) > 0.5 ? "#0a0a0a" : "#ffffff", // text on Primary
+    bg: textFor(background),   // text directly on the page canvas
+    card: textFor(secondary),  // text inside cards / panels
+    onPrimary: luminance(primary) > 0.5 ? "#0a0a0a" : "#ffffff", // text on a Primary fill
   };
 }

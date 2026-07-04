@@ -20,7 +20,7 @@ export function BrandColorFields({
   const [secondary, setSecondary] = useState(s0);
   const [background, setBackground] = useState(b0);
 
-  const { textMain, textSec, onPrimary } = textColors(primary, secondary, background);
+  const { bg, card, onPrimary } = textColors(primary, secondary, background);
 
   return (
     <div className="flex flex-col gap-2">
@@ -50,9 +50,11 @@ export function BrandColorFields({
           <div className="text-[9px] font-bold uppercase tracking-[0.14em]" style={{ color: primary }}>
             ◈ Arena Pass
           </div>
-          <div className="mt-2 rounded-md p-2.5" style={{ background: secondary }}>
-            <div className="text-[11px] font-bold" style={{ color: textMain }}>Member card</div>
-            <div className="text-[10px]" style={{ color: textSec }}>preview of your colours</div>
+          {/* Heading on the bare background — reveals Background text contrast. */}
+          <div className="mt-1 text-[11px] font-bold" style={{ color: bg.text }}>Your journey</div>
+          <div className="mt-1.5 rounded-md p-2.5" style={{ background: secondary }}>
+            <div className="text-[11px] font-bold" style={{ color: card.text }}>Member card</div>
+            <div className="text-[10px]" style={{ color: card.textSec }}>preview of your colours</div>
             <button
               type="button"
               className="mt-2 rounded px-2.5 py-1 text-[10px] font-bold"
@@ -64,8 +66,8 @@ export function BrandColorFields({
         </div>
       </div>
       <span className="text-xs text-ash-dim">
-        Primary = accent (buttons, highlights) · Secondary = cards · Background = page. Designed for dark
-        backgrounds — light colours reduce text legibility (the preview shows the adjusted text).
+        Primary = accent (buttons, highlights) · Secondary = cards · Background = page. Text colour adapts
+        automatically for legibility on each surface — the preview shows exactly what members see.
       </span>
     </div>
   );
