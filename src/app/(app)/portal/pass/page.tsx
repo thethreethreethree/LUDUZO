@@ -62,7 +62,7 @@ export default async function ArenaPassPage() {
         {qrDataUrl ? (
           <Image src={qrDataUrl} alt="Your Arena Pass QR code" width={320} height={320} unoptimized className="h-[min(78vw,320px)] w-[min(78vw,320px)]" />
         ) : (
-          <div className="grid h-[min(78vw,320px)] w-[min(78vw,320px)] place-items-center text-center text-sm text-black">No pass yet — ask the front desk to link your account.</div>
+          <div className="grid h-[min(78vw,320px)] w-[min(78vw,320px)] place-items-center text-center text-sm text-[#141414]">No pass yet — ask the front desk to link your account.</div>
         )}
       </div>
 

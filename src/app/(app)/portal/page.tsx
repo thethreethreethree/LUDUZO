@@ -147,7 +147,7 @@ export default async function PortalPage({ searchParams }: { searchParams: Promi
         </div>
         <Link href="/portal/pass" className="mt-4 flex flex-col items-center" aria-label="Open full-screen Arena Pass">
           <div className="rounded-xl bg-white p-3">
-            {qrDataUrl ? <Image src={qrDataUrl} alt="Your Arena Pass QR" width={200} height={200} unoptimized /> : <div className="grid h-[200px] w-[200px] place-items-center text-xs text-black">No pass yet</div>}
+            {qrDataUrl ? <Image src={qrDataUrl} alt="Your Arena Pass QR" width={200} height={200} unoptimized /> : <div className="grid h-[200px] w-[200px] place-items-center text-xs text-[#141414]">No pass yet</div>}
           </div>
           <span className="mt-2 text-[11px] font-semibold text-gold">Tap to enlarge for scanning →</span>
         </Link>
