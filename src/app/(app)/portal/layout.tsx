@@ -24,7 +24,9 @@ export async function generateMetadata(): Promise<Metadata> {
       gymName = org.name;
       const s = org.settings ?? {};
       const params = new URLSearchParams({ name: gymName });
-      if (typeof s.logo_url === "string" && s.logo_url) { params.set("logo", s.logo_url); appleIcon = s.logo_url; }
+      // PWA/app icon prefers a dedicated app-icon upload, else the main logo.
+      const icon = (typeof s.pwa_icon_url === "string" && s.pwa_icon_url) || (typeof s.logo_url === "string" && s.logo_url) || null;
+      if (icon) { params.set("logo", icon); appleIcon = icon; }
       if (okHex(s.brand_background)) params.set("bg", okHex(s.brand_background)!);
       manifest = "/portal/manifest?" + params.toString();
     }

@@ -15,7 +15,7 @@ type Row = {
     id: string;
     name: string;
     slug: string;
-    settings: { brand_color?: string; brand_primary?: string; brand_secondary?: string; brand_background?: string; logo_url?: string } | null;
+    settings: { brand_color?: string; brand_primary?: string; brand_secondary?: string; brand_background?: string; logo_url?: string; pwa_icon_url?: string } | null;
   } | null;
 };
 
@@ -99,7 +99,23 @@ export default async function SettingsPage({
                         className="min-w-0 flex-1 text-xs text-ash file:mr-2 file:cursor-pointer file:rounded-md file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black"
                       />
                     </div>
-                    <span className="text-xs text-ash-dim">PNG, JPG or SVG under 2 MB. A <b className="text-ash">square</b> image works best — it&apos;s also your app icon when members install the PWA. Leave empty to keep the current logo.</span>
+                    <span className="text-xs text-ash-dim">PNG, JPG or SVG under 2 MB. Shown in your members&apos; app header, and used as the app icon unless you set a separate one below. Leave empty to keep the current logo.</span>
+                  </label>
+                  <label className="flex flex-col gap-1 text-sm">
+                    <span className="font-medium">App icon <span className="font-normal text-ash-dim">— optional, for the installed PWA</span></span>
+                    <div className="flex items-center gap-3">
+                      {r.organization!.settings?.pwa_icon_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={r.organization!.settings.pwa_icon_url} alt="Current app icon" className="h-10 w-10 rounded border border-iron object-cover" />
+                      ) : null}
+                      <input
+                        type="file"
+                        name="pwa_logo"
+                        accept="image/*"
+                        className="min-w-0 flex-1 text-xs text-ash file:mr-2 file:cursor-pointer file:rounded-md file:border-0 file:bg-gold file:px-3 file:py-1.5 file:text-xs file:font-bold file:text-black"
+                      />
+                    </div>
+                    <span className="text-xs text-ash-dim">A separate icon for when members install the app to their phone. A <b className="text-ash">square</b> image works best. Leave empty to use your logo above.</span>
                   </label>
                 </div>
                 <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">

@@ -4,6 +4,27 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
+// Upload one picked image to the public `brand` bucket and return its public URL.
+// Shared by the main logo and the dedicated PWA app icon — identical logic. Returns
+// {} when no file was picked (caller keeps the existing value). Old files are NOT
+// deleted (installed PWAs / cached manifests reference them by URL; deleting 404s
+// their icon).
+async function uploadBrandImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  orgId: string,
+  file: FormDataEntryValue | null,
+  kind: string,
+): Promise<{ url?: string; error?: string }> {
+  if (!(file instanceof File) || file.size === 0) return {};
+  if (!file.type.startsWith("image/")) return { error: "must be an image file." };
+  if (file.size > 2_000_000) return { error: "must be under 2 MB." };
+  const ext = ((file.name.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "")) || "png";
+  const path = `${orgId}/${kind}-${Date.now()}.${ext}`;
+  const { error } = await supabase.storage.from("brand").upload(path, file, { upsert: true, contentType: file.type });
+  if (error) return { error: "upload failed — " + error.message };
+  return { url: supabase.storage.from("brand").getPublicUrl(path).data.publicUrl };
+}
+
 export async function updateOrganization(formData: FormData) {
   const supabase = await createClient();
   const {
@@ -32,35 +53,20 @@ export async function updateOrganization(formData: FormData) {
   const { data: existing } = await supabase.from("organizations").select("settings").eq("id", id).limit(1);
   const prev = (((existing ?? []) as { settings: Record<string, unknown> | null }[])[0]?.settings) ?? {};
 
-  // Logo: upload the picked image to the public `brand` bucket (0061) and store its
-  // URL. No new file → keep the existing logo. RLS restricts writes to the org's own
-  // <org_id>/… folder for owner/admin. Uploaded via the caller's session (RLS applies).
+  // Main logo (in-app header + PWA fallback) and an OPTIONAL dedicated PWA app icon —
+  // same upload logic (RLS restricts writes to the org's own <org_id>/… folder for
+  // owner/admin). No new file for a field → keep its existing value.
   let logo_url: string | null = typeof prev.logo_url === "string" ? prev.logo_url : null;
-  const file = formData.get("logo");
-  if (file instanceof File && file.size > 0) {
-    if (!file.type.startsWith("image/")) {
-      redirect("/dashboard/settings?error=" + encodeURIComponent("Logo must be an image file."));
-    }
-    if (file.size > 2_000_000) {
-      redirect("/dashboard/settings?error=" + encodeURIComponent("Logo must be under 2 MB."));
-    }
-    const ext = ((file.name.split(".").pop() ?? "png").toLowerCase().replace(/[^a-z0-9]/g, "")) || "png";
-    const path = `${id}/logo-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage.from("brand").upload(path, file, {
-      upsert: true,
-      contentType: file.type,
-    });
-    if (upErr) {
-      redirect("/dashboard/settings?error=" + encodeURIComponent("Logo upload failed — " + upErr.message));
-    }
-    // NOTE: we intentionally do NOT delete the previous logo. Installed member PWAs
-    // and cached manifests reference the old file by URL; deleting it 404s their app
-    // icon (it reverted to the default). Orphaned files are a cheap trade for stable
-    // icons.
-    logo_url = supabase.storage.from("brand").getPublicUrl(path).data.publicUrl;
-  }
+  const logoRes = await uploadBrandImage(supabase, id, formData.get("logo"), "logo");
+  if (logoRes.error) redirect("/dashboard/settings?error=" + encodeURIComponent("Logo " + logoRes.error));
+  if (logoRes.url) logo_url = logoRes.url;
 
-  const settings = { ...prev, brand_primary, brand_secondary, brand_background, logo_url };
+  let pwa_icon_url: string | null = typeof prev.pwa_icon_url === "string" ? prev.pwa_icon_url : null;
+  const iconRes = await uploadBrandImage(supabase, id, formData.get("pwa_logo"), "pwa");
+  if (iconRes.error) redirect("/dashboard/settings?error=" + encodeURIComponent("App icon " + iconRes.error));
+  if (iconRes.url) pwa_icon_url = iconRes.url;
+
+  const settings = { ...prev, brand_primary, brand_secondary, brand_background, logo_url, pwa_icon_url };
 
   // RLS (org_update: owner/admin) enforces who may edit the org.
   const { error } = await supabase
