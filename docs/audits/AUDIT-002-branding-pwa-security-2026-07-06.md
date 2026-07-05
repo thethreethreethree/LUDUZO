@@ -131,6 +131,14 @@ self-redemption is built.
   idempotent. **Referrals:** `referrer_member_id` = the authenticated member (RLS 0049);
   no auto-reward, so self/duplicate are staff-reviewed. Both clean.
 
+## UI ↔ schema drift re-check (post-0061) — clean
+Re-ran AUDIT-001's contract against the live DB (it was 0016-era). **64 UI `.from()`
+table refs → all resolve** (the lone "miss", `brand`, is the storage bucket, not a
+table). **14 UI `.rpc()` calls → 13 resolve; the 14th, `update_my_staff_profile`, is
+defined in the unapplied `0057`** (UI degrades gracefully). So no drift, and the check
+independently re-confirms `0057` is the sole pending migration. The "compiles but throws
+at runtime" gap (§0/§5) is closed for the current UI.
+
 ## Conclusion
 Across 11 surfaces the core is **robustly built** — RLS-scoped, DB-constraint-guarded,
 integer-cents money, race-safe check-in. Real issues were few and are resolved or
