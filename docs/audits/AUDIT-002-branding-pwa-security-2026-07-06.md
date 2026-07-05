@@ -79,13 +79,25 @@ expiry, but it's staff-gated and `status` is DB-enum-constrained — no data cor
 no unauthenticated access. *Forward note:* add a status/expiry guard if/when guest
 self-redemption is built.
 
-## Inspected vs NOT inspected
-- **Inspected:** both org-settings writers, the public manifest/icon routes + middleware
-  exemption, `gymTheme` + its consumers, `api_keys`/`webhooks` storage + RLS, POS +
-  coupon money paths, the applied migration state.
-- **NOT inspected this pass:** the subscription/invoice status-transition logic, the
-  check-in/redeem runtime, the guest-pass enforcement path, and any on-device PWA/theming
-  rendering (server side verified; the OS-level install is the founder's to confirm).
+### Invoices / refunds / subscriptions / check-in / referrals — clean
+- **Invoices:** integer-cents; `createInvoice` requires a positive amount; `markPaid`/
+  `void` are staff-gated status changes. **Refunds:** `check (amount_cents >= 0)` (0027)
+  blocks negatives at the DB (app-side gap is only raw-vs-friendly error text). Clean.
+- **Subscriptions:** fixed — `/more` showed a **negative "days left"** for an `active`
+  plan past `current_period_end` (no auto-expiry job); now shows "Expired". (Home/pass
+  still gate on `status === "active"` only — display-only, gym manages billing manually.)
+- **Check-in:** RLS-scoped to the staff's gym; double check-in blocked by an app guard
+  **and** a DB unique constraint (`uq_checkins_open_member`, 0018) — race-safe; checkout
+  idempotent. **Referrals:** `referrer_member_id` = the authenticated member (RLS 0049);
+  no auto-reward, so self/duplicate are staff-reviewed. Both clean.
+
+## Conclusion
+Across 11 surfaces the core is **robustly built** — RLS-scoped, DB-constraint-guarded,
+integer-cents money, race-safe check-in. Real issues were few and are resolved or
+flagged: **M1** (admin-branding trap — open, needs founder decision), the negative
+days-left display (**fixed**), and documented scaffolds (coupon/api-key/guest-pass
+redemption — forward-harden when built). NOT covered: any on-device PWA/theming render
+(server side verified; the OS install is the founder's to confirm). Audit complete.
 
 ## Open actions
 1. **Founder decision:** M1 — dedup the admin branding (recommend: remove the admin inputs).
