@@ -1,5 +1,12 @@
 # LUDUZO — apply & verify runbook
 
+> ⏳ **Currency note (2026-07):** the table below details migrations through `0023`. The repo now
+> has migrations through **`0061`**. Verified applied against the live DB: `0058`–`0061` (2026-07).
+> **`0057_staff_profile.sql` (trainer bios) is authored + apply-verified but NOT yet applied** — it's
+> the one currently-pending migration; apply it via the Supabase SQL editor (it degrades gracefully
+> until then). For migrations past `0023`, apply in numeric order from `migrations/`; each carries its
+> own `⚠ STATUS` header. See `docs/audits/` for what's been verified.
+
 Apply each migration in `migrations/` **in numeric order**, then run its probe in `tests/`.
 Every probe is rollback-safe (writes nothing) and prints a result GRID — the last row
 should read `OVERALL | ALL PASS`. Paste any non-`ALL PASS` grid back for diagnosis.
