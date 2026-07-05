@@ -20,14 +20,18 @@ append-only, immutable `events` stream (CLAUDE.md §3.1) for lifecycle / audit /
 ## Status
 - ✅ **Foundation VERIFIED** against live Supabase — `0001_foundation.sql`, 23/23 checks
   (`supabase/tests/0001_foundation_rls_verify.sql`), applied 2026-06-29.
-- 🚧 **Migrations 0002–0016** authored (members, relationships, documents, billing, POS, check-in,
-  classes, payroll, measurements, member portal, loyalty) — each with a matching probe under
-  `supabase/tests/`. **UNTESTED** until run (founder choice C2, code-first).
+- 🚧 **Migrations 0002–0061** authored (members, relationships, documents, billing, POS, check-in,
+  classes, payroll, measurements, member portal, loyalty, engagement, scheduling, platform-admin,
+  sales/CRM, notifications, workout logs, aggregate views, brand storage, …) — early ones under
+  founder choice C2 (code-first). **`0057–0061` are applied + verified against the live DB** (2026-07);
+  `0057` (trainer bios) is authored + apply-verified but **not yet applied**.
 - 🚧 **App** (Next.js 16, App Router) — full staff dashboard + member self-service portal.
-  `npm run build` **passes** (types + compile); runtime against live Supabase is **UNTESTED**.
+  `npm run build` **passes**; critical pure logic has unit tests (`npm test`) and the PWA icon has a
+  smoke test (`npm run smoke:pwa`). Full runtime against live Supabase remains partial (C2).
 
-> ⚠️ **Scope of "verified":** only `0001` is proven against the live DB. Everything since **compiles**
-> but is not runtime-tested until the migration/probe queue in `docs/DEVELOPMENT-PLAN.md` is run.
+> ⚠️ **Scope of "verified":** `0001` and the 2026-07 branding/PWA migrations (`0057–0061`) are proven
+> against the live DB; the middle range (`0017–0056`) is applied per the founder's run-queue. See
+> `docs/audits/` for the recorded audits.
 
 ## Features (built; compile-verified)
 Onboarding (create a gym) · members (search, statuses, notes, QR, documents, subscriptions incl.
@@ -39,7 +43,7 @@ capacity enforcement & attendance roster · staff directory · payroll/commissio
 
 ## Setup / local dev
 1. Create a Supabase project; copy keys into `.env` (template: `.env.example`).
-2. Apply migrations **in order** `0001` → `0016` from `supabase/migrations/`.
+2. Apply migrations **in order** `0001` → `0061` from `supabase/migrations/`.
 3. After each, run its probe in `supabase/tests/` (expect `OVERALL = ALL PASS`). See the consolidated
    run-queue + dependency notes in `docs/DEVELOPMENT-PLAN.md`.
 4. `npm install` then `npm run dev`; open `/` → **Staff dashboard** or **Member portal**.
