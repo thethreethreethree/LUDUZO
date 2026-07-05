@@ -22,21 +22,19 @@ export async function GET(request: Request) {
   // the manifest straight at the raw upload let Android/iOS reject a non-square/odd-
   // format image and fall back to the LUDUZO static icons (the "reverts to LUDUZO"
   // bug). A real PNG at the declared size can't be rejected. No logo → LUDUZO defaults.
+  // ALL logos (including SVG) go through /portal/icon → a real 192/512 PNG. Serving an
+  // SVG raw as the app icon was the bug: an in-page <img> renders SVG fine (so the
+  // header logo worked), but Android WebAPK / iOS REJECT an SVG installed-app icon and
+  // fall back to LUDUZO. Rasterizing to PNG (verified against the gym's real SVG) makes
+  // it a valid icon. No logo → LUDUZO defaults.
   const iconUrl = (px: number) =>
     `/portal/icon?s=${px}&logo=${encodeURIComponent(logo!)}&bg=${encodeURIComponent(background)}`;
-  const isSvg = logo ? /\.svg(\?|$)/i.test(logo) : false;
   const icons = logo
-    ? isSvg
-      ? // SVG is already a scalable, valid icon — serve it directly.
-        [
-          { src: logo, sizes: "any", type: "image/svg+xml", purpose: "any" as const },
-          { src: logo, sizes: "any", type: "image/svg+xml", purpose: "maskable" as const },
-        ]
-      : [
-          { src: iconUrl(192), sizes: "192x192", type: "image/png", purpose: "any" as const },
-          { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "any" as const },
-          { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "maskable" as const },
-        ]
+    ? [
+        { src: iconUrl(192), sizes: "192x192", type: "image/png", purpose: "any" as const },
+        { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "any" as const },
+        { src: iconUrl(512), sizes: "512x512", type: "image/png", purpose: "maskable" as const },
+      ]
     : [
         { src: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png", purpose: "any" as const },
         { src: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png", purpose: "any" as const },

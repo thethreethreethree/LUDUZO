@@ -29,11 +29,9 @@ export async function generateMetadata(): Promise<Metadata> {
       const icon = (typeof s.pwa_icon_url === "string" && s.pwa_icon_url) || (typeof s.logo_url === "string" && s.logo_url) || null;
       if (icon) {
         params.set("logo", icon);
-        // apple-touch-icon → SVG served raw (already valid), raster → the generated
-        // square PNG, so iOS installs get a valid, client-branded icon.
-        appleIcon = /\.svg(\?|$)/i.test(icon)
-          ? icon
-          : `/portal/icon?s=180&logo=${encodeURIComponent(icon)}&bg=${encodeURIComponent(bgHex)}`;
+        // apple-touch-icon → the generated square PNG (incl. rasterized SVG), so iOS
+        // installs get a valid, client-branded icon. iOS rejects raw SVG icons.
+        appleIcon = `/portal/icon?s=180&logo=${encodeURIComponent(icon)}&bg=${encodeURIComponent(bgHex)}`;
       }
       if (okHex(s.brand_background)) params.set("bg", bgHex);
       manifest = "/portal/manifest?" + params.toString();
