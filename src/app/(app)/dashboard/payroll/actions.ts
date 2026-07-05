@@ -20,6 +20,11 @@ export async function createCommission(formData: FormData) {
   if (!organization_id || !staff_user_id) {
     redirect("/dashboard/payroll?error=" + encodeURIComponent("Gym and staff member are required."));
   }
+  // Friendly guard for a non-positive amount (the DB check(amount_cents>=0) would
+  // otherwise surface a raw Postgres constraint error to the user).
+  if (!Number.isFinite(amount_cents) || amount_cents <= 0) {
+    redirect("/dashboard/payroll?error=" + encodeURIComponent("Enter a commission amount greater than zero."));
+  }
   // RLS (commissions_write: owner/admin/manager) enforces who can create.
   const { error } = await supabase
     .from("commissions")

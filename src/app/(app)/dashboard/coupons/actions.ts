@@ -35,6 +35,12 @@ export async function createCoupon(formData: FormData) {
   if (!organization_id || !code) {
     redirect("/dashboard/coupons?error=" + encodeURIComponent("Gym and code are required."));
   }
+  if (!Number.isFinite(discount_value) || discount_value <= 0) {
+    redirect("/dashboard/coupons?error=" + encodeURIComponent("Enter a discount value greater than zero."));
+  }
+  if (discount_type === "percent" && discount_value > 100) {
+    redirect("/dashboard/coupons?error=" + encodeURIComponent("A percentage discount can't exceed 100%."));
+  }
   const { error } = await supabase
     .from("coupons")
     .insert({ organization_id, code, discount_type, discount_value });

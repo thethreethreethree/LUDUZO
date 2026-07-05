@@ -69,8 +69,8 @@ export async function recordRefund(formData: FormData) {
   const amountRaw = String(formData.get("amount") ?? "").trim();
   const amount_cents = amountRaw ? Math.round(Number(amountRaw) * 100) : 0;
   const reason = String(formData.get("reason") ?? "").trim() || null;
-  if (!organization_id || !amount_cents) {
-    redirect("/dashboard/invoices?error=" + encodeURIComponent("Amount is required."));
+  if (!organization_id || !Number.isFinite(amount_cents) || amount_cents <= 0) {
+    redirect("/dashboard/invoices?error=" + encodeURIComponent("Enter a refund amount greater than zero."));
   }
   const { error } = await supabase
     .from("refunds")
