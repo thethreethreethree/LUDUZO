@@ -33,16 +33,20 @@ reset role;
 do $$
 declare oa uuid := nullif(current_setting('ci.orgA', true), '')::uuid;
         ob uuid := nullif(current_setting('ci.orgB', true), '')::uuid;
-        ma uuid; mb uuid;
+        ma uuid; ma2 uuid; mb uuid;
 begin
   insert into organization_members (organization_id, user_id, role) values
     (oa, 'aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'front_desk'),
     (oa, 'aaaaaaa3-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'member');
   insert into members (organization_id, first_name, last_name) values (oa,'Chk','MemberA') returning id into ma;
+  -- ma2: a second org-A member with NO seeded check-in, for the front-desk write test
+  -- (0018 allows only one open check-in per member, so it can't reuse ma).
+  insert into members (organization_id, first_name, last_name) values (oa,'Chk','MemberA2') returning id into ma2;
   insert into members (organization_id, first_name, last_name) values (ob,'Chk','MemberB') returning id into mb;
   insert into checkins (organization_id, member_id) values (oa, ma);
   insert into checkins (organization_id, member_id) values (ob, mb);
   perform set_config('ci.ma', ma::text, true);
+  perform set_config('ci.ma2', ma2::text, true);
   perform set_config('ci.seed','PASS',true);
 exception when others then perform set_config('ci.seed','ERROR: '||sqlerrm, true); end $$;
 
@@ -70,14 +74,14 @@ reset role;
 -- front_desk: write allowed + checkin/checkout events + occupancy
 set local role authenticated;
 select set_config('request.jwt.claims', json_build_object('sub','aaaaaaa2-aaaa-aaaa-aaaa-aaaaaaaaaaaa','role','authenticated')::text, true);
-do $$ declare oa uuid := nullif(current_setting('ci.orgA', true), '')::uuid; ma uuid := nullif(current_setting('ci.ma', true), '')::uuid; cid uuid; n int;
+do $$ declare oa uuid := nullif(current_setting('ci.orgA', true), '')::uuid; ma2 uuid := nullif(current_setting('ci.ma2', true), '')::uuid; cid uuid; n int;
 begin
-  insert into checkins (organization_id, member_id, method) values (oa, ma, 'kiosk') returning id into cid;
+  insert into checkins (organization_id, member_id, method) values (oa, ma2, 'kiosk') returning id into cid;
   get diagnostics n = row_count;
   perform set_config('ci.write_front', case when n=1 then 'PASS' else format('FAIL: %s rows',n) end, true);
-  perform set_config('ci.evt_checkin', case when exists(select 1 from events where subject_type='member' and subject_id=ma and event_type='member.checkin') then 'PASS' else 'FAIL: no member.checkin' end, true);
+  perform set_config('ci.evt_checkin', case when exists(select 1 from events where subject_type='member' and subject_id=ma2 and event_type='member.checkin') then 'PASS' else 'FAIL: no member.checkin' end, true);
   update checkins set checked_out_at = now() where id = cid;
-  perform set_config('ci.evt_checkout', case when exists(select 1 from events where event_type='member.checkout' and subject_id=ma) then 'PASS' else 'FAIL: no member.checkout' end, true);
+  perform set_config('ci.evt_checkout', case when exists(select 1 from events where event_type='member.checkout' and subject_id=ma2) then 'PASS' else 'FAIL: no member.checkout' end, true);
   -- occupancy: open checkins (checked_out_at null) for org A = the seeded one only (front's was checked out)
   select count(*) into n from checkins where checked_out_at is null;
   perform set_config('ci.occupancy', case when n=1 then 'PASS' else format('FAIL: %s open (expected 1)',n) end, true);
