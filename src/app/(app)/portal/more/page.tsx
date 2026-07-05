@@ -206,10 +206,19 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
               <div className="mono text-xs text-ash">{activeSub.status}</div>
             </div>
             {daysLeft != null ? (
-              <div className="text-right">
-                <div className={`mono text-2xl font-extrabold ${daysLeft <= 7 ? "text-warn" : "text-bone"}`}>{daysLeft}</div>
-                <div className="text-[10px] uppercase tracking-[0.07em] text-ash">days left</div>
-              </div>
+              daysLeft < 0 ? (
+                // Past the current period end (no auto-expiry job flips status yet) —
+                // show "Expired", never a negative countdown.
+                <div className="text-right">
+                  <div className="mono text-sm font-extrabold text-loss">Expired</div>
+                  <div className="text-[10px] uppercase tracking-[0.07em] text-ash">renew at the desk</div>
+                </div>
+              ) : (
+                <div className="text-right">
+                  <div className={`mono text-2xl font-extrabold ${daysLeft <= 7 ? "text-warn" : "text-bone"}`}>{daysLeft}</div>
+                  <div className="text-[10px] uppercase tracking-[0.07em] text-ash">days left</div>
+                </div>
+              )
             ) : null}
           </div>
         ) : (
