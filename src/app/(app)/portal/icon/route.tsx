@@ -18,7 +18,11 @@ export async function GET(request: Request) {
   const bg = okHex(url.searchParams.get("bg")) || DEFAULT_BACKGROUND;
   const size = Math.min(1024, Math.max(48, parseInt(url.searchParams.get("s") || "512", 10) || 512));
 
-  if (!logo || !/^https:\/\//i.test(logo)) {
+  // SSRF guard: this route is public and fetches `logo` server-side, so pin it to the
+  // gym's own Supabase public storage (where the `brand` bucket lives). Without this,
+  // any caller could make the server fetch an arbitrary internal URL.
+  const allowedPrefix = `${(process.env.NEXT_PUBLIC_SUPABASE_URL || "").replace(/\/$/, "")}/storage/v1/object/public/`;
+  if (!logo || !process.env.NEXT_PUBLIC_SUPABASE_URL || !logo.startsWith(allowedPrefix)) {
     return new Response("Not found", { status: 404 });
   }
 
