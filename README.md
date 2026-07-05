@@ -53,11 +53,13 @@ capacity enforcement & attendance roster · staff directory · payroll/commissio
 ## Quality checks
 - `npm run lint` — ESLint (expect 0 problems).
 - `npm run typecheck` — `tsc --noEmit`.
-- `npm test` — dependency-free unit tests (39 assertions) for the self-contained
-  pure-logic modules: theming contrast math, money formatting, Postgres SQLSTATE
-  classifiers, and env validation (`scripts/*.test.mjs`). Runs on Node 22+ via
-  `--experimental-strip-types`; anything importing the `@/` alias needs a test
-  framework with tsconfig-paths (not yet added).
+- `npm test` — dependency-free unit tests (48 assertions) for the pure-logic modules:
+  theming contrast math, money formatting, Postgres SQLSTATE classifiers, env
+  validation, and check-in message helpers (`scripts/*.test.mjs`). Runs on Node 22+ via
+  `--experimental-strip-types`. Modules that import the `@/` alias (e.g. `checkins.ts`)
+  run through a small resolve hook — add `--import ./scripts/register-tsalias.mjs` to the
+  node invocation (see `test:checkins` in `package.json`); it maps `@/x` → `src/x` so no
+  test framework / tsconfig-paths dependency is needed.
 - `npm run smoke:pwa [baseUrl] [supabaseLogoUrl]` — post-deploy smoke test of the PWA
   manifest + generated app icon (SSRF guard, PNG icons, optional real-logo rasterize).
   Defaults to the production URL.
