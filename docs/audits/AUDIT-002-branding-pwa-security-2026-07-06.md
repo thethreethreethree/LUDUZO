@@ -74,6 +74,9 @@ API-key auth is actually built.
 - **Secret hygiene:** tracked files scanned — no hardcoded keys/tokens/passwords/private
   keys; `.env` confirmed untracked (gitignored). ✅
 - **Dependencies:** `npm audit` → S3 above (moderate, low practical risk, safe fix noted).
+- **Storage:** both buckets verified on the live DB — `brand` (public; owner/admin-write) and
+  `member-documents` (**private**; read+write **org-scoped** via `storage.foldername` +
+  `auth_org_ids`). Clears the `0004` "validate manually — not probe-covered" storage flag. ✅
 
 ## RLS correctness — ALL 14 PROBES PASS against the live DB ✅ (was deferred under C2)
 Ran the **entire `tests/*_rls_verify.sql` suite** against the live database (each probe
