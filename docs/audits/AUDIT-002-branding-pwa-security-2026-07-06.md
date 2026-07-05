@@ -61,13 +61,23 @@ API-key auth is actually built.
   `pwa-*.svg`, palette all-dark (F1 edge not hit).
 - Project lint: **0 problems**; typecheck + production build green.
 
+### Billing write-path spot check — clean / scaffold (no active defect)
+- **POS `recordSale`** → delegates to the `record_sale` RPC (0011): integer-cents math,
+  atomic stock-decrement + paid invoice, quantity clamped `≥1`. **Clean** — no JS float
+  money math.
+- **Coupons** → `createCoupon` doesn't clamp `percent` to ≤100, BUT: negatives are blocked
+  by the DB `check (discount_value >= 0)` (0010:22), and coupon **application is not
+  implemented** (0010:4 flags it; no code applies a discount to any invoice). So the
+  `percent > 100` gap is **inert** (scaffold). *Forward note:* when redemption is built,
+  clamp `percent ≤ 100` and `max(0, total − discount)`.
+
 ## Inspected vs NOT inspected
 - **Inspected:** both org-settings writers, the public manifest/icon routes + middleware
-  exemption, `gymTheme` + its consumers, `api_keys`/`webhooks` storage + RLS, the applied
-  migration state.
-- **NOT inspected this pass:** the billing/invoice write paths, the check-in/redeem
-  runtime, the guest-pass enforcement path, and any on-device PWA/theming rendering
-  (server side verified; the OS-level install is the founder's to confirm).
+  exemption, `gymTheme` + its consumers, `api_keys`/`webhooks` storage + RLS, POS +
+  coupon money paths, the applied migration state.
+- **NOT inspected this pass:** the subscription/invoice status-transition logic, the
+  check-in/redeem runtime, the guest-pass enforcement path, and any on-device PWA/theming
+  rendering (server side verified; the OS-level install is the founder's to confirm).
 
 ## Open actions
 1. **Founder decision:** M1 — dedup the admin branding (recommend: remove the admin inputs).
