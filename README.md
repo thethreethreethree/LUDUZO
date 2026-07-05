@@ -51,11 +51,11 @@ capacity enforcement & attendance roster · staff directory · payroll/commissio
 ## Quality checks
 - `npm run lint` — ESLint (expect 0 problems).
 - `npm run typecheck` — `tsc --noEmit`.
-- `npm test` — dependency-free unit tests for critical pure logic: per-gym theming
-  contrast math (`scripts/gymTheme.test.mjs`) and money formatting
-  (`scripts/billing.test.mjs`). Runs on Node 22+ via `--experimental-strip-types`
-  (covers self-contained modules; anything importing the `@/` alias needs a test
-  framework with tsconfig-paths, not yet added).
+- `npm test` — dependency-free unit tests (39 assertions) for the self-contained
+  pure-logic modules: theming contrast math, money formatting, Postgres SQLSTATE
+  classifiers, and env validation (`scripts/*.test.mjs`). Runs on Node 22+ via
+  `--experimental-strip-types`; anything importing the `@/` alias needs a test
+  framework with tsconfig-paths (not yet added).
 - `npm run smoke:pwa [baseUrl] [supabaseLogoUrl]` — post-deploy smoke test of the PWA
   manifest + generated app icon (SSRF guard, PNG icons, optional real-logo rasterize).
   Defaults to the production URL.
