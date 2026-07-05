@@ -75,16 +75,19 @@ API-key auth is actually built.
   keys; `.env` confirmed untracked (gitignored). ✅
 - **Dependencies:** `npm audit` → S3 above (moderate, low practical risk, safe fix noted).
 
-## RLS probe run (checkins) — RLS VERIFIED, probe stale
-Ran `tests/0006_checkins_rls_verify.sql` against the live DB (rollback-safe; 0 test orgs
-leaked). **RLS correctness PASSES**: tenant isolation (`iso_a`), member-role cannot
-record a check-in (`write_member`), and cross-tenant check-in blocked (`write_cross`) —
-all ✅. The `write_front`/`evt_*`/`occupancy` rows ERROR on `uq_checkins_open_member`,
-which is **the probe being stale, not a defect**: it predates `0018` and inserts a second
-OPEN check-in for the same member. *Fix (flagged):* the probe needs a distinct org-A
-member to separate the seeded/occupancy check-in from the front-desk write test. **Meta:**
-other probes may likewise predate later migrations — the `tests/` suite needs a staleness
-pass before it's a reliable green-bar.
+## RLS correctness — ALL 14 PROBES PASS against the live DB ✅ (was deferred under C2)
+Ran the **entire `tests/*_rls_verify.sql` suite** against the live database (each probe
+is rollback-safe; **0 test orgs leaked**). Every probe returns **OVERALL ALL PASS** —
+tenant isolation, write-permissions, and cross-tenant blocking verified for: foundation,
+members, relationships, documents, billing, checkins, classes/bookings, inventory,
+announcements, coupons, payroll, measurements, loyalty, communications. This converts the
+core §3.2 tenancy discipline from "present (62/62 tables)" to **"verified correct against
+the live DB"** — the verification the founder had deferred (C2 code-first).
+
+One probe was **stale and fixed**: `0006_checkins` predated `0018`'s
+`uq_checkins_open_member` and inserted a second open check-in for one member (false
+ERRORs). Fixed by adding a distinct org-A member for the front-desk write test; re-run =
+ALL PASS. No other probe was stale.
 
 ## Live-DB verification performed
 - Migrations applied + correct: `0058` (redeem_reward member lock + execute grant),

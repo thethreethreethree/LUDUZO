@@ -29,9 +29,11 @@ append-only, immutable `events` stream (CLAUDE.md §3.1) for lifecycle / audit /
   `npm run build` **passes**; critical pure logic has unit tests (`npm test`) and the PWA icon has a
   smoke test (`npm run smoke:pwa`). Full runtime against live Supabase remains partial (C2).
 
-> ⚠️ **Scope of "verified":** `0001` and the 2026-07 branding/PWA migrations (`0057–0061`) are proven
-> against the live DB; the middle range (`0017–0056`) is applied per the founder's run-queue. See
-> `docs/audits/` for the recorded audits.
+> ✅ **RLS correctness VERIFIED (2026-07-06):** all **14 RLS probes** (`tests/*_rls_verify.sql` —
+> foundation, members, relationships, documents, billing, checkins, classes, inventory, announcements,
+> coupons, payroll, measurements, loyalty, communications) return **OVERALL ALL PASS** against the live
+> DB. Tenant isolation, write-permissions, and cross-tenant blocking are proven, not just present.
+> `0057–0061` are verified applied (`0057` pending apply). See `docs/audits/AUDIT-002`.
 
 ## Features (built; compile-verified)
 Onboarding (create a gym) · members (search, statuses, notes, QR, documents, subscriptions incl.
