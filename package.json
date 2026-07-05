@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "smoke:pwa": "node scripts/smoke-pwa.mjs",
     "test:theme": "node --experimental-strip-types scripts/gymTheme.test.mjs",
-    "test": "npm run test:theme"
+    "test:billing": "node --experimental-strip-types scripts/billing.test.mjs",
+    "test": "npm run test:theme && npm run test:billing"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
