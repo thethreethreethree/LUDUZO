@@ -5,7 +5,7 @@ import { NAV_GROUPS } from "@/lib/nav";
 import { formatMoney } from "@/lib/billing";
 import { Icon, type IconName } from "@/components/Icon";
 import {
-  StatBlock, ProgressBar, AlertItem, Avatar, Card, CardHeader,
+  StatBlock, ProgressBar, AlertItem, Card, CardHeader,
   SectionLabel, btnGold, btnSecondary,
 } from "@/components/ui";
 

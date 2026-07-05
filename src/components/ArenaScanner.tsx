@@ -99,6 +99,9 @@ export function ArenaScanner({
   }, [stop]);
 
   useEffect(() => {
+    // Intentional: acquire the camera on mount. `start` is a stable useCallback, so its
+    // synchronous state set is a one-shot, not a cascading render — the rule's concern.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     start();
     return stop;
   }, [start, stop]);
@@ -107,7 +110,6 @@ export function ArenaScanner({
     <>
       {/* Viewfinder */}
       <div className="relative mx-auto aspect-square w-full max-w-[260px] overflow-hidden rounded-lg border border-iron bg-black">
-        {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
         <video ref={videoRef} className="h-full w-full object-cover" muted playsInline />
         <canvas ref={canvasRef} className="hidden" />
         <span className="pointer-events-none absolute left-3 top-3 h-6 w-6 rounded-tl border-l-2 border-t-2 border-gold" />
