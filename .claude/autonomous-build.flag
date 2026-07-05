@@ -1,7 +1,20 @@
-Autonomous build ACTIVE (founder directive: "do not stop building until I say so").
+ACTIVE
+================================================================================
+LUDUZO autonomous build — HARD MODE (ThinkerThinker A23)
 
-While this file exists, the Stop hook (.claude/hooks/build-continue-guard.mjs, A23)
-blocks silent premature stops and re-injects the Build-Stop Decision protocol.
+The FIRST LINE of this file is the control switch, read by the Stop hook
+(.claude/hooks/build-continue-guard.mjs):
 
-To end the autonomous build: the founder removes this file (or says "stop"),
-and the agent deletes it.
+  • ACTIVE  → the agent may NOT stop. Every attempt to end a turn is blocked and
+             the agent is told to keep building. There is no self-authorized stop.
+
+  • STOP    → the founder's command. The agent is allowed to stop.
+             (HALT / STAND DOWN / END / DONE / CEASE also work.)
+
+TO STOP THE BUILD (founder command only), do ONE of:
+  1. change the first line above from  ACTIVE  to  STOP , or
+  2. delete this file.
+
+Nothing else — not "hard-blocked", not "nothing buildable", not "waiting on you" —
+lets the agent stop. Only your command via this file.
+================================================================================

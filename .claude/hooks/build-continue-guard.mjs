@@ -1,43 +1,58 @@
 #!/usr/bin/env node
-// Build-continuation guard (ThinkerThinker A23). Stop hook: fires when the agent
-// tries to end a turn. While an autonomous build is active (sentinel file present),
-// it blocks the FIRST stop and re-injects the Build-Stop Decision protocol, so the
-// agent cannot silently stop building. Loop-safe via stop_hook_active. Inert when
-// no autonomous build is active (sentinel absent) — normal chat is not nagged.
+// ============================================================================
+// Build-continuation guard (ThinkerThinker A23) — HARD MODE.
 //
-// Toggle: an autonomous build creates `.claude/autonomous-build.flag`; the founder
-// saying "stop" removes it.
+// Stop hook: fires whenever the agent tries to end a turn. While the sentinel
+// `.claude/autonomous-build.flag` exists AND its first line is not a stop
+// command, this BLOCKS EVERY stop and re-injects the continue directive.
+//
+// There is NO agent self-authorized stop. "Hard-blocked", "nothing left to
+// build", "waiting on the founder" are NOT permission to stop — the agent must
+// flag what it needs and keep building the next buildable thing.
+//
+// The autonomous build ends ONLY on the FOUNDER'S EXPLICIT COMMAND, via one of:
+//   • set the FIRST LINE of `.claude/autonomous-build.flag` to a stop word
+//       (STOP / HALT / STAND DOWN / END / DONE), or
+//   • delete the flag file entirely.
+// Nothing else stops the build.
+// ============================================================================
 import fs from "node:fs";
 
-let input = "";
-process.stdin.on("data", (d) => (input += d));
+const FLAG = ".claude/autonomous-build.flag";
+const STOP_WORDS = new Set(["STOP", "HALT", "STAND DOWN", "END", "END BUILD", "DONE", "CEASE"]);
+
+// Drain stdin (the harness sends the hook payload as JSON) then decide on "end".
+process.stdin.on("data", () => {});
 process.stdin.on("end", () => {
-  let data = {};
+  // No sentinel → not an autonomous build → allow the stop (normal conversation).
+  if (!fs.existsSync(FLAG)) process.exit(0);
+
+  // Read the control line = the first non-empty line of the flag file.
+  // Fail OPEN on a read error (don't wedge the session; the founder can re-arm).
+  let control = "";
   try {
-    data = JSON.parse(input || "{}");
+    const text = fs.readFileSync(FLAG, "utf8");
+    control = (text.split(/\r?\n/).find((l) => l.trim()) || "").trim().toUpperCase();
   } catch {
-    /* ignore malformed input — fail open */
+    process.exit(0);
   }
 
-  // Already continuing because of this hook → allow the stop (prevents loops).
-  if (data.stop_hook_active) process.exit(0);
+  // Founder's explicit stop command on the control line → allow the stop.
+  if (STOP_WORDS.has(control)) process.exit(0);
 
-  // Only enforce during an active autonomous build.
-  if (!fs.existsSync(".claude/autonomous-build.flag")) process.exit(0);
-
+  // Otherwise: BLOCK — every time, no exceptions, no self-authorized stop.
   const reason = [
-    "BUILD-CONTINUATION GUARD (A23) — an autonomous build is active.",
+    "BUILD-CONTINUATION GUARD (A23 · HARD MODE) — autonomous build is ACTIVE.",
     "",
-    "State your Build-Stop Decision before stopping. You may stop ONLY if:",
-    "  (a) the founder told you to stop, OR",
-    "  (b) you are hard-blocked AND no other element is buildable without founder input.",
+    "You may NOT stop. There is NO self-authorized stop: 'hard-blocked',",
+    "'nothing left to build', or 'waiting on the founder' are NOT permission to",
+    "stop. Flag whatever needs the founder, then build the next buildable element.",
+    "If no feature is buildable this moment, do the most useful adjacent work —",
+    "verification, tests, docs, refactors, an audit — and keep going.",
     "",
-    "A limitation that merely needs the founder to run a migration/probe or make a",
-    "runtime decision is FLAG-AND-CONTINUE, not stop: note it, then build the next",
-    "buildable element. If neither (a) nor (b) holds, do NOT stop — keep building.",
-    "",
-    "If you are genuinely stopping, write: 'STOPPING — condition (a)/(b): <evidence>'.",
-    "To end the autonomous build, the founder removes .claude/autonomous-build.flag.",
+    "This ends ONLY on the founder's explicit command: set the FIRST LINE of",
+    "`.claude/autonomous-build.flag` to STOP (or HALT / STAND DOWN / END / DONE),",
+    "or delete the file. Nothing else stops the build.",
   ].join("\n");
 
   process.stdout.write(JSON.stringify({ decision: "block", reason }));
