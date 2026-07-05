@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "smoke:pwa": "node scripts/smoke-pwa.mjs"
+    "smoke:pwa": "node scripts/smoke-pwa.mjs",
+    "test:theme": "node --experimental-strip-types scripts/gymTheme.test.mjs",
+    "test": "npm run test:theme"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
