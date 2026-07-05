@@ -13,7 +13,8 @@
     "test:billing": "node --experimental-strip-types scripts/billing.test.mjs",
     "test:pg-errors": "node --experimental-strip-types scripts/pg-errors.test.mjs",
     "test:env": "node --experimental-strip-types scripts/env.test.mjs",
-    "test": "npm run test:theme && npm run test:billing && npm run test:pg-errors && npm run test:env"
+    "test:checkins": "node --experimental-strip-types --import ./scripts/register-tsalias.mjs scripts/checkins.test.mjs",
+    "test": "npm run test:theme && npm run test:billing && npm run test:pg-errors && npm run test:env && npm run test:checkins"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",
