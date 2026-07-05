@@ -34,6 +34,21 @@ without error but **never appears in the member app**. Two branding UIs, one rea
   API-keys/webhooks/contact there). Small, safe edit — held pending founder decision
   (§3.3: don't silently remove owner-facing admin UI).
 
+### OPEN — dependency vuln (low risk; safe fix identified)
+
+**S3 · `postcss <8.5.10` XSS via Next's bundled copy.** MODERATE advisory · LOW practical.
+`npm audit` flags 2 moderate vulns: Next `16.2.9` bundles `postcss@8.4.31` (XSS via
+unescaped `</style>` in CSS stringify, GHSA-qx2v-qp2m-jg93). **Practical exploitability
+here is negligible** — postcss runs at BUILD time on dev-authored Tailwind CSS; no
+user-controlled CSS is stringified. (The project's own `@tailwindcss/postcss` is already
+on patched `8.5.15`; only Next's transitive copy is old.)
+- ⛔ **DO NOT run `npm audit fix --force`** — it installs `next@9.3.3`, a catastrophic
+  Next 16→9 downgrade that would destroy the app.
+- ✅ **Safe fix (founder call — Next is pinned `16.2.9` exactly):** `npm install
+  next@16.2.10` (a patch release; likely bumps the bundled postcss), then `npm run build`
+  + `npm test` to verify. Held rather than bumping the pinned framework unattended, given
+  the negligible risk.
+
 ### CLOSED — not a current defect (A15), with a forward note
 
 **L1 · `api_keys.token` stored in plaintext.** LOW · scaffold. `0030` stores the full
