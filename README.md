@@ -44,6 +44,18 @@ capacity enforcement & attendance roster · staff directory · payroll/commissio
    run-queue + dependency notes in `docs/DEVELOPMENT-PLAN.md`.
 4. `npm install` then `npm run dev`; open `/` → **Staff dashboard** or **Member portal**.
 
+## Quality checks
+- `npm run lint` — ESLint (expect 0 problems).
+- `npm run typecheck` — `tsc --noEmit`.
+- `npm test` — dependency-free unit tests for critical pure logic: per-gym theming
+  contrast math (`scripts/gymTheme.test.mjs`) and money formatting
+  (`scripts/billing.test.mjs`). Runs on Node 22+ via `--experimental-strip-types`
+  (covers self-contained modules; anything importing the `@/` alias needs a test
+  framework with tsconfig-paths, not yet added).
+- `npm run smoke:pwa [baseUrl] [supabaseLogoUrl]` — post-deploy smoke test of the PWA
+  manifest + generated app icon (SSRF guard, PNG icons, optional real-logo rasterize).
+  Defaults to the production URL.
+
 ## Governance note
 Migration `0004` includes Supabase Storage policies (not probe-covered — validate manually). Stripe is
 **not** integrated (schema reserves `stripe_*` columns); the C3 Stripe-Connect decision is pending.
