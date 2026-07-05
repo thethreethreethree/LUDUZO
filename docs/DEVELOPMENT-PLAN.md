@@ -1,5 +1,10 @@
 # LUDUZO — Phase-Structured Development Plan
 
+> ⏳ **Currency note (2026-07):** this plan details migrations through ~`0023`. The project has
+> since grown to **`0061`** (engagement, scheduling, platform-admin, sales/CRM, notifications,
+> workout logs, aggregate views, brand storage, per-gym theming/PWA). For state past `0023`, the
+> source of truth is `supabase/migrations/` + git history + `docs/audits/`, not this plan.
+>
 > Governed by `CLAUDE.md` (constitution) and `ThinkerThinker.md` (asset library), both in the repo root.
 > AMD-006 lives in `CLAUDE.md` as §1.5.1 + §1.5.2 (not a separate file).
 > Build order obeys CLAUDE.md **§1.5.1** (four-layer, foundation-up) and **§1.7** (ground-up).
