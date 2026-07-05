@@ -67,6 +67,14 @@ API-key auth is actually built.
 | S2 | Public-route exemption used `startsWith` (future over-exposure) | Exact-match `/portal/manifest` + `/portal/icon` | ✅ build |
 | P1 | SVG logos rejected as installed PWA icons → reverted to LUDUZO | Rasterize all logos to a real 192/512 PNG via `/portal/icon` | ✅ prod: gym's real SVG → 512×512 PNG; manifest serves PNG icons |
 
+## Supply-chain + schema-wide security sweep (2026-07-06)
+- **RLS coverage:** all **62/62** public tables have RLS **enabled + ≥1 policy** — zero
+  open tables, zero accidental deny-all. The §3.2 tenancy invariant holds across the
+  whole schema. ✅
+- **Secret hygiene:** tracked files scanned — no hardcoded keys/tokens/passwords/private
+  keys; `.env` confirmed untracked (gitignored). ✅
+- **Dependencies:** `npm audit` → S3 above (moderate, low practical risk, safe fix noted).
+
 ## Live-DB verification performed
 - Migrations applied + correct: `0058` (redeem_reward member lock + execute grant),
   `0059` (both aggregate views), `0060` (locker_rentals), `0061` (brand bucket, public).
