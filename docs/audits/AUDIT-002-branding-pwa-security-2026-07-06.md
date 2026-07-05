@@ -75,6 +75,17 @@ API-key auth is actually built.
   keys; `.env` confirmed untracked (gitignored). ✅
 - **Dependencies:** `npm audit` → S3 above (moderate, low practical risk, safe fix noted).
 
+## RLS probe run (checkins) — RLS VERIFIED, probe stale
+Ran `tests/0006_checkins_rls_verify.sql` against the live DB (rollback-safe; 0 test orgs
+leaked). **RLS correctness PASSES**: tenant isolation (`iso_a`), member-role cannot
+record a check-in (`write_member`), and cross-tenant check-in blocked (`write_cross`) —
+all ✅. The `write_front`/`evt_*`/`occupancy` rows ERROR on `uq_checkins_open_member`,
+which is **the probe being stale, not a defect**: it predates `0018` and inserts a second
+OPEN check-in for the same member. *Fix (flagged):* the probe needs a distinct org-A
+member to separate the seeded/occupancy check-in from the front-desk write test. **Meta:**
+other probes may likewise predate later migrations — the `tests/` suite needs a staleness
+pass before it's a reliable green-bar.
+
 ## Live-DB verification performed
 - Migrations applied + correct: `0058` (redeem_reward member lock + execute grant),
   `0059` (both aggregate views), `0060` (locker_rentals), `0061` (brand bucket, public).
