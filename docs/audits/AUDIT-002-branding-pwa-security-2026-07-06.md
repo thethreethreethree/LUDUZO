@@ -71,6 +71,14 @@ API-key auth is actually built.
   `percent > 100` gap is **inert** (scaffold). *Forward note:* when redemption is built,
   clamp `percent ≤ 100` and `max(0, total − discount)`.
 
+### Guest passes — staff-managed, LOW (no guest-exploitable path)
+`issueGuestPass` / `updateGuestPassStatus` are **staff actions** (front desk issues +
+manually marks `redeemed`). No guest self-service redemption exists (0003 flags
+enforcement as not-built). `updateGuestPassStatus` doesn't guard double-redemption or
+expiry, but it's staff-gated and `status` is DB-enum-constrained — no data corruption,
+no unauthenticated access. *Forward note:* add a status/expiry guard if/when guest
+self-redemption is built.
+
 ## Inspected vs NOT inspected
 - **Inspected:** both org-settings writers, the public manifest/icon routes + middleware
   exemption, `gymTheme` + its consumers, `api_keys`/`webhooks` storage + RLS, POS +
