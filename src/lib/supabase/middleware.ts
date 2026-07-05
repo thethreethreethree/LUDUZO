@@ -43,7 +43,9 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const needsAuth =
     PROTECTED_PREFIXES.some((p) => path.startsWith(p)) &&
-    !PUBLIC_EXCEPTIONS.some((p) => path.startsWith(p));
+    // Exact-match the exceptions (not startsWith) so only these precise routes are
+    // public — a future /portal/icon-something route wouldn't be exposed by accident.
+    !PUBLIC_EXCEPTIONS.includes(path);
   if (needsAuth && !user) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
