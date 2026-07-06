@@ -9,6 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "smoke:pwa": "node scripts/smoke-pwa.mjs",
+    "smoke:routes": "node scripts/smoke-routes.mjs",
+    "smoke": "npm run smoke:routes && npm run smoke:pwa",
     "test:theme": "node --experimental-strip-types scripts/gymTheme.test.mjs",
     "test:billing": "node --experimental-strip-types scripts/billing.test.mjs",
     "test:pg-errors": "node --experimental-strip-types scripts/pg-errors.test.mjs",
