@@ -149,11 +149,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         <div className="text-[15px] font-bold text-bone">Your details</div>
         <form action={updateMyProfile} className="mt-2 flex flex-col gap-2">
           <div className="flex gap-2">
-            <input name="first_name" defaultValue={me0?.first_name ?? ""} required placeholder="First name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
-            <input name="last_name" defaultValue={me0?.last_name ?? ""} required placeholder="Last name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="first_name" aria-label="First name" defaultValue={me0?.first_name ?? ""} required placeholder="First name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="last_name" aria-label="Last name" defaultValue={me0?.last_name ?? ""} required placeholder="Last name" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
           </div>
           <div className="flex gap-2">
-            <input name="phone" defaultValue={me0?.phone ?? ""} inputMode="tel" placeholder="Phone number" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="phone" aria-label="Phone number" defaultValue={me0?.phone ?? ""} inputMode="tel" placeholder="Phone number" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
             <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save</button>
           </div>
         </form>
@@ -164,11 +164,11 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
       <section className="rounded-2xl border border-iron bg-onyx p-4">
         <div className="text-[15px] font-bold text-bone">Your goals</div>
         <form action={updateMyGoals} className="mt-2 flex flex-col gap-2">
-          <select name="fitness_level" defaultValue={myGoals?.fitness_level ?? ""} className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone">
+          <select name="fitness_level" aria-label="Fitness level" defaultValue={myGoals?.fitness_level ?? ""} className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone">
             <option value="">Fitness level…</option>
             {["Beginner", "Intermediate", "Advanced"].map((l) => (<option key={l} value={l}>{l}</option>))}
           </select>
-          <textarea name="goals" rows={2} defaultValue={myGoals?.goals ?? ""} placeholder="What are you training for? (e.g. lose 5kg, first 5k, build strength)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <textarea name="goals" aria-label="Your training goals" rows={2} defaultValue={myGoals?.goals ?? ""} placeholder="What are you training for? (e.g. lose 5kg, first 5k, build strength)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Save goals</button>
         </form>
       </section>
@@ -178,9 +178,9 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
         <div className="text-[15px] font-bold text-bone">Refer a friend</div>
         <p className="mt-0.5 text-xs text-ash">Know someone who&apos;d love {gymName}? Send us their details and we&apos;ll reach out.</p>
         <form action={submitReferral} className="mt-2 flex flex-col gap-2">
-          <input name="referred_name" required placeholder="Friend's name" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <input name="referred_name" aria-label="Friend's name" required placeholder="Friend's name" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
           <div className="flex gap-2">
-            <input name="referred_email" type="email" placeholder="Their email (optional)" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+            <input name="referred_email" aria-label="Friend's email (optional)" type="email" placeholder="Their email (optional)" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
             <button className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-bold text-black hover:brightness-110">Refer</button>
           </div>
         </form>
@@ -301,7 +301,7 @@ export default async function PortalMorePage({ searchParams }: { searchParams: P
                 ) : null}
                 <form action={addMemberComment} className="mt-2 flex gap-2">
                   <input type="hidden" name="post_id" value={p.id} />
-                  <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-1.5 text-xs text-bone placeholder:text-ash-dim" />
+                  <input name="body" aria-label="Write a reply" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron bg-onyx-2 px-3 py-1.5 text-xs text-bone placeholder:text-ash-dim" />
                   <button className="rounded-md border border-iron px-3 py-1 text-xs font-semibold text-ash hover:border-gold hover:text-gold">Send</button>
                 </form>
               </li>

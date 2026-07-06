@@ -112,7 +112,7 @@ export default async function PortalHelpPage({ searchParams }: { searchParams: P
               </label>
             ))}
           </div>
-          <textarea name="comment" rows={2} placeholder="Anything else? (optional)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <textarea name="comment" aria-label="Additional feedback (optional)" rows={2} placeholder="Anything else? (optional)" className="w-full rounded-md border border-iron bg-onyx-2 px-3 py-2 text-sm text-bone placeholder:text-ash-dim" />
           <SubmitButton className="self-start rounded-xl bg-gold px-4 py-2 text-sm font-bold text-black" pendingLabel="Sending…">Send feedback</SubmitButton>
         </form>
       </section>
