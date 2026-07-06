@@ -70,8 +70,8 @@ export default async function InvoicesPage({
             <span className="text-sm font-medium">Record a refund</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <input name="amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              <input name="reason" placeholder="Reason (optional)" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="amount" aria-label="Refund amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="reason" aria-label="Refund reason (optional)" placeholder="Reason (optional)" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             </div>
             <button className="self-start rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:border-gold hover:text-gold">Record refund</button>
           </form>
@@ -133,8 +133,8 @@ export default async function InvoicesPage({
           <h2 className="text-sm font-medium">New invoice</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="amount" type="number" min="0" step="0.01" required placeholder="Amount" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="due_date" type="date" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="amount" aria-label="Invoice amount" type="number" min="0" step="0.01" required placeholder="Amount" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="due_date" aria-label="Due date" type="date" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create invoice

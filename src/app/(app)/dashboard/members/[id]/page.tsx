@@ -498,8 +498,8 @@ export default async function MemberDetailPage({
         <form action={logMeasurement} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="weight_kg" type="number" step="0.1" min="0" placeholder="Weight kg" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="body_fat_pct" type="number" step="0.1" min="0" placeholder="Body fat %" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="weight_kg" aria-label="Weight in kg" type="number" step="0.1" min="0" placeholder="Weight kg" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="body_fat_pct" aria-label="Body fat percentage" type="number" step="0.1" min="0" placeholder="Body fat %" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Log
           </button>

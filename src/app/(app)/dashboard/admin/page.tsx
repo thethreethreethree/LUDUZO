@@ -100,7 +100,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <h2 className="text-sm font-medium text-ash">API keys</h2>
             <form action={generateApiKey} className="flex gap-2 rounded-md border border-onyx bg-onyx p-4">
               <input type="hidden" name="organization_id" value={orgs[0].id} />
-              <input name="name" placeholder="Key name" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="name" aria-label="API key name" placeholder="Key name" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Generate</button>
             </form>
             {keys.length > 0 ? (
@@ -123,8 +123,8 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
             <h2 className="text-sm font-medium text-ash">Webhooks</h2>
             <form action={addWebhook} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4 sm:flex-row">
               <input type="hidden" name="organization_id" value={orgs[0].id} />
-              <input name="url" required placeholder="https://your-endpoint" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              <input name="event_types" placeholder="member.created, invoice.paid" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="url" aria-label="Webhook URL" required placeholder="https://your-endpoint" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="event_types" aria-label="Event types (comma-separated)" placeholder="member.created, invoice.paid" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Add</button>
             </form>
             {webhooks.length > 0 ? (

@@ -135,14 +135,14 @@ export default async function ClassesPage({
         <form action={createSession} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a session</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="class_id" aria-label="Class" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="starts_at" aria-label="Session date and time" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule
           </button>
@@ -153,15 +153,15 @@ export default async function ClassesPage({
         <form action={createRecurringSessions} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Schedule a weekly series</h2>
           <OrgPicker orgs={mgmtOrgs} />
-          <select name="class_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="class_id" aria-label="Class" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {classes.map((c) => (
               <option key={c.id} value={c.id}>
                 {c.name}
               </option>
             ))}
           </select>
-          <input name="starts_at" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="count" type="number" min="1" max="52" defaultValue={8} className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" title="Number of weeks" />
+          <input name="starts_at" aria-label="First session date and time" type="datetime-local" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="count" aria-label="Number of weeks" type="number" min="1" max="52" defaultValue={8} className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" title="Number of weeks" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Schedule weekly
           </button>
