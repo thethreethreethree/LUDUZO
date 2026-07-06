@@ -9,9 +9,6 @@ export async function updateOrgSettings(formData: FormData) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
   const id = String(formData.get("organization_id") ?? "");
-  const brand_color = String(formData.get("brand_color") ?? "").trim() || null;
-  const accent_color = String(formData.get("accent_color") ?? "").trim() || null;
-  const logo_url = String(formData.get("logo_url") ?? "").trim() || null;
   const plan_tier = String(formData.get("plan_tier") ?? "free");
   const default_currency = String(formData.get("default_currency") ?? "USD").trim().toUpperCase() || "USD";
   const locale = String(formData.get("locale") ?? "en").trim() || "en";
@@ -23,6 +20,10 @@ export async function updateOrgSettings(formData: FormData) {
   if (!id) redirect("/dashboard/admin");
   // Merge member-facing gym info into the settings jsonb without clobbering other
   // keys (branding etc.). Members read these via org_select_member (0041).
+  // Branding (logo/colours/icon) is NOT written here — it lives in the Settings page,
+  // which writes the settings jsonb the member app reads. The old top-level
+  // brand_color/accent_color/logo_url columns this action used to write were never read
+  // by the member app (M1), so they've been dropped from this form.
   const { data: cur } = await supabase.from("organizations").select("settings").eq("id", id).maybeSingle();
   const settings = {
     ...(((cur as { settings: Record<string, unknown> } | null)?.settings) ?? {}),
@@ -34,7 +35,7 @@ export async function updateOrgSettings(formData: FormData) {
   };
   const { error } = await supabase
     .from("organizations")
-    .update({ brand_color, accent_color, logo_url, plan_tier, default_currency, locale, settings })
+    .update({ plan_tier, default_currency, locale, settings })
     .eq("id", id);
   if (error) redirect("/dashboard/admin?error=" + encodeURIComponent(error.message));
   revalidatePath("/dashboard/admin");

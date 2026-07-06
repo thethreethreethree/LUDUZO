@@ -7,7 +7,6 @@ export const dynamic = "force-dynamic";
 
 type Org = {
   id: string; name: string; role: string;
-  brand_color: string | null; accent_color: string | null; logo_url: string | null;
   plan_tier: string; default_currency: string; locale: string;
   settings: { phone?: string; address?: string; hours?: string; amenities?: string; cancellation_policy?: string } | null;
 };
@@ -25,7 +24,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
   // Orgs where the caller is owner/admin (platform admin scope).
   const { data: memData } = await supabase
     .from("organization_members")
-    .select("role, organization:organizations(id, name, brand_color, accent_color, logo_url, plan_tier, default_currency, locale, settings)")
+    .select("role, organization:organizations(id, name, plan_tier, default_currency, locale, settings)")
     .in("role", ["owner", "admin"]);
   const orgs: Org[] = ((memData ?? []) as unknown as { role: string; organization: Omit<Org, "role"> | null }[])
     .filter((m) => m.organization)
@@ -41,7 +40,7 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
       <div>
         <Link href="/dashboard" className="text-sm text-ash hover:underline">← Dashboard</Link>
         <h1 className="mt-1 text-h1 text-bone">Admin</h1>
-        <p className="text-sm text-ash">White-label, plan tier, localisation, API &amp; webhooks.</p>
+        <p className="text-sm text-ash">Plan tier, localisation, gym info, API &amp; webhooks.</p>
       </div>
 
       {error ? <p className="rounded-md border border-loss/40 bg-loss/10 px-3 py-2 text-sm text-loss">{error}</p> : null}
@@ -58,15 +57,11 @@ export default async function AdminPage({ searchParams }: { searchParams: Promis
               <span className="text-xs text-gold">{o.role}</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <label className="flex flex-col gap-1 text-xs text-ash">Brand colour
-                <input name="brand_color" defaultValue={o.brand_color ?? "#FECE00"} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              </label>
-              <label className="flex flex-col gap-1 text-xs text-ash">Accent colour
-                <input name="accent_color" defaultValue={o.accent_color ?? "#0A0A0A"} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              </label>
-              <label className="flex flex-col gap-1 text-xs text-ash">Logo URL
-                <input name="logo_url" defaultValue={o.logo_url ?? ""} placeholder="https://…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              </label>
+              <p className="text-xs text-ash sm:col-span-3">
+                Branding — logo, colours, and app icon — lives in{" "}
+                <Link href="/dashboard/settings" className="font-medium text-gold hover:underline">Settings</Link>,
+                which is what the member app actually reads.
+              </p>
               <label className="flex flex-col gap-1 text-xs text-ash">Plan tier
                 <select name="plan_tier" defaultValue={o.plan_tier} className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                   {TIERS.map((t) => (<option key={t} value={t}>{t}</option>))}

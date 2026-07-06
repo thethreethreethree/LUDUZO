@@ -2,84 +2,81 @@
 
 - **Stance:** Outside-view (§1.3), grounded in the codebase, not memory. Every load-bearing
   claim below was checked against `src/` or the live DB the day of writing.
-- **Discipline:** No single fabricated percentage (§5). Readiness is decomposed by *what is
-  being shipped*, because one number would hide the gap that matters most (payments).
+- **Discipline:** No fabricated precision (§5). The percentage counts only operational
+  locks/bottlenecks.
+
+## Ratified definition (founder, 2026-07-06)
+
+> "Market ready" = **a gym owner can fully operate their gym end-to-end.** The percentage
+> counts **only operational locks/bottlenecks** — elements that would *stop* an owner from
+> running the gym. Explicitly **excluded from the %**:
+> - **Online payment processing (Stripe/C3).** Gyms take cash / manual payment today; a
+>   processor is a later addition, not an operating blocker.
+> - **Non-operational polish** (accessibility, cosmetic gaps, enhancements). Real, tracked
+>   below, but they don't stop a gym from operating, so they don't gate the number.
 
 ---
 
-## The one-number trap
+## Operational readiness: ~90% — and no known hard blocker
 
-"What's our readiness %" has no honest single answer — it depends entirely on the target.
-Three targets, three very different numbers:
+A gym owner can operate today. Every make-or-break operational flow is built and verified;
+what keeps this from a *confident* 100% is real-use proof and a few minor edges, **not
+missing features.**
 
-| Target | Readiness | Gating gaps |
+### Core operational flows — verified present & sound
+| Flow | Status | Evidence |
 |---|---|---|
-| **Design-partner soft launch** — a few gyms who accept *manual* billing | **~70–75%** | PWA on-device sign-off, `0057` apply, M1 decision, no E2E tests |
-| **Broad self-serve launch** — any gym signs up and pays | **~45–55%** | **No automated payments**, no transactional email, no external security audit, no proven real-customer run |
-| **The differentiated "System"** — the events→signals→problems→resolutions diagnostic AI (CLAUDE.md §3–4) | **~15–25%** | The diagnostic engine is not built; the schema/method discipline exists, the product does not |
+| Create a gym (onboarding) | ✅ | `onboarding/` |
+| Add / edit / check in members | ✅ | `members/*`, `checkins`, race-safe (0018) |
+| **Member portal access** | ✅ | self-signup → claim by email (`link_my_member_records`, 0015) |
+| **Staff onboarding** | ✅ | `add_staff_member` (0021); staffer signs up first, owner adds by email |
+| Classes + member booking | ✅ | `classes`, `portal/book` |
+| POS + inventory (cash sale) | ✅ | `record_sale` RPC (0011) — integer cents, atomic stock |
+| Cash/manual invoicing | ✅ | `invoices` — create/mark-paid/void, integer cents |
+| Member self-service PWA | ✅ | pass, booking, progress, referrals, feedback |
+| Tenant isolation | ✅ | RLS 62/62 tables, 14/14 probes pass live |
 
-These are grounded estimates with stated reasoning — not precision defensible to a decimal.
+### Why not 100% (the honest residual — all non-feature)
+1. **Real-use end-to-end proof** (largest slice). Flows are traced in code + structurally
+   verified (RLS, money math, access); no *design-partner gym has run a week of real
+   operations*. That's missing **proof**, not a missing feature.
+2. **Minor operational edges** (work, small friction): a staffer must self-sign-up before
+   an owner can add them (clear message, not a lock); webhook *delivery* is a scaffold
+   (registration works; delivery needs a job runner — irrelevant to running a gym).
+3. **`0057` (trainer bios)** not yet applied — the UI degrades gracefully, so not a
+   blocker; founder-apply when convenient.
 
-## Evidence (checked 2026-07-06)
-- **Payments:** `grep` for `new Stripe` / `stripe.(checkout|paymentIntents|subscriptions|customers)`
-  → **0 files.** Billing is record-only/manual; schema reserves `stripe_*` columns, nothing
-  consumes them.
-- **Transactional email/SMS:** `grep` for resend/sendgrid/nodemailer/postmark/mailgun/smtp
-  → **0 files.** Receipts, invoice reminders, referral emails do not send. In-app + Supabase
-  Auth login emails only.
-- **The "System":** no `signals` / `resolutions` / `diagnos*` product surface in `src/app`.
-  What ships today is the gym-management SaaS, not the diagnostic thesis product.
-- **Tenant isolation:** RLS on **62/62** tables; **14/14** RLS probes pass against the live DB
-  (AUDIT-002). The hardest-to-retrofit property is done.
+### Only one "not implemented" marker exists in the whole app
+`admin/page.tsx` — webhook event delivery (scaffold). Nothing in the daily
+operating path is stubbed.
 
-## Genuinely strong (verified, not asserted)
-- Multi-tenant isolation (above) — the core moat.
-- Broad surface: ≈45 dashboard segments + full member PWA (membership, QR pass, booking,
-  progress, referrals, feedback, community, notifications).
-- Per-gym white-label branding (colours, logo, PWA icon), integer-cents money integrity,
-  complete error-boundary net (dashboard + portal + root), honest pure-logic tests
-  (48 assertions), portal form a11y.
+---
 
-## Gaps that cap the number — in priority order
-1. **Payments (biggest).** "Collect dues automatically" is table-stakes for most gyms.
-   Manual-only billing suits a handful of design partners; it's a dealbreaker for a broad
-   launch. This alone caps the middle row at ~55%. **Decision required: C3 — Stripe Connect
-   (docs note it pending).**
-2. **Transactional email.** Receipts/reminders don't leave the system.
-3. **No proof under real conditions** — no E2E/integration tests, no external security
-   audit, no confirmed paying-customer deployment. (Prod is live and green; real usage is
-   unverified — not claimed.)
-4. **The thesis product** — if "market" means the diagnostic System, that is the real gap,
-   and it's a product-direction decision, not a polish pass.
+## Explicitly excluded from the % (real, but not operating blockers)
+- **Online payments (Stripe/C3).** Founder-deferred; cash works. When built: the C3
+  Stripe-Connect decision, then dues/invoice/POS card flows + an external security review.
+- **Accessibility polish.** Member portal forms are labelled; the staff dashboard sweep is
+  underway (`classes`, `gamification`, `programs`, `inventory`, `maintenance`, `leads`,
+  `feedback`, `resources` done). ~19 lower-traffic pages remain — quality, not a blocker.
+- **Transactional email** (receipts/reminders). In-app + Supabase auth email cover the
+  operating path; app-level email is an enhancement.
 
-## Punch-lists
+---
 
-### To design-partner soft launch (top row — achievable, Stripe deferred)
-- [ ] Founder: reinstall PWA on-device, confirm the rasterized gym icon holds.
-- [ ] Founder: apply `0057` (trainer bios; verified apply-ready).
-- [ ] Founder decision: M1 — dedup the admin-vs-settings branding trap.
-- [ ] Add a minimal happy-path E2E smoke (member claim → check-in → book) — currently only
-      pure logic is unit-tested.
-- [ ] Written manual-billing runbook for partner gyms (what the gym does without Stripe).
+## Resolved since first draft
+- **M1 (admin branding trap) — FIXED.** The Admin page's `brand_color`/`accent_color`/
+  `logo_url` inputs wrote top-level columns the member app never read (it reads the
+  `settings` jsonb, written by the **Settings** page). An owner setting a logo in Admin saw
+  it silently vanish — a broken owner workflow. The dead inputs + their writes were removed
+  and Admin now points to Settings. (Harmless unused columns left in place; dropping them
+  is a founder-gated migration, not needed.)
 
-### To broad self-serve launch (middle row — Stripe is the gate)
-- [ ] **C3 decision + build: Stripe Connect** (per-gym payouts) — dues, invoices, POS.
-- [ ] Transactional email (receipts, invoice reminders, referral touch).
-- [ ] External security review / pen test before taking card data flows live.
-- [ ] Load/soak test on the busiest paths (check-in, booking).
-- [ ] **Dashboard a11y sweep (bounded).** The member portal forms now have accessible
-      names; the staff dashboard's inline edit/quick-add inputs on operational pages
-      (`classes`, `programs`, `gamification`, `inventory`, `leads`, …) are largely
-      placeholder-only. Honest scope: ~120 controls across ~27 pages that use no `<label>`
-      (an earlier raw grep of 206 was inflated — the member-CRUD forms, e.g. `members/new`,
-      already use the proper `<label>`-wrap pattern, which is the template for the sweep).
-      `classes` fixed as the demonstration. Staff-facing, so lower priority than the portal.
+## Open decisions
+1. **`0057` apply** (trainer bios) — verified apply-ready.
+2. **PWA device check** — reinstall to confirm the rasterized gym icon holds.
+3. **When to start payments** (Stripe/C3) — deferred by founder; picked up later.
+4. **Finish the dashboard a11y sweep?** (quality, ~19 pages left) — founder's call.
 
-## Open decisions this assessment surfaces
-1. **Which target are we actually building toward?** (materially changes priorities)
-2. **C3 — Stripe Connect** (the payments gate).
-3. Whether/when to build the diagnostic **System** vs. harden the SaaS.
-4. Carried from AUDIT-002: M1, `0057`, PWA device check, `next@16.2.10` (S3).
-
-*Recorded per §1.7 (assessments on the record) and §3.1 (data-as-asset). Estimates are
-honest and grounded; no gap omitted to flatter the number.*
+*Recorded per §1.7 (assessments on the record) and §3.1 (data-as-asset). The number is
+honest and grounded; no operating blocker omitted to flatter it, none invented to justify
+work.*
