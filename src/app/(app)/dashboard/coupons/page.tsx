@@ -97,15 +97,15 @@ export default async function CouponsPage({
         <form action={createCoupon} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">New coupon</h2>
           <OrgPicker orgs={orgs} />
-          <input name="code" required placeholder="CODE" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <select name="discount_type" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <input name="code" aria-label="Coupon code" required placeholder="CODE" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="discount_type" aria-label="Discount type" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {DISCOUNT_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}
               </option>
             ))}
           </select>
-          <input name="discount_value" type="number" min="0" step="0.01" required placeholder="Value" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="discount_value" aria-label="Discount value" type="number" min="0" step="0.01" required placeholder="Value" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create
           </button>

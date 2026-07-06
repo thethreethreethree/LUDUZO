@@ -86,6 +86,7 @@ export default async function ReferralsPage({
                 <input type="hidden" name="id" value={r.id} />
                 <select
                   name="status"
+                  aria-label={`Status for ${r.referred_name}`}
                   defaultValue={r.status}
                   className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                 >
@@ -109,10 +110,10 @@ export default async function ReferralsPage({
           <h2 className="text-sm font-medium">Log referral</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="referred_name" required placeholder="Referred person's name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="referred_email" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="referred_name" aria-label="Referred person's name" required placeholder="Referred person's name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="referred_email" aria-label="Referred person's email (optional)" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
-          <select name="referrer_member_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="referrer_member_id" aria-label="Referred by (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">Referred by (optional)</option>
             {members.map((m) => (
               <option key={m.id} value={m.id}>

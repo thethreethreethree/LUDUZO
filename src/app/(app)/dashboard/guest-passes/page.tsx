@@ -90,6 +90,7 @@ export default async function GuestPassesPage({
                 <input type="hidden" name="id" value={p.id} />
                 <select
                   name="status"
+                  aria-label={`Status for ${p.guest_name}`}
                   defaultValue={p.status}
                   className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                 >
@@ -113,11 +114,11 @@ export default async function GuestPassesPage({
           <h2 className="text-sm font-medium">Issue guest pass</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="guest_name" required placeholder="Guest name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="guest_email" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="guest_name" aria-label="Guest name" required placeholder="Guest name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="guest_email" aria-label="Guest email (optional)" type="email" placeholder="Email (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <div className="flex gap-3">
-            <select name="host_member_id" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <select name="host_member_id" aria-label="Host member (optional)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">Host member (optional)</option>
               {members.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -125,7 +126,7 @@ export default async function GuestPassesPage({
                 </option>
               ))}
             </select>
-            <input name="expires_at" type="date" title="Expires" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="expires_at" aria-label="Expiry date" type="date" title="Expires" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Issue pass
