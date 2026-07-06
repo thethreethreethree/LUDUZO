@@ -72,6 +72,12 @@ operating path is stubbed.
   is a founder-gated migration, not needed.)
 
 ## Open decisions
+0. **Restore `docs/amendments/`** — the entire amendments directory (AMD-001…006) is
+   absent from the tree, though CLAUDE.md cites them and their ratified text (e.g. §1.5.1/
+   §1.5.2) lives in CLAUDE.md. Two stray duplicate copies of the constitution (`THINKX1.md`,
+   `THINKX2.md`) also sit at repo root. Surfaced 2026-07-07 during the theme build; the
+   founder authorized proceeding under the in-tree ratified text. Restore the amendment
+   docs so AMD-006 etc. can be quoted from source (§0.1/A19).
 1. **`0057` apply** (trainer bios) — verified apply-ready.
 2. **PWA device check** — reinstall to confirm the rasterized gym icon holds.
 3. **When to start payments** (Stripe/C3) — deferred by founder; picked up later.
