@@ -137,7 +137,7 @@ export default async function MembersPage({
       <div className="flex flex-wrap items-center gap-2">
         <form className="min-w-[220px] flex-1">
           {status ? <input type="hidden" name="status" value={status} /> : null}
-          <input type="search" name="q" defaultValue={q ?? ""} placeholder="Search by name, email, or member ID…" className="w-full rounded-md border border-iron bg-onyx-2 px-3.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
+          <input type="search" name="q" aria-label="Search members" defaultValue={q ?? ""} placeholder="Search by name, email, or member ID…" className="w-full rounded-md border border-iron bg-onyx-2 px-3.5 py-2 text-sm text-bone placeholder:text-ash-dim" />
         </form>
         <div className="flex gap-1.5">
           {chips.map((c) => {

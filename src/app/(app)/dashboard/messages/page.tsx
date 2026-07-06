@@ -59,13 +59,13 @@ export default async function MessagesPage({ searchParams }: { searchParams: Pro
       ) : (
         <form action={sendMessage} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <select name="to_user" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="to_user" aria-label="Recipient" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">To…</option>
             {staff.filter((s) => s.user_id !== user.id).map((s) => (
               <option key={s.user_id} value={s.user_id}>{s.profile?.full_name ?? "(staff)"}</option>
             ))}
           </select>
-          <textarea name="body" rows={2} required placeholder="Message…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="body" aria-label="Message" rows={2} required placeholder="Message…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Send</button>
         </form>
       )}

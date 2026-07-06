@@ -66,8 +66,8 @@ export default async function GroupDetailPage({
         </p>
         <form action={updateGroup} className="mt-3 flex flex-wrap items-center gap-2">
           <input type="hidden" name="id" value={group.id} />
-          <input name="name" defaultValue={group.name} className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
-          <select name="group_type" defaultValue={group.group_type} className="rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2">
+          <input name="name" aria-label="Group name" defaultValue={group.name} className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+          <select name="group_type" aria-label="Group type" defaultValue={group.group_type} className="rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2">
             {GROUP_TYPES.map((t) => (
               <option key={t} value={t}>
                 {t}

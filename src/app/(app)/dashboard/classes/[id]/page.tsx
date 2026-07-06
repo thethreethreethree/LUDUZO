@@ -113,6 +113,7 @@ export default async function SessionRosterPage({
                   <input type="hidden" name="session_id" value={session.id} />
                   <select
                     name="status"
+                    aria-label="Booking status"
                     defaultValue={b.status}
                     className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                   >

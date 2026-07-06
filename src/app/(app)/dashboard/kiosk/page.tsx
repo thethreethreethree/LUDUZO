@@ -47,6 +47,7 @@ export default async function KioskPage({
       <form action={kioskCheckIn} className="flex w-full flex-col gap-3">
         <input
           name="qr_token"
+          aria-label="QR token"
           autoFocus
           placeholder="QR token"
           className="w-full rounded-md border border-iron px-4 py-4 text-center text-lg bg-onyx-2"

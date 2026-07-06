@@ -45,8 +45,8 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
       {orgs.length > 0 ? (
         <form action={createPost} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="title" placeholder="Title (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <textarea name="body" rows={3} required placeholder="Share something with the community…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="title" aria-label="Post title (optional)" placeholder="Title (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="body" aria-label="Post body" rows={3} required placeholder="Share something with the community…" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Post</button>
         </form>
       ) : null}
@@ -73,7 +73,7 @@ export default async function CommunityPage({ searchParams }: { searchParams: Pr
                 <form action={addComment} className="flex gap-2">
                   <input type="hidden" name="organization_id" value={p.organization_id} />
                   <input type="hidden" name="post_id" value={p.id} />
-                  <input name="body" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                  <input name="body" aria-label="Write a reply" required placeholder="Reply…" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
                   <button className="rounded-md border border-iron px-3 py-1 text-xs font-medium hover:border-gold hover:text-gold">Reply</button>
                 </form>
               </div>

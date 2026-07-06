@@ -47,6 +47,7 @@ export default async function ImportMembersPage({
           <OrgPicker orgs={orgs} />
           <textarea
             name="rows"
+            aria-label="Member rows (CSV: first, last, email, phone)"
             rows={10}
             required
             placeholder={"Jane,Doe,jane@example.com,555-1234\nJohn,Smith,john@example.com"}

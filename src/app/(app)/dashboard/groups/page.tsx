@@ -85,8 +85,8 @@ export default async function GroupsPage({
           <h2 className="text-sm font-medium">Create group</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="name" required placeholder="Group name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <select name="group_type" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <input name="name" aria-label="Group name" required placeholder="Group name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <select name="group_type" aria-label="Group type" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {GROUP_TYPES.map((t) => (
                 <option key={t} value={t}>
                   {t}

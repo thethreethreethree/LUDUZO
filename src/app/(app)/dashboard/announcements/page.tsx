@@ -56,8 +56,8 @@ export default async function AnnouncementsPage({
         <form action={postAnnouncement} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="text-sm font-medium">Post an announcement</h2>
           <OrgPicker orgs={orgs} />
-          <input name="title" required placeholder="Title" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <textarea name="body" rows={3} placeholder="Message (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="title" aria-label="Announcement title" required placeholder="Title" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="body" aria-label="Announcement message" rows={3} placeholder="Message (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Post
           </button>

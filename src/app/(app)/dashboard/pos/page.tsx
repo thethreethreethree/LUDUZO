@@ -78,6 +78,7 @@ export default async function PosPage({
                 <input type="hidden" name="product_id" value={p.id} />
                 <input
                   name="quantity"
+                  aria-label={`Quantity for ${p.name}`}
                   type="number"
                   min="1"
                   defaultValue={1}
