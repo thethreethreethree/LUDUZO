@@ -89,7 +89,7 @@ export default async function PayrollPage({
         <form action={createCommission} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Record commission</h2>
           <OrgPicker orgs={orgs} />
-          <select name="staff_user_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="staff_user_id" aria-label="Staff member" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">— staff —</option>
             {staff.map((s) => (
               <option key={s.user_id} value={s.user_id}>
@@ -97,8 +97,8 @@ export default async function PayrollPage({
               </option>
             ))}
           </select>
-          <input name="amount" type="number" min="0" step="0.01" required placeholder="Amount" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="amount" aria-label="Commission amount" type="number" min="0" step="0.01" required placeholder="Amount" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="reason" aria-label="Commission reason" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Record
           </button>

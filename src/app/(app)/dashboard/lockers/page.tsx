@@ -45,12 +45,12 @@ export default async function LockersPage({ searchParams }: { searchParams: Prom
       {orgs.length > 0 ? (
         <form action={rentLocker} className="flex flex-wrap items-end gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="locker_label" required placeholder="Locker #" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <select name="member_id" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <input name="locker_label" aria-label="Locker number" required placeholder="Locker #" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="member_id" aria-label="Member" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">— member —</option>
             {members.map((m) => (<option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>))}
           </select>
-          <input name="monthly_fee" type="number" step="0.01" min="0" placeholder="$/mo" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="monthly_fee" aria-label="Monthly fee" type="number" step="0.01" min="0" placeholder="$/mo" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Rent</button>
         </form>
       ) : null}

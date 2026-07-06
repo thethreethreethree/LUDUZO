@@ -66,8 +66,8 @@ export default async function StaffPage({
         <form action={addStaff} className="flex flex-wrap items-end gap-2 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="w-full text-sm font-medium">Add staff (existing account)</h2>
           <OrgPicker orgs={adminOrgs} />
-          <input name="email" type="email" required placeholder="their@email.com" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <select name="role" defaultValue="front_desk" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <input name="email" aria-label="Staff email" type="email" required placeholder="their@email.com" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="role" aria-label="Staff role" defaultValue="front_desk" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {STAFF_ROLES.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -108,7 +108,7 @@ export default async function StaffPage({
                     <form action={updateStaffRole} className="flex items-center gap-1">
                       <input type="hidden" name="id" value={s.id} />
                       <input type="hidden" name="user_id" value={s.user_id} />
-                      <select name="role" defaultValue={s.role} className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2">
+                      <select name="role" aria-label="Change this staff member's role" defaultValue={s.role} className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2">
                         {STAFF_ROLES.map((r) => (
                           <option key={r} value={r}>
                             {r}

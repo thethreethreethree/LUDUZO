@@ -92,8 +92,8 @@ export default async function DocumentsPage({
           <h2 className="text-sm font-medium">New template</h2>
           <OrgPicker orgs={orgs} />
           <div className="flex gap-3">
-            <input name="title" required placeholder="Title (e.g. Liability Waiver)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <select name="kind" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <input name="title" aria-label="Document title" required placeholder="Title (e.g. Liability Waiver)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <select name="kind" aria-label="Document kind" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {DOCUMENT_KINDS.map((k) => (
                 <option key={k} value={k}>
                   {k}
@@ -101,7 +101,7 @@ export default async function DocumentsPage({
               ))}
             </select>
           </div>
-          <textarea name="body" rows={4} placeholder="Template text (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="body" aria-label="Document template text" rows={4} placeholder="Template text (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Create template
           </button>

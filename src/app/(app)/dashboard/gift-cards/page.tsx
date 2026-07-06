@@ -49,9 +49,9 @@ export default async function GiftCardsPage({ searchParams }: { searchParams: Pr
       {orgs.length > 0 ? (
         <form action={issueGiftCard} className="flex flex-wrap items-end gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="code" required placeholder="CODE" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <select name="issued_to_member" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <input name="code" aria-label="Gift card code" required placeholder="CODE" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="amount" aria-label="Gift card amount" type="number" step="0.01" min="0" required placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <select name="issued_to_member" aria-label="Issue to member (optional)" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">— unassigned —</option>
             {members.map((m) => (<option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>))}
           </select>
