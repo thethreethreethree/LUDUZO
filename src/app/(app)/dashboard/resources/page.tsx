@@ -79,7 +79,7 @@ export default async function ResourcesPage({
           <form action={createResource} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
             <span className="text-sm font-medium">Add a resource</span>
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="e.g. Court 1 / Locker 12" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="name" aria-label="Resource name" required placeholder="e.g. Court 1 / Locker 12" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <div className="flex gap-3">
               <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-ash">
                 Type
@@ -102,11 +102,11 @@ export default async function ResourcesPage({
           <form action={bookResource} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
             <span className="text-sm font-medium">Book a resource</span>
             <OrgPicker orgs={orgs} />
-            <select name="resource_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <select name="resource_id" aria-label="Resource to book" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">Select resource…</option>
               {resources.map((r) => (<option key={r.id} value={r.id}>{r.name} ({r.type})</option>))}
             </select>
-            <select name="member_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <select name="member_id" aria-label="Member (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">— no member —</option>
               {members.map((m) => (<option key={m.id} value={m.id}>{m.first_name} {m.last_name}</option>))}
             </select>

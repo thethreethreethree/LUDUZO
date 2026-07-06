@@ -48,29 +48,29 @@ export default async function MaintenancePage({ searchParams }: { searchParams: 
           <form action={logMaintenance} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4">
             <span className="text-sm font-medium">Log maintenance</span>
             <OrgPicker orgs={orgs} />
-            <select name="equipment_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <select name="equipment_id" aria-label="Equipment" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               <option value="">— general —</option>
               {equipment.map((e) => (<option key={e.id} value={e.id}>{e.name}</option>))}
             </select>
             <div className="flex gap-2">
-              <select name="kind" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+              <select name="kind" aria-label="Maintenance kind" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                 <option value="service">service</option><option value="repair">repair</option><option value="inspection">inspection</option>
               </select>
-              <input name="scheduled_for" type="date" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="scheduled_for" aria-label="Scheduled date" type="date" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             </div>
             <label className="flex items-center gap-2 text-xs text-ash"><input type="checkbox" name="down" /> mark out of service</label>
-            <input name="notes" placeholder="Notes" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="notes" aria-label="Maintenance notes" placeholder="Notes" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Log</button>
           </form>
 
           <form action={addSupplier} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4">
             <span className="text-sm font-medium">Add supplier</span>
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="Supplier name" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="contact_name" placeholder="Contact" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="name" aria-label="Supplier name" required placeholder="Supplier name" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="contact_name" aria-label="Contact name" placeholder="Contact" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <div className="flex gap-2">
-              <input name="email" type="email" placeholder="Email" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              <input name="phone" placeholder="Phone" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="email" aria-label="Supplier email" type="email" placeholder="Email" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <input name="phone" aria-label="Supplier phone" placeholder="Phone" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             </div>
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Add</button>
           </form>

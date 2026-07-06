@@ -68,12 +68,12 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
             <span className="text-sm font-medium">Log a review</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <select name="rating" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+              <select name="rating" aria-label="Star rating" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                 {[5, 4, 3, 2, 1].map((n) => (<option key={n} value={n}>{n}★</option>))}
               </select>
-              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
+              <select name="member_id" aria-label="Member (optional)" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
             </div>
-            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="comment" aria-label="Comment (optional)" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save review</button>
           </form>
 
@@ -81,12 +81,12 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
             <span className="text-sm font-medium">Log NPS</span>
             <OrgPicker orgs={orgs} />
             <div className="flex gap-2">
-              <select name="score" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+              <select name="score" aria-label="NPS score" required className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
                 {Array.from({ length: 11 }, (_, i) => 10 - i).map((n) => (<option key={n} value={n}>{n}</option>))}
               </select>
-              <select name="member_id" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
+              <select name="member_id" aria-label="Member (optional)" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
             </div>
-            <input name="comment" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="comment" aria-label="Comment (optional)" placeholder="Comment (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">Save NPS</button>
           </form>
         </div>
