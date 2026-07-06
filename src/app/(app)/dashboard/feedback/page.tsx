@@ -22,6 +22,13 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
   const reviews = (reviewData ?? []) as unknown as Review[];
   const { data: npsData } = await supabase.from("nps_responses").select("id, score, comment, created_at").order("created_at", { ascending: false }).limit(500);
   const nps = (npsData ?? []) as unknown as Nps[];
+  // True totals for the headline count — never the capped row lengths (A24). The avg
+  // rating / NPS below are intentionally over the recent window and disclosed as such.
+  const [{ count: reviewsCount }, { count: npsCount }] = await Promise.all([
+    supabase.from("reviews").select("id", { count: "exact", head: true }),
+    supabase.from("nps_responses").select("id", { count: "exact", head: true }),
+  ]);
+  const responsesTotal = (reviewsCount ?? reviews.length) + (npsCount ?? nps.length);
   const { data: memberData } = await supabase.from("members").select("id, first_name, last_name").order("last_name").limit(500);
   const members = (memberData ?? []) as unknown as MemberOpt[];
 
@@ -58,9 +65,15 @@ export default async function FeedbackPage({ searchParams }: { searchParams: Pro
         </div>
         <div className="rounded-md border border-onyx bg-onyx p-4">
           <div className="text-xs text-ash">Responses</div>
-          <div className="mt-1 font-display text-2xl font-extrabold">{reviews.length + nps.length}</div>
+          <div className="mt-1 font-display text-2xl font-extrabold">{responsesTotal.toLocaleString()}</div>
         </div>
       </div>
+      {(reviewsCount != null && reviewsCount > reviews.length) || (npsCount != null && npsCount > nps.length) ? (
+        <p className="-mt-3 text-xs text-ash">
+          “Responses” is the all-time total; the average rating and NPS reflect the most recent{" "}
+          {reviews.length.toLocaleString()} reviews and {nps.length.toLocaleString()} NPS responses.
+        </p>
+      ) : null}
 
       {orgs.length > 0 ? (
         <div className="grid gap-4 sm:grid-cols-2">
