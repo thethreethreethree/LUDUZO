@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { login, signup } from "./actions";
 import { OAuthButtons } from "@/components/OAuthButtons";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default async function LoginPage({
   searchParams,
@@ -11,10 +12,15 @@ export default async function LoginPage({
   const { error, message } = await searchParams;
 
   return (
-    <main className="flex flex-1 items-center justify-center p-8">
+    <main className="relative flex flex-1 items-center justify-center p-8">
+      <div className="absolute right-6 top-6">
+        <ThemeToggle />
+      </div>
       <div className="w-full max-w-sm">
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={28} height={28} />
+          {/* White helmet reads on the dark canvas; dark helmet reads on the light one. */}
+          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={28} height={28} className="hidden dark:block" />
+          <Image src="/brand/luduzo_helmet.svg" alt="LUDUZO" width={28} height={28} className="block dark:hidden" />
           <span className="font-display font-extrabold tracking-widest">LUDUZO</span>
         </Link>
         <h1 className="mt-6 text-h1 text-bone">Sign in</h1>

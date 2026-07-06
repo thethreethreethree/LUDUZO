@@ -116,7 +116,11 @@ body{background:${background};--nav-progress-bg:linear-gradient(90deg,color-mix(
 `.trim();
 
   return (
-    <div className="gym-theme">
+    // `dark` is pinned here so the member portal always renders on the DARK base
+    // regardless of the viewer's global Light/Dark choice — the per-gym branding
+    // (injected below) owns the member's canvas, and the theme toggle must not
+    // override the gym owner's chosen background (A16 — the two systems compose).
+    <div className="gym-theme dark">
       <style dangerouslySetInnerHTML={{ __html: css }} />
 
       {/* Gym logo + name, top-right of the member webapp. */}

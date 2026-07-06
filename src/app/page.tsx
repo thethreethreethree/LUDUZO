@@ -1,16 +1,20 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col">
       <header className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2.5">
-          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={32} height={32} priority />
+          {/* White helmet reads on the dark canvas; dark helmet reads on the light one. */}
+          <Image src="/brand/luduzo_helmet_white.svg" alt="LUDUZO" width={32} height={32} priority className="hidden dark:block" />
+          <Image src="/brand/luduzo_helmet.svg" alt="LUDUZO" width={32} height={32} priority className="block dark:hidden" />
           <span className="font-display text-lg font-extrabold tracking-widest">LUDUZO</span>
         </div>
         <nav className="flex items-center gap-3 text-sm">
-          <Link href="/login" className="text-ash hover:text-white">
+          <ThemeToggle />
+          <Link href="/login" className="text-ash hover:text-bone">
             Sign in
           </Link>
           <Link

@@ -3,32 +3,43 @@
 /* ============================================================================
    LUDUZO — Design tokens (from DESIGN ELEMENTS/DESIGN GUIDE), translated to
    Tailwind v4 @theme. Single source of truth for colour/type/radius/motion.
-   Changing a value here propagates to every bg / text / border usage.
+
+   Multi-theme (2026-07-07): the surface/text colours resolve through semantic
+   `--c-*` variables that FLIP with the `.dark` class on <html>:
+     • no .dark  → LIGHT mode (brand-faithful warm paper + ink + gold)
+     • .dark     → DARK mode  (the original onyx/bone/gold arena look)
+   The `.dark` class is set before paint by the no-flash script in the root
+   layout, from localStorage or the OS preference. Because utilities point at the
+   `--c-*` vars (A13 — the token space is authored ONCE here, not per component),
+   every existing `bg-onyx` / `text-bone` / `border-iron` retheme automatically.
+   The member portal PINS `.dark` on its own wrapper so a member's theme choice
+   never overrides the gym owner's per-gym branding (A16 — the two systems compose).
    ============================================================================ */
 
-/* Keep the class-based dark variant so pages still mid-migration keep working. */
+/* Class-based dark variant: `dark:` utilities key on the same `.dark` signal. */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  /* ---- Surfaces ---- */
-  --color-black: #0a0a0a;      /* app background + gold-button text */
-  --color-onyx: #161616;       /* card / panel */
-  --color-onyx-2: #1c1c1c;     /* raised / hover / table header */
-  --color-iron: #2a2a2a;       /* borders, dividers */
-  --color-iron-2: #333333;     /* hover borders */
+  /* ---- Surfaces (resolve through the theme-flipping --c-* vars below) ---- */
+  --color-black: var(--c-bg);        /* app background + gold-button text */
+  --color-onyx: var(--c-surface);    /* card / panel */
+  --color-onyx-2: var(--c-surface-2);/* raised / hover / table header */
+  --color-iron: var(--c-border);     /* borders, dividers */
+  --color-iron-2: var(--c-border-2); /* hover borders */
 
   /* ---- Text ---- */
-  --color-bone: #ededed;       /* primary text (never pure white) */
-  --color-ash: #8a8a8a;        /* secondary text / labels */
-  --color-ash-dim: #5e5e5e;    /* tertiary / placeholder / disabled */
+  --color-bone: var(--c-text);       /* primary text */
+  --color-ash: var(--c-text-2);      /* secondary text / labels */
+  --color-ash-dim: var(--c-text-3);  /* tertiary / placeholder / disabled */
 
-  /* ---- Brand accent ---- */
+  /* ---- Brand accent — CONSTANT in both modes (gold buttons carry black text
+         either way, so the accent stays the brand's gold on light and dark) ---- */
   --color-gold: #f5c518;
   --color-gold-hover: #ffd429;
   --color-gold-dim: rgba(245, 197, 24, 0.14);
   --color-gold-line: rgba(245, 197, 24, 0.35);
 
-  /* ---- Semantic / status ---- */
+  /* ---- Semantic / status — constant ---- */
   --color-win: #3fb950;
   --color-loss: #e5534b;
   --color-warn: #e3a008;
@@ -39,8 +50,8 @@
   --color-plan-rookie: #8a8a8a;
 
   /* Back-compat aliases (existing pages reference these before D7 migration) */
-  --color-background: #0a0a0a;
-  --color-foreground: #ededed;
+  --color-background: var(--c-bg);
+  --color-foreground: var(--c-text);
 
   /* ---- Typography ---- */
   --font-display: var(--font-montserrat), system-ui, sans-serif;
@@ -59,12 +70,35 @@
   --animate-scanline: scanline 2.4s ease-in-out infinite;
 }
 
+/* ---- Theme palettes: the single source of truth for surfaces + text ----
+   Default (:root, no .dark) is LIGHT; `.dark` restores the original arena look. */
 :root {
-  color-scheme: dark;
-  /* raw rgba tokens for gradients / arbitrary use */
+  color-scheme: light;
+  --c-bg: #f4f2ec;         /* warm paper — the brand in daylight, never clinical white */
+  --c-surface: #ffffff;    /* cards / panels */
+  --c-surface-2: #f0ece2;  /* raised / hover / table header */
+  --c-border: #e4dfd2;     /* borders, dividers */
+  --c-border-2: #d6cfbe;   /* hover borders */
+  --c-text: #1a1916;       /* warm near-black ink (never pure black) */
+  --c-text-2: #66625a;     /* secondary text / labels */
+  --c-text-3: #97907f;     /* tertiary / placeholder / disabled */
+
+  /* raw gold tokens for gradients / arbitrary use (constant) */
   --gold: #f5c518;
   --gold-dim: rgba(245, 197, 24, 0.14);
   --gold-line: rgba(245, 197, 24, 0.35);
+}
+
+.dark {
+  color-scheme: dark;
+  --c-bg: #0a0a0a;
+  --c-surface: #161616;
+  --c-surface-2: #1c1c1c;
+  --c-border: #2a2a2a;
+  --c-border-2: #333333;
+  --c-text: #ededed;
+  --c-text-2: #8a8a8a;
+  --c-text-3: #5e5e5e;
 }
 
 *,
@@ -74,8 +108,8 @@
 }
 
 body {
-  background: #0a0a0a;
-  color: #ededed;
+  background: var(--c-bg);
+  color: var(--c-text);
   font-family: var(--font-montserrat), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   line-height: 1.4;
@@ -94,8 +128,26 @@ h3 {
   font-feature-settings: "tnum" 1;
 }
 
-/* Hero / highlighted card gradient + occupancy fill */
+/* Gold as TEXT needs a darker ink on light surfaces for contrast; bright gold
+   stays for fills / borders / buttons. (No override under .dark — the baked
+   bright gold is already legible on dark.) The portal pins .dark, so its
+   per-gym gold is unaffected. */
+:root:not(.dark) .text-gold {
+  color: #8a6a00;
+}
+
+/* `black` is the app *background* token (it flips light↔dark), but `text-black` is
+   used as dark INK on gold buttons/badges and must stay dark in BOTH modes — without
+   this it would become paper-coloured (invisible) on gold in light mode. */
+:root:not(.dark) .text-black {
+  color: #1a1916;
+}
+
+/* Hero / highlighted card gradient + occupancy fill — per-theme surface. */
 .gold-gradient {
+  background: linear-gradient(160deg, #fffdf3, #f4f2ec);
+}
+.dark .gold-gradient {
   background: linear-gradient(160deg, #1a1a12, #161616);
 }
 .gold-fill {

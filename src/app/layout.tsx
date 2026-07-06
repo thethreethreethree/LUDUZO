@@ -38,6 +38,12 @@ export const metadata: Metadata = {
   },
 };
 
+// No-flash theme: set `.dark` BEFORE first paint from the saved choice (localStorage)
+// or the OS preference, so there's no light/dark flash on load. Runs synchronously in
+// <head>; on any error falls back to dark (the brand default). The member portal pins
+// its own `.dark`, so this never overrides per-gym branding.
+const THEME_SCRIPT = `(function(){try{var e=localStorage.getItem("luduzo-theme"),d=document.documentElement,useDark=e?e==="dark":window.matchMedia("(prefers-color-scheme: dark)").matches;d.classList.toggle("dark",useDark);}catch(_){document.documentElement.classList.add("dark");}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,8 +52,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`dark ${montserrat.variable} ${jetbrains.variable} h-full antialiased`}
+      suppressHydrationWarning
+      className={`${montserrat.variable} ${jetbrains.variable} h-full antialiased`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <Suspense fallback={null}>
           <NavigationProgress />

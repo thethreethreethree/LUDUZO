@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardNav } from "@/components/DashboardNav";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Avatar, btnGhost } from "@/components/ui";
 import { signout } from "./actions";
 
@@ -32,6 +33,7 @@ export default async function DashboardLayout({
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-4">
+            <ThemeToggle />
             <span className="hidden items-center gap-2 rounded-full border border-iron px-3 py-1 text-xs font-semibold text-win sm:inline-flex">
               <span className="h-[7px] w-[7px] rounded-full bg-win animate-[livepulse_2s_infinite]" />
               Arena live
