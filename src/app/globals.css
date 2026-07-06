@@ -143,6 +143,20 @@ h3 {
   color: #1a1916;
 }
 
+/* Status colours as TEXT: the bright win/loss/warn hex are tuned for the dark canvas
+   and fall below WCAG AA on the light paper background. Darken them for light mode only
+   (same treatment as text-gold above); solid bg-win/bg-loss usage is unaffected, and the
+   .dark-pinned member portal keeps the bright originals. */
+:root:not(.dark) .text-win {
+  color: #1a7f37;
+}
+:root:not(.dark) .text-loss {
+  color: #b3261e;
+}
+:root:not(.dark) .text-warn {
+  color: #8a5a00;
+}
+
 /* Hero / highlighted card gradient + occupancy fill — per-theme surface. */
 .gold-gradient {
   background: linear-gradient(160deg, #fffdf3, #f4f2ec);
