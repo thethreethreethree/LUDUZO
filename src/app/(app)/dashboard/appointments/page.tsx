@@ -146,6 +146,7 @@ export default async function AppointmentsPage({
                   <input type="hidden" name="id" value={a.id} />
                   <select
                     name="status"
+                    aria-label={`Status for ${a.title ?? "this appointment"}`}
                     defaultValue={a.status}
                     className="rounded-md border border-iron bg-transparent px-2 py-1 text-xs"
                   >

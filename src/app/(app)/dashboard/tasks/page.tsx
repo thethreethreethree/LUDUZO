@@ -67,8 +67,8 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
       ) : (
         <form action={createTask} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-5">
           <OrgPicker orgs={orgs} />
-          <input name="title" required placeholder="Task title" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <textarea name="description" rows={2} placeholder="Details (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="title" aria-label="Task title" required placeholder="Task title" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <textarea name="description" aria-label="Task details" rows={2} placeholder="Details (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <div className="flex gap-3">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-ash">Assign to
               <select name="assigned_to" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
@@ -107,7 +107,7 @@ export default async function TasksPage({ searchParams }: { searchParams: Promis
                 </div>
                 <form action={updateTaskStatus} className="flex items-center gap-2">
                   <input type="hidden" name="id" value={t.id} />
-                  <select name="status" defaultValue={t.status} className="rounded-md border border-iron bg-transparent px-2 py-1 text-xs">
+                  <select name="status" aria-label={`Status for ${t.title}`} defaultValue={t.status} className="rounded-md border border-iron bg-transparent px-2 py-1 text-xs">
                     {TASK_STATUSES.map((s) => (<option key={s} value={s}>{s}</option>))}
                   </select>
                   <button className="rounded-md border border-iron px-2 py-1 text-xs font-medium hover:border-gold hover:text-gold">Save</button>

@@ -64,9 +64,9 @@ export default async function LocationsPage({
               {orgs.length > 0 ? (
                 <form action={updateLocation} className="flex flex-wrap items-center gap-2">
                   <input type="hidden" name="id" value={l.id} />
-                  <input name="name" defaultValue={l.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
-                  <input name="capacity" type="number" min="0" defaultValue={l.capacity ?? ""} placeholder="Cap" className="w-20 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
-                  <select name="status" defaultValue={l.status} className="rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2">
+                  <input name="name" aria-label={`Location name for ${l.name}`} defaultValue={l.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                  <input name="capacity" aria-label={`Capacity for ${l.name}`} type="number" min="0" defaultValue={l.capacity ?? ""} placeholder="Cap" className="w-20 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                  <select name="status" aria-label={`Status for ${l.name}`} defaultValue={l.status} className="rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2">
                     {LOCATION_STATUSES.map((s) => (
                       <option key={s} value={s}>
                         {s}
@@ -92,10 +92,10 @@ export default async function LocationsPage({
         <form action={createLocation} className="flex flex-col gap-3 rounded-md border border-onyx bg-onyx p-4">
           <h2 className="text-sm font-medium">Add location</h2>
           <OrgPicker orgs={orgs} />
-          <input name="name" required placeholder="Location name" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="name" aria-label="Location name" required placeholder="Location name" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <div className="flex gap-3">
-            <input name="timezone" placeholder="Timezone (e.g. UTC)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="capacity" type="number" min="0" placeholder="Capacity" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="timezone" aria-label="Timezone" placeholder="Timezone (e.g. UTC)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="capacity" aria-label="Capacity" type="number" min="0" placeholder="Capacity" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           </div>
           <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
             Add location
