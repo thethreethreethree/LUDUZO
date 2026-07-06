@@ -59,8 +59,8 @@ export default async function ProgramsPage({ searchParams }: { searchParams: Pro
           {orgs.length > 0 ? (
             <form action={createWorkoutPlan} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4">
               <OrgPicker orgs={orgs} />
-              <input name="name" required placeholder="Plan name (e.g. Push/Pull/Legs)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-              <select name="member_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
+              <input name="name" aria-label="Workout plan name" required placeholder="Plan name (e.g. Push/Pull/Legs)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+              <select name="member_id" aria-label="Assign to member (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
               <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">New plan</button>
             </form>
           ) : null}
@@ -79,10 +79,10 @@ export default async function ProgramsPage({ searchParams }: { searchParams: Pro
               <form action={addExercise} className="mt-2 flex flex-wrap gap-2">
                 <OrgPicker orgs={orgs} />
                 <input type="hidden" name="plan_id" value={p.id} />
-                <input name="name" required placeholder="Exercise" className="min-w-0 flex-1 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
-                <input name="sets" type="number" placeholder="sets" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
-                <input name="reps" type="number" placeholder="reps" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
-                <input name="weight_kg" type="number" step="0.5" placeholder="kg" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="name" aria-label="Exercise name" required placeholder="Exercise" className="min-w-0 flex-1 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="sets" aria-label="Sets" type="number" placeholder="sets" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="reps" aria-label="Reps" type="number" placeholder="reps" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="weight_kg" aria-label="Weight in kg" type="number" step="0.5" placeholder="kg" className="w-14 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
                 <button className="rounded-md border border-iron px-2 py-1 text-xs hover:border-gold hover:text-gold">Add</button>
               </form>
             </div>
@@ -97,10 +97,10 @@ export default async function ProgramsPage({ searchParams }: { searchParams: Pro
             <form action={createMealPlan} className="flex flex-col gap-2 rounded-md border border-onyx bg-onyx p-4">
               <OrgPicker orgs={orgs} />
               <div className="flex gap-2">
-                <input name="name" required placeholder="Plan name" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-                <input name="daily_calorie_target" type="number" placeholder="kcal/day" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+                <input name="name" aria-label="Nutrition plan name" required placeholder="Plan name" className="min-w-0 flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+                <input name="daily_calorie_target" aria-label="Daily calorie target" type="number" placeholder="kcal/day" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
               </div>
-              <select name="member_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
+              <select name="member_id" aria-label="Assign to member (optional)" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">{memberOptions}</select>
               <button className="self-start rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">New plan</button>
             </form>
           ) : null}
@@ -119,9 +119,9 @@ export default async function ProgramsPage({ searchParams }: { searchParams: Pro
               <form action={addMealItem} className="mt-2 flex flex-wrap gap-2">
                 <OrgPicker orgs={orgs} />
                 <input type="hidden" name="meal_plan_id" value={p.id} />
-                <input name="meal" placeholder="meal" className="w-20 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
-                <input name="description" required placeholder="Food / item" className="min-w-0 flex-1 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
-                <input name="calories" type="number" placeholder="kcal" className="w-16 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="meal" aria-label="Meal" placeholder="meal" className="w-20 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="description" aria-label="Food / item" required placeholder="Food / item" className="min-w-0 flex-1 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
+                <input name="calories" aria-label="Calories" type="number" placeholder="kcal" className="w-16 rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2" />
                 <button className="rounded-md border border-iron px-2 py-1 text-xs hover:border-gold hover:text-gold">Add</button>
               </form>
             </div>

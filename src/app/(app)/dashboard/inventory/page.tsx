@@ -85,6 +85,7 @@ export default async function InventoryPage({
                     <input type="hidden" name="id" value={p.id} />
                     <input
                       name="stock_quantity"
+                      aria-label={`Stock quantity for ${p.name}`}
                       type="number"
                       min="0"
                       defaultValue={p.stock_quantity}
@@ -112,11 +113,11 @@ export default async function InventoryPage({
         {orgs.length > 0 ? (
           <form action={createProduct} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="Product" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="sku" placeholder="SKU" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="price" type="number" min="0" step="0.01" placeholder="Price" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="stock" type="number" min="0" placeholder="Stock" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="reorder_level" type="number" min="0" placeholder="Reorder ≤" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="name" aria-label="Product name" required placeholder="Product" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="sku" aria-label="SKU" placeholder="SKU" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="price" aria-label="Price" type="number" min="0" step="0.01" placeholder="Price" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="stock" aria-label="Initial stock" type="number" min="0" placeholder="Stock" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="reorder_level" aria-label="Reorder level" type="number" min="0" placeholder="Reorder ≤" className="w-24 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add
             </button>
@@ -138,6 +139,7 @@ export default async function InventoryPage({
                     <input type="hidden" name="id" value={e.id} />
                     <select
                       name="status"
+                      aria-label={`Status for ${e.name}`}
                       defaultValue={e.status}
                       className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                     >
@@ -161,9 +163,9 @@ export default async function InventoryPage({
         {orgs.length > 0 ? (
           <form action={createEquipment} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={orgs} />
-            <input name="name" required placeholder="Equipment" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="purchased_at" type="date" title="Purchased" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <select name="status" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <input name="name" aria-label="Equipment name" required placeholder="Equipment" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="purchased_at" aria-label="Purchase date" type="date" title="Purchased" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <select name="status" aria-label="Equipment status" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {EQUIPMENT_STATUSES.map((s) => (
                 <option key={s} value={s}>
                   {s}
