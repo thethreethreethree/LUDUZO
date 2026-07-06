@@ -18,12 +18,22 @@ export default async function RetentionPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
+  // Score at most ANALYSIS_CAP members, but fetch the MOST RECENT active members
+  // deterministically (not an arbitrary 2000) AND read the true active count separately,
+  // so the headline stat is correct and we can disclose when the analysis is a sample
+  // (A24: never present an aggregate over a capped fetch as the whole truth).
+  const ANALYSIS_CAP = 2000;
   const { data: memberData } = await supabase
     .from("members")
     .select("id, first_name, last_name, status")
     .eq("status", "active")
-    .limit(2000);
+    .order("member_since", { ascending: false, nullsFirst: false })
+    .limit(ANALYSIS_CAP);
   const members = (memberData ?? []) as unknown as Member[];
+  const { count: activeCount } = await supabase
+    .from("members")
+    .select("id", { count: "exact", head: true })
+    .eq("status", "active");
 
   const { data: checkinData } = await supabase
     .from("checkins")
@@ -62,7 +72,7 @@ export default async function RetentionPage() {
       <div className="grid grid-cols-3 gap-3">
         <div className="rounded-md border border-onyx bg-onyx p-4">
           <div className="text-xs text-ash">Active members</div>
-          <div className="mt-1 font-display text-2xl font-extrabold">{members.length}</div>
+          <div className="mt-1 font-display text-2xl font-extrabold">{(activeCount ?? members.length).toLocaleString()}</div>
         </div>
         <div className="rounded-md border border-onyx bg-onyx p-4">
           <div className="text-xs text-ash">At risk</div>
@@ -73,6 +83,14 @@ export default async function RetentionPage() {
           <div className="mt-1 font-display text-2xl font-extrabold">{scored.filter((m) => m.neverVisited).length}</div>
         </div>
       </div>
+
+      {activeCount != null && activeCount > members.length ? (
+        <p className="-mt-3 text-xs text-ash">
+          Analysing the {members.length.toLocaleString()} most-recently-joined active members of{" "}
+          {activeCount.toLocaleString()} total — the “at risk” and “never visited” figures cover
+          that sample, not the full roster. (Full-roster scoring will move server-side.)
+        </p>
+      ) : null}
 
       <section className="flex flex-col gap-2">
         <h2 className="text-sm font-medium text-ash">Reach out</h2>
