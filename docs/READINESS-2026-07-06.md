@@ -67,6 +67,13 @@ These are grounded estimates with stated reasoning — not precision defensible 
 - [ ] Transactional email (receipts, invoice reminders, referral touch).
 - [ ] External security review / pen test before taking card data flows live.
 - [ ] Load/soak test on the busiest paths (check-in, booking).
+- [ ] **Dashboard a11y sweep (bounded).** The member portal forms now have accessible
+      names; the staff dashboard's inline edit/quick-add inputs on operational pages
+      (`classes`, `programs`, `gamification`, `inventory`, `leads`, …) are largely
+      placeholder-only. Honest scope: ~120 controls across ~27 pages that use no `<label>`
+      (an earlier raw grep of 206 was inflated — the member-CRUD forms, e.g. `members/new`,
+      already use the proper `<label>`-wrap pattern, which is the template for the sweep).
+      `classes` fixed as the demonstration. Staff-facing, so lower priority than the portal.
 
 ## Open decisions this assessment surfaces
 1. **Which target are we actually building toward?** (materially changes priorities)

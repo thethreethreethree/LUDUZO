@@ -97,11 +97,11 @@ export default async function ClassesPage({
                 {mgmtOrgs.length > 0 ? (
                   <form action={updateClass} className="flex flex-wrap items-center gap-2">
                     <input type="hidden" name="id" value={c.id} />
-                    <input name="name" defaultValue={c.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
-                    <input name="instructor_name" defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
-                    <input name="capacity" type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
-                    <input name="class_type" defaultValue={classTags.get(c.id)?.class_type ?? ""} placeholder="Type" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
-                    <input name="difficulty" defaultValue={classTags.get(c.id)?.difficulty ?? ""} placeholder="Level" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <input name="name" aria-label={`Class name for ${c.name}`} defaultValue={c.name} className="flex-1 rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                    <input name="instructor_name" aria-label={`Instructor for ${c.name}`} defaultValue={c.instructor_name ?? ""} placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-1.5 text-sm bg-onyx-2" />
+                    <input name="capacity" aria-label={`Capacity for ${c.name}`} type="number" min="0" defaultValue={c.capacity ?? ""} placeholder="Cap" className="w-16 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <input name="class_type" aria-label={`Type for ${c.name}`} defaultValue={classTags.get(c.id)?.class_type ?? ""} placeholder="Type" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
+                    <input name="difficulty" aria-label={`Difficulty for ${c.name}`} defaultValue={classTags.get(c.id)?.difficulty ?? ""} placeholder="Level" className="w-24 rounded-md border border-iron px-2 py-1.5 text-sm bg-onyx-2" />
                     <button className="rounded-md border border-iron px-3 py-1.5 text-xs font-medium hover:bg-onyx-2 hover:bg-onyx-2">
                       Save
                     </button>
@@ -119,11 +119,11 @@ export default async function ClassesPage({
         {mgmtOrgs.length > 0 ? (
           <form action={createClass} className="mt-2 flex flex-wrap items-end gap-2">
             <OrgPicker orgs={mgmtOrgs} />
-            <input name="name" required placeholder="Class name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="instructor_name" placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="class_type" placeholder="Type (e.g. Yoga)" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-            <input name="difficulty" placeholder="Level (e.g. Beginner)" className="w-36 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="name" aria-label="Class name" required placeholder="Class name" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="instructor_name" aria-label="Instructor" placeholder="Instructor" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="capacity" aria-label="Capacity" type="number" min="0" placeholder="Cap" className="w-20 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="class_type" aria-label="Class type" placeholder="Type (e.g. Yoga)" className="w-32 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="difficulty" aria-label="Difficulty level" placeholder="Level (e.g. Beginner)" className="w-36 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md bg-gold px-4 py-2 text-sm font-medium text-black hover:opacity-90">
               Add class
             </button>
