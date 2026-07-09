@@ -1,9 +1,9 @@
-ACTIVE
+PAUSE
 ================================================================================
 LUDUZO autonomous build — HARD MODE (ThinkerThinker A23)
 
-ARMED 2026-07-07 by founder command: operate autonomously/continuously until the
-founder gives <Pause> or <Stop>.
+PAUSED 2026-07-07 by founder command <Pause>. Working tree clean and pushed.
+To RESUME, change this first line back to  ACTIVE .
 
 The FIRST LINE of this file is the control switch, read by the Stop hook
 (.claude/hooks/build-continue-guard.mjs). Only the first non-empty line matters;
