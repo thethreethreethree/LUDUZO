@@ -10,16 +10,17 @@
 // build", "waiting on the founder" are NOT permission to stop — the agent must
 // flag what it needs and keep building the next buildable thing.
 //
-// The autonomous build ends ONLY on the FOUNDER'S EXPLICIT COMMAND, via one of:
-//   • set the FIRST LINE of `.claude/autonomous-build.flag` to a stop word
-//       (STOP / HALT / STAND DOWN / END / DONE), or
+// The autonomous build ends ONLY on the FOUNDER'S EXPLICIT COMMAND <Pause> or
+// <Stop>, via one of:
+//   • set the FIRST LINE of `.claude/autonomous-build.flag` to PAUSE or STOP
+//       (HALT / STAND DOWN / END / DONE / CEASE also work; wrapping <> is ignored), or
 //   • delete the flag file entirely.
 // Nothing else stops the build.
 // ============================================================================
 import fs from "node:fs";
 
 const FLAG = ".claude/autonomous-build.flag";
-const STOP_WORDS = new Set(["STOP", "HALT", "STAND DOWN", "END", "END BUILD", "DONE", "CEASE"]);
+const STOP_WORDS = new Set(["PAUSE", "PAUSED", "STOP", "HALT", "STAND DOWN", "END", "END BUILD", "DONE", "CEASE"]);
 
 // Drain stdin (the harness sends the hook payload as JSON) then decide on "end".
 process.stdin.on("data", () => {});
@@ -32,7 +33,12 @@ process.stdin.on("end", () => {
   let control = "";
   try {
     const text = fs.readFileSync(FLAG, "utf8");
-    control = (text.split(/\r?\n/).find((l) => l.trim()) || "").trim().toUpperCase();
+    // First non-empty line, upper-cased, with any wrapping <>, quotes, or spaces
+    // stripped — so <Pause>, <STOP>, "pause", and PAUSE all match the same command.
+    control = (text.split(/\r?\n/).find((l) => l.trim()) || "")
+      .trim()
+      .toUpperCase()
+      .replace(/^[<"'\s]+|[>"'\s]+$/g, "");
   } catch {
     process.exit(0);
   }
@@ -50,9 +56,10 @@ process.stdin.on("end", () => {
     "If no feature is buildable this moment, do the most useful adjacent work —",
     "verification, tests, docs, refactors, an audit — and keep going.",
     "",
-    "This ends ONLY on the founder's explicit command: set the FIRST LINE of",
-    "`.claude/autonomous-build.flag` to STOP (or HALT / STAND DOWN / END / DONE),",
-    "or delete the file. Nothing else stops the build.",
+    "This ends ONLY on the founder's explicit command <Pause> or <Stop>: set the",
+    "FIRST LINE of `.claude/autonomous-build.flag` to PAUSE or STOP (HALT / STAND",
+    "DOWN / END / DONE / CEASE also work), or delete the file. If the founder types",
+    "<Pause> or <Stop> in chat, write that word to the flag's first line, then stop.",
   ].join("\n");
 
   process.stdout.write(JSON.stringify({ decision: "block", reason }));

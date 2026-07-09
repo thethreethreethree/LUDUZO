@@ -2,19 +2,27 @@ ACTIVE
 ================================================================================
 LUDUZO autonomous build — HARD MODE (ThinkerThinker A23)
 
+ARMED 2026-07-07 by founder command: operate autonomously/continuously until the
+founder gives <Pause> or <Stop>.
+
 The FIRST LINE of this file is the control switch, read by the Stop hook
-(.claude/hooks/build-continue-guard.mjs):
+(.claude/hooks/build-continue-guard.mjs). Only the first non-empty line matters;
+everything below is notes. Wrapping <> and quotes are ignored, so <ACTIVE>,
+<Pause>, "STOP" all work.
 
   • ACTIVE  → the agent may NOT stop. Every attempt to end a turn is blocked and
-             the agent is told to keep building. There is no self-authorized stop.
+             the agent keeps building. There is no self-authorized stop.
 
-  • STOP    → the founder's command. The agent is allowed to stop.
+  • PAUSE   → the founder's <Pause> command. The agent is allowed to stop and hold.
+  • STOP    → the founder's <Stop> command. The agent is allowed to stop.
              (HALT / STAND DOWN / END / DONE / CEASE also work.)
 
-TO STOP THE BUILD (founder command only), do ONE of:
-  1. change the first line above from  ACTIVE  to  STOP , or
-  2. delete this file.
+HOW THE FOUNDER HALTS IT:
+  • Type <Pause> or <Stop> in chat  → the agent writes that word to this first line
+        and stops, OR
+  • Edit this first line yourself to  PAUSE  or  STOP , OR
+  • Delete this file.
 
 Nothing else — not "hard-blocked", not "nothing buildable", not "waiting on you" —
-lets the agent stop. Only your command via this file.
+lets the agent stop. Only your <Pause>/<Stop> command.
 ================================================================================
