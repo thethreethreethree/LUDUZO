@@ -308,6 +308,7 @@ export default async function MemberDetailPage({
           <input type="hidden" name="id" value={member.id} />
           <select
             name="status"
+            aria-label="Member status"
             defaultValue={member.status}
             className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2"
           >
@@ -329,6 +330,7 @@ export default async function MemberDetailPage({
           <input type="hidden" name="id" value={member.id} />
           <textarea
             name="notes"
+            aria-label="Staff notes about this member"
             rows={3}
             defaultValue={member.notes ?? ""}
             placeholder="Staff notes about this member…"
@@ -364,6 +366,7 @@ export default async function MemberDetailPage({
                   <input type="hidden" name="member_id" value={member.id} />
                   <select
                     name="status"
+                    aria-label="Subscription status"
                     defaultValue={s.status}
                     className="rounded-md border border-iron px-2 py-1 text-xs bg-onyx-2"
                   >
@@ -392,7 +395,7 @@ export default async function MemberDetailPage({
           <form action={assignSubscription} className="flex items-center gap-2">
             <input type="hidden" name="organization_id" value={member.organization_id} />
             <input type="hidden" name="member_id" value={member.id} />
-            <select name="plan_id" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+            <select name="plan_id" aria-label="Plan to assign" required className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
               {plans.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} — {formatMoney(p.price_cents, p.currency)}/{p.interval}
@@ -453,7 +456,7 @@ export default async function MemberDetailPage({
         <form action={assignDocument} className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <select name="template_id" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="template_id" aria-label="Document template" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             <option value="">(no template)</option>
             {templates.map((t) => (
               <option key={t.id} value={t.id}>
@@ -461,7 +464,7 @@ export default async function MemberDetailPage({
               </option>
             ))}
           </select>
-          <select name="kind" defaultValue="waiver" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
+          <select name="kind" aria-label="Document kind" defaultValue="waiver" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2">
             {DOCUMENT_KINDS.map((k) => (
               <option key={k} value={k}>
                 {k}
@@ -528,8 +531,8 @@ export default async function MemberDetailPage({
         <form action={createMemberInvoice} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="amount" type="number" min="0" step="0.01" placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="due_date" type="date" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="amount" aria-label="Invoice amount" type="number" min="0" step="0.01" placeholder="Amount" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="due_date" aria-label="Invoice due date" type="date" className="w-full rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Invoice
           </button>
@@ -561,7 +564,7 @@ export default async function MemberDetailPage({
           <form action={addMemberToGroup} className="flex flex-wrap items-center gap-2">
             <input type="hidden" name="organization_id" value={member.organization_id} />
             <input type="hidden" name="member_id" value={member.id} />
-            <select name="group_id" required className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
+            <select name="group_id" aria-label="Group" required className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
               <option value="">— group —</option>
               {groups.map((g) => (
                 <option key={g.id} value={g.id}>
@@ -569,7 +572,7 @@ export default async function MemberDetailPage({
                 </option>
               ))}
             </select>
-            <input name="relationship" placeholder="Relationship (e.g. parent)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+            <input name="relationship" aria-label="Relationship in group" placeholder="Relationship (e.g. parent)" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
             <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
               Add to group
             </button>
@@ -588,8 +591,8 @@ export default async function MemberDetailPage({
         <form action={awardPoints} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <input name="points" type="number" placeholder="Points (+/-)" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
-          <input name="reason" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="points" aria-label="Points to adjust (positive or negative)" type="number" placeholder="Points (+/-)" className="w-28 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="reason" aria-label="Reason for adjustment" placeholder="Reason" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Adjust
           </button>
@@ -618,14 +621,14 @@ export default async function MemberDetailPage({
         <form action={logCommunication} className="flex flex-wrap items-end gap-2">
           <input type="hidden" name="organization_id" value={member.organization_id} />
           <input type="hidden" name="member_id" value={member.id} />
-          <select name="channel" defaultValue="note" className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
+          <select name="channel" aria-label="Communication channel" defaultValue="note" className="rounded-md border border-iron px-2 py-2 text-sm bg-onyx-2">
             {["note", "email", "sms", "call"].map((c) => (
               <option key={c} value={c}>
                 {c}
               </option>
             ))}
           </select>
-          <input name="body" placeholder="Message…" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
+          <input name="body" aria-label="Communication note" placeholder="Message…" className="flex-1 rounded-md border border-iron px-3 py-2 text-sm bg-onyx-2" />
           <button className="rounded-md border border-iron px-4 py-2 text-sm font-medium hover:border-gold hover:text-gold">
             Log
           </button>
