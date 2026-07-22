@@ -17,19 +17,20 @@ export default async function GamificationPage({ searchParams }: { searchParams:
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const orgs = await getWritableOrgs(supabase);
-
-  const { data: badgeData } = await supabase.from("badges").select("id, name, icon, description").order("name");
-  const badges = (badgeData ?? []) as unknown as Badge[];
-  const { data: chData } = await supabase.from("challenges").select("id, name, goal_target, starts_on, ends_on").order("created_at", { ascending: false });
-  const challenges = (chData ?? []) as unknown as Challenge[];
-  const { data: memberData } = await supabase.from("members").select("id, first_name, last_name").order("last_name").limit(500);
-  const members = (memberData ?? []) as unknown as MemberOpt[];
+  // PERF: orgs + these four reads are mutually independent — one parallel wave instead
+  // of five serial round-trips. A5-verified: nothing consumes another's result (the
+  // leaderboard is derived below from members + checkinRows). A14: identical queries + casts.
+  const [orgs, badges, challenges, members, checkinRows] = await Promise.all([
+    getWritableOrgs(supabase),
+    supabase.from("badges").select("id, name, icon, description").order("name").then((r) => (r.data ?? []) as unknown as Badge[]),
+    supabase.from("challenges").select("id, name, goal_target, starts_on, ends_on").order("created_at", { ascending: false }).then((r) => (r.data ?? []) as unknown as Challenge[]),
+    supabase.from("members").select("id, first_name, last_name").order("last_name").limit(500).then((r) => (r.data ?? []) as unknown as MemberOpt[]),
+    supabase.from("checkins").select("member_id").limit(5000).then((r) => (r.data ?? []) as { member_id: string }[]),
+  ]);
 
   // Derived leaderboard: top members by lifetime check-in count (honest heuristic, not "AI").
-  const { data: checkinRows } = await supabase.from("checkins").select("member_id").limit(5000);
   const counts = new Map<string, number>();
-  for (const r of (checkinRows ?? []) as { member_id: string }[]) counts.set(r.member_id, (counts.get(r.member_id) ?? 0) + 1);
+  for (const r of checkinRows) counts.set(r.member_id, (counts.get(r.member_id) ?? 0) + 1);
   const nameById = new Map(members.map((m) => [m.id, `${m.first_name} ${m.last_name}`]));
   const leaderboard = [...counts.entries()]
     .map(([id, n]) => ({ name: nameById.get(id) ?? "(member)", n }))
