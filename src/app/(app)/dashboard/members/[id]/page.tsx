@@ -80,126 +80,71 @@ export default async function MemberDetailPage({
     );
   }
 
-  const { data: eventsData } = await supabase
-    .from("events")
-    .select("id, event_type, payload, occurred_at")
-    .eq("subject_type", "member")
-    .eq("subject_id", id)
-    .order("occurred_at", { ascending: false })
-    .limit(20);
-  const events = (eventsData ?? []) as unknown as Evt[];
+  // PERF (2026-07-07): everything below keys off the URL `id` or the now-known
+  // member.organization_id, so these reads are mutually INDEPENDENT — run them in one
+  // parallel wave instead of ~13 serial round-trips. A5: verified no query consumes
+  // another's result (getUser + the member fetch above remain the only serial steps,
+  // because they gate auth and the 404 and supply organization_id). A14: each arm
+  // returns the EXACT same processed value the render consumed before — no query,
+  // column, filter, order, limit, or cast changed.
+  const orgId = member.organization_id;
+  const [
+    events,
+    templates,
+    memberDocs,
+    plans,
+    subscriptions,
+    measurements,
+    loyaltyBalance,
+    communications,
+    invoices,
+    lastVisit,
+    openCheckinId,
+    groups,
+    groupLinks,
+  ] = await Promise.all([
+    supabase.from("events").select("id, event_type, payload, occurred_at").eq("subject_type", "member").eq("subject_id", id).order("occurred_at", { ascending: false }).limit(20)
+      .then((r) => (r.data ?? []) as unknown as Evt[]),
+    supabase.from("document_templates").select("id, title, kind").eq("organization_id", orgId).eq("active", true).order("title", { ascending: true })
+      .then((r) => (r.data ?? []) as unknown as DocTemplate[]),
+    supabase.from("member_documents").select("id, kind, status, signed_at").eq("member_id", id).order("created_at", { ascending: false })
+      .then((r) => (r.data ?? []) as unknown as MemberDoc[]),
+    supabase.from("plans").select("id, name, price_cents, currency, interval").eq("organization_id", orgId).eq("active", true).order("price_cents", { ascending: true })
+      .then((r) => (r.data ?? []) as unknown as PlanOpt[]),
+    supabase.from("subscriptions").select("id, status, current_period_end, plan:plans(name)").eq("member_id", id).order("created_at", { ascending: false })
+      .then((r) => (r.data ?? []) as unknown as Subscription[]),
+    supabase.from("member_measurements").select("id, recorded_at, weight_kg, body_fat_pct").eq("member_id", id).order("recorded_at", { ascending: false }).limit(12)
+      .then((r) => (r.data ?? []) as unknown as Measurement[]),
+    // TRUE balance from the 0059 aggregate view; fall back to the capped row sum if the
+    // view isn't applied. Two-step, kept self-contained in this arm (still one wave).
+    (async () => {
+      const { data: balData, error: balErr } = await supabase.from("member_points_balance").select("balance").eq("member_id", id);
+      if (!balErr && balData) return (balData as { balance: number }[]).reduce((sum, r) => sum + (r.balance ?? 0), 0);
+      const { data: loyaltyData } = await supabase.from("loyalty_transactions").select("points").eq("member_id", id).limit(2000);
+      return ((loyaltyData ?? []) as { points: number }[]).reduce((sum, r) => sum + (r.points ?? 0), 0);
+    })(),
+    supabase.from("member_communications").select("id, channel, body, created_at").eq("member_id", id).order("created_at", { ascending: false }).limit(20)
+      .then((r) => (r.data ?? []) as unknown as Communication[]),
+    supabase.from("invoices").select("id, amount_cents, currency, status, due_date").eq("member_id", id).order("created_at", { ascending: false }).limit(50)
+      .then((r) => (r.data ?? []) as unknown as Invoice[]),
+    supabase.from("checkins").select("checked_in_at").eq("member_id", id).order("checked_in_at", { ascending: false }).limit(1).maybeSingle()
+      .then((r) => (r.data as { checked_in_at: string } | null)?.checked_in_at ?? null),
+    supabase.from("checkins").select("id").eq("member_id", id).is("checked_out_at", null).limit(1).maybeSingle()
+      .then((r) => (r.data as { id: string } | null)?.id ?? null),
+    supabase.from("member_groups").select("id, name, group_type").eq("organization_id", orgId).order("name", { ascending: true }).limit(200)
+      .then((r) => (r.data ?? []) as unknown as Group[]),
+    supabase.from("member_group_links").select("id, relationship, group:member_groups(name)").eq("member_id", id)
+      .then((r) => (r.data ?? []) as unknown as GroupLink[]),
+  ]);
 
-  const { data: tplData } = await supabase
-    .from("document_templates")
-    .select("id, title, kind")
-    .eq("organization_id", member.organization_id)
-    .eq("active", true)
-    .order("title", { ascending: true });
-  const templates = (tplData ?? []) as unknown as DocTemplate[];
-
-  const { data: docData } = await supabase
-    .from("member_documents")
-    .select("id, kind, status, signed_at")
-    .eq("member_id", id)
-    .order("created_at", { ascending: false });
-  const memberDocs = (docData ?? []) as unknown as MemberDoc[];
-
-  const { data: planData } = await supabase
-    .from("plans")
-    .select("id, name, price_cents, currency, interval")
-    .eq("organization_id", member.organization_id)
-    .eq("active", true)
-    .order("price_cents", { ascending: true });
-  const plans = (planData ?? []) as unknown as PlanOpt[];
-
-  const { data: subData } = await supabase
-    .from("subscriptions")
-    .select("id, status, current_period_end, plan:plans(name)")
-    .eq("member_id", id)
-    .order("created_at", { ascending: false });
-  const subscriptions = (subData ?? []) as unknown as Subscription[];
-
-  const { data: measureData } = await supabase
-    .from("member_measurements")
-    .select("id, recorded_at, weight_kg, body_fat_pct")
-    .eq("member_id", id)
-    .order("recorded_at", { ascending: false })
-    .limit(12);
-  const measurements = (measureData ?? []) as unknown as Measurement[];
-
-  // TRUE balance from the 0059 aggregate view; fall back to the capped row sum if the
-  // view isn't applied. (member_points_balance is org-scoped, so staff read is allowed.)
-  const { data: balData, error: balErr } = await supabase
-    .from("member_points_balance")
-    .select("balance")
-    .eq("member_id", id);
-  let loyaltyBalance: number;
-  if (!balErr && balData) {
-    loyaltyBalance = (balData as { balance: number }[]).reduce((sum, r) => sum + (r.balance ?? 0), 0);
-  } else {
-    const { data: loyaltyData } = await supabase
-      .from("loyalty_transactions")
-      .select("points")
-      .eq("member_id", id)
-      .limit(2000);
-    loyaltyBalance = ((loyaltyData ?? []) as { points: number }[]).reduce((sum, r) => sum + (r.points ?? 0), 0);
-  }
-
-  const { data: commsData } = await supabase
-    .from("member_communications")
-    .select("id, channel, body, created_at")
-    .eq("member_id", id)
-    .order("created_at", { ascending: false })
-    .limit(20);
-  const communications = (commsData ?? []) as unknown as Communication[];
-
-  const { data: invoiceData } = await supabase
-    .from("invoices")
-    .select("id, amount_cents, currency, status, due_date")
-    .eq("member_id", id)
-    .order("created_at", { ascending: false })
-    .limit(50);
-  const invoices = (invoiceData ?? []) as unknown as Invoice[];
   // 'open' is the only unpaid invoice_status (past_due is a subscription status — 0033).
   const outstanding = invoices
     .filter((inv) => inv.status === "open")
     .reduce((sum, inv) => sum + (inv.amount_cents ?? 0), 0);
 
-  const { data: lastVisitData } = await supabase
-    .from("checkins")
-    .select("checked_in_at")
-    .eq("member_id", id)
-    .order("checked_in_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const lastVisit = (lastVisitData as { checked_in_at: string } | null)?.checked_in_at ?? null;
-
   const age = member.date_of_birth
     ? Math.floor((new Date().getTime() - Date.parse(member.date_of_birth)) / (365.25 * 24 * 3600 * 1000))
     : null;
-
-  const { data: openCheckin } = await supabase
-    .from("checkins")
-    .select("id")
-    .eq("member_id", id)
-    .is("checked_out_at", null)
-    .limit(1)
-    .maybeSingle();
-  const openCheckinId = (openCheckin as { id: string } | null)?.id ?? null;
-
-  const { data: groupData } = await supabase
-    .from("member_groups")
-    .select("id, name, group_type")
-    .eq("organization_id", member.organization_id)
-    .order("name", { ascending: true })
-    .limit(200);
-  const groups = (groupData ?? []) as unknown as Group[];
-
-  const { data: linkData } = await supabase
-    .from("member_group_links")
-    .select("id, relationship, group:member_groups(name)")
-    .eq("member_id", id);
-  const groupLinks = (linkData ?? []) as unknown as GroupLink[];
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 p-8">
